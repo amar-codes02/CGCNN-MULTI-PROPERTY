@@ -1,0 +1,24 @@
+# Virtual environments & IDE
+.venv/
+venv/
+ENV/
+.jdk1.8.0_202/
+.idea/
+.vscode/
+.ipynb_checkpoints/
+
+# Python cache & build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Large cache and data files (> 100MB or generated)
+data/graph_cache.pkl
+*.zip
+*.tar.gz
+
+# Operating system files
+.DS_Store
+Thumbs.db
