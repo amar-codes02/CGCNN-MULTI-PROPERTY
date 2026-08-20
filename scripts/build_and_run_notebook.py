@@ -330,6 +330,83 @@ save_paper_fig(fig, "fig3_eda_material_classification")
 plt.show()
 """)
 
+    # Section 2.2 Dedicated Adsorption Energy EDA Markdown Header
+    m_sec2_ads = nbf.v4.new_markdown_cell(r"""---
+## 2.2 Specialized Polysulfide Adsorption Energy ($E_{\text{ads}}$) EDA & Chemical Anchoring Analysis
+
+Pada bagian ini, dilakukan **Analisis Eksplorasi Data (EDA) Khusus Energi Adsorpsi Polisulfida ($E_{\text{ads}}$)** mencakup:
+- **Figure 3b (a)**: Distribusi & perbandingan energi adsorpsi untuk 5 spesies molekul adsorbat ($S_8, \text{Li}_2\text{S}_8, \text{Li}_2\text{S}_6, \text{Li}_2\text{S}_4, \text{Li}_2\text{S}_2$).
+- **Figure 3b (b)**: Proporsi material host yang memenuhi ambang batas **Strong Chemical Anchoring ($E_{\text{ads}} \ge 1.5\text{ eV}$)** penekan *shuttle effect*.
+- **Figure 3b (c)**: Korelasi fisik antara Energi Adsorpsi ($E_{\text{ads}}$) vs Kekakuan Mekanis (Bulk Modulus $K$).
+- **Figure 3b (d)**: Peringkat 10 Material Host Terbaik berdasarkan Rata-rata Energi Adsorpsi Polisulfida.
+""")
+
+    c6_ads_eda = nbf.v4.new_code_cell(r"""# ==============================================================================
+# 6b. Specialized Polysulfide Adsorption Energy (E_ads) EDA & Chemical Anchoring Analysis (Figure 3b)
+# ==============================================================================
+fig, axes = plt.subplots(2, 2, figsize=(15, 11))
+
+# Panel (a): Boxplot & Stripplot per Adsorbate Species
+ax1 = axes[0, 0]
+adsorbate_order = ["S8", "Li2S8", "Li2S6", "Li2S4", "Li2S2"]
+sns.boxplot(data=df_matched, x="adsorbate", y="adsorption_energy_eV", order=adsorbate_order,
+            ax=ax1, palette="Purples", width=0.5, boxprops=dict(alpha=0.75))
+sns.stripplot(data=df_matched, x="adsorbate", y="adsorption_energy_eV", order=adsorbate_order,
+              ax=ax1, color="#2b0054", alpha=0.6, jitter=0.2, size=5.5)
+
+ax1.axhline(1.5, color="#d95f02", linestyle="--", linewidth=1.5, label="Anchoring Threshold (1.5 eV)")
+ax1.set_title("(a) Adsorption Energy across Polysulfide Adsorbate Species", fontweight="bold", fontsize=11)
+ax1.set_xlabel("Polysulfide Adsorbate Species", fontweight="bold")
+ax1.set_ylabel("Adsorption Energy E_ads (eV)", fontweight="bold")
+ax1.grid(True, linestyle="--", alpha=0.4)
+ax1.legend(loc="upper right", frameon=True, fontsize=8.5)
+
+# Panel (b): Strong Chemical Anchoring Proportion (E_ads >= 1.5 eV)
+ax2 = axes[0, 1]
+df_matched["anchoring_class"] = df_matched["adsorption_energy_eV"].apply(
+    lambda x: "Strong Anchoring (≥1.5 eV)" if x >= 1.5 else "Weak Anchoring (<1.5 eV)"
+)
+anchor_counts = df_matched["anchoring_class"].value_counts()
+colors_anchor = ["#7570b3", "#d95f02"]
+
+wedges, texts, autotexts = ax2.pie(
+    anchor_counts, labels=anchor_counts.index, autopct="%1.1f%%",
+    pctdistance=0.72, startangle=120, colors=colors_anchor,
+    wedgeprops=dict(width=0.42, edgecolor="w", linewidth=2.5),
+    textprops=dict(fontweight="bold", fontsize=10.5)
+)
+for autotext in autotexts:
+    autotext.set_color("white")
+    autotext.set_fontweight("bold")
+ax2.set_title("(b) Polysulfide Chemical Anchoring Capacity Proportion", fontweight="bold", fontsize=11)
+
+# Panel (c): Scatter Plot - Adsorption Energy vs Bulk Modulus (K)
+ax3 = axes[1, 0]
+sns.regplot(data=df_matched, x="bulk_modulus", y="adsorption_energy_eV", ax=ax3,
+            color="#2ca02c", scatter_kws={"alpha": 0.65, "s": 35}, line_kws={"color": "#1b9e77", "linewidth": 2})
+r_bm, _ = pearsonr(df_matched["bulk_modulus"].dropna(), df_matched["adsorption_energy_eV"].dropna())
+ax3.set_title(f"(c) E_ads vs Bulk Modulus (Pearson r = {r_bm:.3f})", fontweight="bold", fontsize=11)
+ax3.set_xlabel("Bulk Modulus K (GPa)", fontweight="bold")
+ax3.set_ylabel("Adsorption Energy E_ads (eV)", fontweight="bold")
+ax3.grid(True, linestyle="--", alpha=0.4)
+
+# Panel (d): Top Host Material Ranking by Average Adsorption Energy
+ax4 = axes[1, 1]
+df_top_ads = df_matched.groupby("formula")["adsorption_energy_eV"].mean().sort_values(ascending=False).head(10).reset_index()
+sns.barplot(data=df_top_ads, x="adsorption_energy_eV", y="formula", ax=ax4, palette="magma_r", edgecolor="black", linewidth=1)
+ax4.axvline(1.5, color="#d95f02", linestyle="--", linewidth=1.5, label="Anchoring Threshold (1.5 eV)")
+ax4.set_title("(d) Top 10 Host Materials by Average Adsorption Energy", fontweight="bold", fontsize=11)
+ax4.set_xlabel("Mean Polysulfide Adsorption Energy E_ads (eV)", fontweight="bold")
+ax4.set_ylabel("Host Formula", fontweight="bold")
+ax4.grid(True, linestyle="--", alpha=0.4)
+ax4.legend(loc="lower right", frameon=True, fontsize=8.5)
+
+plt.suptitle("Specialized Polysulfide Adsorption Energy (E_ads) & Chemical Anchoring EDA", fontsize=13.5, fontweight="bold", y=0.99)
+plt.tight_layout()
+save_paper_fig(fig, "fig3b_adsorption_energy_specialized_eda")
+plt.show()
+""")
+
     # Section 3 Markdown Header
     m_sec3 = nbf.v4.new_markdown_cell(r"""---
 ## 3. CGCNN Model Architecture, 3000-Epoch Training & 5-Property Parity Evaluation""")
@@ -877,6 +954,7 @@ print(latex_table)
         m_title,
         m_sec1, c1_setup, c2_load, c3_stats,
         m_sec2, c4_dist, c5_corr, c6_class,
+        m_sec2_ads, c6_ads_eda,
         m_sec3, c7_feat, c8_model, c9_curves, c10_eval, c11_parity,
         m_sec4, c12_tpms, c13_vis,
         m_sec5, c14_latex
