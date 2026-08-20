@@ -676,9 +676,13 @@ plt.show()
 # 12. Skrining 5 Sheet Graphene TPMS (Fokus 5 Properti: Band Gap, Formation Energy, Bulk Modulus, Shear Modulus, Adsorption Energy)
 # ==============================================================================
 import sys
-if "models" not in sys.path:
-    sys.path.insert(0, "models")
-from cgcnn_model import load_trained_model, predict_from_cif
+for p in [".", "models", os.path.join("..", "models")]:
+    if os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
+try:
+    from cgcnn_model import predict_from_cif
+except ImportError:
+    from models.cgcnn_model import predict_from_cif
 
 TPMS_DIR = "structures/Graphene_TPMS_Sheet" if os.path.exists("structures/Graphene_TPMS_Sheet") else "Graphene_TPMS_Sheet"
 tpms_files = sorted([f for f in os.listdir(TPMS_DIR) if f.endswith(".cif")])
