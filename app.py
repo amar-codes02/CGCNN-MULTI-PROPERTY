@@ -90,7 +90,7 @@ if os.path.exists(TPMS_DIR):
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF Viewer Component
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#0b0f19"):
+def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19"):
     """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
     safe_cif = (
         cif_text.replace("\\", "\\\\")
@@ -155,8 +155,11 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
           viewer.setStyle({{}}, {style_js});
           viewer.addUnitCell(model, {{
             box: {{ color: "#38bdf8", linewidth: 2 }},
-            alabel: "a", blabel: "b", clabel: "c"
+            alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
           }});
+          try {{
+            viewer.addAxes({{ scale: 1.2, color: "#38bdf8" }});
+          }} catch (e) {{ }}
           viewer.zoomTo();
           viewer.zoom(1.05);
           viewer.render();
@@ -1319,9 +1322,9 @@ with tab_viz3d:
                     plot_bgcolor=plotly_bg,
                     font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
                     scene=dict(
-                        xaxis=dict(visible=False),
-                        yaxis=dict(visible=False),
-                        zaxis=dict(visible=False)
+                        xaxis=dict(title="X (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
+                        yaxis=dict(title="Y (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
+                        zaxis=dict(title="Z (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color)
                     ),
                     margin=dict(l=0, r=0, b=0, t=30),
                     height=520
