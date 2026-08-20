@@ -236,14 +236,10 @@ for idx, col in enumerate(FIVE_TARGETS):
     ax.set_ylim(top=ax.get_ylim()[1] * 1.30)
     
     stats_str = (
-        f"Mean    : {mean_val:.2f}\n"
-        f"Median  : {median_val:.2f}\n"
-        f"Std Dev : {std_val:.2f}\n"
-        f"Min     : {data.min():.2f}\n"
-        f"Max     : {data.max():.2f}\n"
-        f"Skew    : {data.skew():.2f}"
+        f"Mean   : {mean_val:.2f}\n"
+        f"Median : {median_val:.2f}"
     )
-    ax.text(0.96, 0.95, stats_str, transform=ax.transAxes, fontsize=8.0, fontfamily="monospace",
+    ax.text(0.96, 0.95, stats_str, transform=ax.transAxes, fontsize=8.8, fontfamily="monospace",
             verticalalignment="top", horizontalalignment="right",
             bbox=dict(boxstyle="round,pad=0.4", facecolor="white", alpha=0.9, edgecolor="gray"))
 
