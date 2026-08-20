@@ -30,7 +30,7 @@ from cgcnn_model import (
 )
 
 # ---------------------------------------------------------------------------
-# Page Configuration & Global Theme
+# Page Configuration
 # ---------------------------------------------------------------------------
 st.set_page_config(
     page_title="Li-S Battery Graphene TPMS Research Platform",
@@ -52,256 +52,45 @@ if not os.path.exists(TPMS_DIR):
     TPMS_DIR = os.path.join(APP_DIR, "Graphene_TPMS_Sheet")
 
 # ---------------------------------------------------------------------------
-# Custom CSS Theme (Justified Text Alignment & Premium Web Styling)
+# Background Resources Loader (Cached)
 # ---------------------------------------------------------------------------
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 18px;
-    }
-    
-    .stApp {
-        background: radial-gradient(circle at 15% 15%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.97) 50%, #080c14 100%);
-        color: #f8fafc;
-    }
+@st.cache_resource(show_spinner="Memuat Model CGCNN (cgcnn_model.pt) ...")
+def load_default_model(checkpoint_path):
+    if not os.path.exists(checkpoint_path):
+        return None
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model, t_mean, t_std, meta = load_trained_model(checkpoint_path, map_device=device)
+    return {"model": model, "t_mean": t_mean, "t_std": t_std, "meta": meta, "device": device}
 
-    /* Custom Sleek Web Scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #0b0f19;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #334155;
-        border-radius: 6px;
-        border: 2px solid #0b0f19;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #38bdf8;
-    }
 
-    /* Justified Text Alignment Across All Content Blocks */
-    p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
-        text-align: justify !important;
-        text-justify: inter-word !important;
-        font-size: 1.15rem !important;
-        line-height: 1.75 !important;
-    }
+@st.cache_data(show_spinner="Memuat Dataset Adsorpsi Polisulfida & JARVIS-DFT 3D ...")
+def load_default_eda(dataset_path):
+    if not os.path.exists(dataset_path):
+        return None
+    with open(dataset_path, "rb") as f:
+        data = pickle.load(f)
+    df = pd.DataFrame(data)
+    if "band_gap" in df.columns:
+        df["material_type"] = df["band_gap"].apply(classify_band_gap)
+    return df
 
-    /* Website Hero Banner */
-    .hero-banner {
-        position: relative;
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 24px;
-        padding: 2.8rem 3.2rem;
-        margin-bottom: 2.2rem;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    }
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(56, 189, 248, 0.18);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        color: #38bdf8;
-        font-size: 0.95rem !important;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.09em;
-        padding: 8px 18px;
-        border-radius: 30px;
-        margin-bottom: 1.2rem;
-    }
-    .hero-title {
-        font-size: 3.1rem !important;
-        font-weight: 800;
-        line-height: 1.2;
-        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
-        text-align: left !important;
-    }
-    .hero-subtitle {
-        color: #cbd5e1;
-        font-size: 1.22rem !important;
-        line-height: 1.75 !important;
-        max-width: 1000px;
-        font-weight: 400;
-    }
 
-    /* Structured Web Card Component */
-    .web-card {
-        background: rgba(15, 23, 42, 0.72);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 22px;
-        padding: 1.8rem 2.2rem;
-        margin-bottom: 1.8rem;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .web-card:hover {
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
-        transform: translateY(-2px);
-    }
+bundle = load_default_model(DEFAULT_MODEL_PATH)
+eda_df = load_default_eda(DEFAULT_DATASET_PATH)
 
-    .web-card-title {
-        font-size: 1.65rem !important;
-        font-weight: 800;
-        color: #f8fafc;
-        margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-align: left !important;
-    }
-    .web-card-title span {
-        background: linear-gradient(90deg, #38bdf8, #818cf8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    /* KPI Stat Metric Cards */
-    .kpi-card {
-        background: rgba(30, 41, 59, 0.68);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 1.6rem;
-        text-align: center;
-        box-shadow: 0 10px 28px rgba(0,0,0,0.3);
-        transition: transform 0.25s ease, border-color 0.25s ease;
-    }
-    .kpi-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(56, 189, 248, 0.45);
-    }
-    .kpi-label {
-        font-size: 0.92rem !important;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #94a3b8;
-        margin-bottom: 0.6rem;
-        text-align: center !important;
-    }
-    .kpi-value {
-        font-size: 2.6rem !important;
-        font-weight: 800;
-        background: linear-gradient(90deg, #38bdf8, #c084fc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.3rem;
-        text-align: center !important;
-    }
-    .kpi-sub {
-        font-size: 0.95rem !important;
-        color: #64748b;
-        font-weight: 600;
-        text-align: center !important;
-    }
-
-    /* Stage Timeline Cards */
-    .stage-card {
-        background: rgba(30, 41, 59, 0.52);
-        border-left: 5px solid #38bdf8;
-        border-radius: 14px;
-        padding: 1.5rem 1.8rem;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    }
-    .stage-header {
-        font-size: 1.3rem !important;
-        font-weight: 800;
-        color: #38bdf8;
-        margin-bottom: 0.6rem;
-        text-align: left !important;
-    }
-    .stage-desc {
-        color: #cbd5e1;
-        font-size: 1.12rem !important;
-        line-height: 1.75 !important;
-        text-align: justify !important;
-        text-justify: inter-word !important;
-    }
-
-    /* Centered HD Video Container */
-    .video-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 2.2rem 0;
-        width: 100%;
-    }
-    .video-wrapper {
-        position: relative;
-        width: 85%;
-        max-width: 960px;
-        padding-bottom: 47.8125%;
-        height: 0;
-        border-radius: 24px;
-        overflow: hidden;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.3);
-        border: 2px solid rgba(56, 189, 248, 0.4);
-    }
-    .video-wrapper iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: 0;
-    }
-
-    /* Tabs Bar Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 14px;
-        background: rgba(15, 23, 42, 0.78);
-        padding: 12px 16px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 54px;
-        border-radius: 14px;
-        padding: 0 28px;
-        font-size: 1.15rem !important;
-        font-weight: 700;
-        color: #94a3b8;
-        border: none;
-        transition: all 0.25s ease;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%) !important;
-        color: #ffffff !important;
-        box-shadow: 0 8px 24px rgba(56, 189, 248, 0.45);
-    }
-
-    /* Dataframe Styling */
-    .stDataFrame {
-        font-size: 1.08rem !important;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Load sample CIF files
+sample_cif_files = {}
+if os.path.exists(TPMS_DIR):
+    for fn in sorted(os.listdir(TPMS_DIR)):
+        if fn.endswith(".cif"):
+            nice_name = fn.replace("graphene_sheet_", "").replace(".cif", "").upper() + " Graphene TPMS"
+            sample_cif_files[nice_name] = os.path.join(TPMS_DIR, fn)
 
 
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF Viewer Component
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=False):
+def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#0b0f19"):
     """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
     safe_cif = (
         cif_text.replace("\\", "\\\\")
@@ -324,7 +113,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
     <head>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js"></script>
     </head>
-    <body style="margin:0; padding:0; background-color:#0b0f19; overflow:hidden;">
+    <body style="margin:0; padding:0; background-color:{bg_color}; overflow:hidden;">
       <div id="viewer3dmol" style="height: {height}px; width: 100%; position: relative;"></div>
       <script>
         (function() {{
@@ -334,7 +123,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
             return;
           }}
           var cifData = `{safe_cif}`;
-          var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "#0b0f19" }});
+          var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
           var model = viewer.addModel(cifData, "cif", {{
             doAssembly: true,
             duplicateAssemblyAtoms: true,
@@ -380,50 +169,21 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
 
 
 # ---------------------------------------------------------------------------
-# Background Resources Loader (Cached)
-# ---------------------------------------------------------------------------
-@st.cache_resource(show_spinner="Memuat Model CGCNN (cgcnn_model.pt) ...")
-def load_default_model(checkpoint_path):
-    if not os.path.exists(checkpoint_path):
-        return None
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model, t_mean, t_std, meta = load_trained_model(checkpoint_path, map_device=device)
-    return {"model": model, "t_mean": t_mean, "t_std": t_std, "meta": meta, "device": device}
-
-
-@st.cache_data(show_spinner="Memuat Dataset Adsorpsi Polisulfida & JARVIS-DFT 3D ...")
-def load_default_eda(dataset_path):
-    if not os.path.exists(dataset_path):
-        return None
-    with open(dataset_path, "rb") as f:
-        data = pickle.load(f)
-    df = pd.DataFrame(data)
-    if "band_gap" in df.columns:
-        df["material_type"] = df["band_gap"].apply(classify_band_gap)
-    if "bulk_modulus" in df.columns and "shear_modulus" in df.columns:
-        df["pugh_ratio"] = df.apply(lambda r: r["bulk_modulus"] / r["shear_modulus"] if r["shear_modulus"] > 0 else 0.0, axis=1)
-        df["mechanical_behavior"] = df["pugh_ratio"].apply(lambda p: "Ductile" if p > 1.75 else "Brittle")
-    return df
-
-
-bundle = load_default_model(DEFAULT_MODEL_PATH)
-eda_df = load_default_eda(DEFAULT_DATASET_PATH)
-
-# Load sample CIF files
-sample_cif_files = {}
-if os.path.exists(TPMS_DIR):
-    for fn in sorted(os.listdir(TPMS_DIR)):
-        if fn.endswith(".cif"):
-            nice_name = fn.replace("graphene_sheet_", "").replace(".cif", "").upper() + " Graphene TPMS"
-            sample_cif_files[nice_name] = os.path.join(TPMS_DIR, fn)
-
-
-# ---------------------------------------------------------------------------
 # Sidebar Settings & System Control
 # ---------------------------------------------------------------------------
 with st.sidebar:
     st.markdown("### ⚙️ Platform Control Panel")
     
+    st.markdown("#### 🎨 Mode Tampilan / Theme")
+    theme_mode = st.radio(
+        "Pilih Theme Mode:",
+        ["🌙 Mode Gelap (Dark)", "☀️ Mode Terang (Light)", "🖥️ Auto (System Preference)"],
+        index=0,
+        key="app_theme_mode"
+    )
+    
+    st.divider()
+
     st.markdown("#### 📁 Structure Viewer Selector")
     input_mode = st.radio("Pilih Sumber File CIF Single:", ["Gunakan Contoh TPMS", "Upload File .CIF Single"], index=0)
     
@@ -469,6 +229,506 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
+# Global Styling & Theme Configuration (Dark Mode & Light Mode Support)
+# ---------------------------------------------------------------------------
+is_light = (theme_mode == "☀️ Mode Terang (Light)")
+
+plotly_template = "plotly_white" if is_light else "plotly_dark"
+plotly_font_color = "#0f172a" if is_light else "#f8fafc"
+plotly_grid_color = "rgba(0,0,0,0.12)" if is_light else "rgba(255,255,255,0.12)"
+plotly_bg = "rgba(255,255,255,0.7)" if is_light else "rgba(15,23,42,0.6)"
+mol3d_bg = "#ffffff" if is_light else "#0b0f19"
+
+if theme_mode == "☀️ Mode Terang (Light)":
+    theme_css = """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        html, body, .stApp {
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%) !important;
+            color: #0f172a !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+        }
+
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+
+        p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
+            text-align: justify !important;
+            text-justify: inter-word !important;
+            font-size: 1.15rem !important;
+            line-height: 1.75 !important;
+            color: #334155 !important;
+        }
+        h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title {
+            color: #0f172a !important;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+            border: 1px solid rgba(203, 213, 225, 0.85) !important;
+            border-radius: 24px;
+            padding: 2.8rem 3.2rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(2, 132, 199, 0.12);
+            border: 1px solid rgba(2, 132, 199, 0.35);
+            color: #0284c7;
+            font-size: 0.95rem !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            padding: 8px 18px;
+            border-radius: 30px;
+            margin-bottom: 1.2rem;
+        }
+        .hero-title {
+            font-size: 3.1rem !important;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(90deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-align: left !important;
+        }
+        .hero-subtitle {
+            color: #334155 !important;
+            font-size: 1.22rem !important;
+            line-height: 1.75 !important;
+            max-width: 1000px;
+            font-weight: 400;
+        }
+        .web-card {
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(203, 213, 225, 0.85) !important;
+            border-radius: 22px;
+            padding: 1.8rem 2.2rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .web-card:hover {
+            border-color: rgba(2, 132, 199, 0.5) !important;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12) !important;
+            transform: translateY(-2px);
+        }
+        .web-card-title {
+            font-size: 1.65rem !important;
+            font-weight: 800;
+            color: #0f172a !important;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left !important;
+        }
+        .web-card-title span {
+            background: linear-gradient(90deg, #0284c7, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(203, 213, 225, 0.85) !important;
+            border-radius: 20px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.06) !important;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(2, 132, 199, 0.5) !important;
+        }
+        .kpi-label {
+            font-size: 0.92rem !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b !important;
+            margin-bottom: 0.6rem;
+            text-align: center !important;
+        }
+        .kpi-value {
+            font-size: 2.6rem !important;
+            font-weight: 800;
+            background: linear-gradient(90deg, #0284c7, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+            text-align: center !important;
+        }
+        .kpi-sub {
+            font-size: 0.95rem !important;
+            color: #475569 !important;
+            font-weight: 600;
+            text-align: center !important;
+        }
+        .stage-card {
+            background: rgba(241, 245, 249, 0.95) !important;
+            border-left: 5px solid #0284c7;
+            border-radius: 14px;
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05) !important;
+        }
+        .stage-header {
+            font-size: 1.3rem !important;
+            font-weight: 800;
+            color: #0284c7;
+            margin-bottom: 0.6rem;
+            text-align: left !important;
+        }
+        .stage-desc {
+            color: #334155 !important;
+            font-size: 1.12rem !important;
+            line-height: 1.75 !important;
+            text-align: justify !important;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2.2rem 0;
+            width: 100%;
+        }
+        .video-wrapper {
+            position: relative;
+            width: 85%;
+            max-width: 960px;
+            padding-bottom: 47.8125%;
+            height: 0;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15), 0 0 40px rgba(2, 132, 199, 0.2);
+            border: 2px solid rgba(2, 132, 199, 0.4);
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: 0;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 14px;
+            background: rgba(241, 245, 249, 0.95) !important;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(203, 213, 225, 0.85) !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            height: 54px;
+            border-radius: 14px;
+            padding: 0 28px;
+            font-size: 1.15rem !important;
+            font-weight: 700;
+            color: #475569 !important;
+            border: none;
+            transition: all 0.25s ease;
+        }
+        .stTabs [aria-selected="true"] {
+            background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+        }
+        .stDataFrame {
+            font-size: 1.08rem !important;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+    </style>
+    """
+elif theme_mode == "🌙 Mode Gelap (Dark)":
+    theme_css = """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        html, body, .stApp {
+            background: radial-gradient(circle at 15% 15%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.97) 50%, #080c14 100%) !important;
+            color: #f8fafc !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+        }
+
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 6px; border: 2px solid #0b0f19; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
+            text-align: justify !important;
+            text-justify: inter-word !important;
+            font-size: 1.15rem !important;
+            line-height: 1.75 !important;
+            color: #cbd5e1 !important;
+        }
+        h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title {
+            color: #f8fafc !important;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 24px;
+            padding: 2.8rem 3.2rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(56, 189, 248, 0.18);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            font-size: 0.95rem !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            padding: 8px 18px;
+            border-radius: 30px;
+            margin-bottom: 1.2rem;
+        }
+        .hero-title {
+            font-size: 3.1rem !important;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-align: left !important;
+        }
+        .hero-subtitle {
+            color: #cbd5e1 !important;
+            font-size: 1.22rem !important;
+            line-height: 1.75 !important;
+            max-width: 1000px;
+            font-weight: 400;
+        }
+        .web-card {
+            background: rgba(15, 23, 42, 0.72) !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 22px;
+            padding: 1.8rem 2.2rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .web-card:hover {
+            border-color: rgba(56, 189, 248, 0.4) !important;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55) !important;
+            transform: translateY(-2px);
+        }
+        .web-card-title {
+            font-size: 1.65rem !important;
+            font-weight: 800;
+            color: #f8fafc !important;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left !important;
+        }
+        .web-card-title span {
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .kpi-card {
+            background: rgba(30, 41, 59, 0.68) !important;
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 20px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.3) !important;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.45) !important;
+        }
+        .kpi-label {
+            font-size: 0.92rem !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8 !important;
+            margin-bottom: 0.6rem;
+            text-align: center !important;
+        }
+        .kpi-value {
+            font-size: 2.6rem !important;
+            font-weight: 800;
+            background: linear-gradient(90deg, #38bdf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+            text-align: center !important;
+        }
+        .kpi-sub {
+            font-size: 0.95rem !important;
+            color: #64748b !important;
+            font-weight: 600;
+            text-align: center !important;
+        }
+        .stage-card {
+            background: rgba(30, 41, 59, 0.52) !important;
+            border-left: 5px solid #38bdf8;
+            border-radius: 14px;
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25) !important;
+        }
+        .stage-header {
+            font-size: 1.3rem !important;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 0.6rem;
+            text-align: left !important;
+        }
+        .stage-desc {
+            color: #cbd5e1 !important;
+            font-size: 1.12rem !important;
+            line-height: 1.75 !important;
+            text-align: justify !important;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2.2rem 0;
+            width: 100%;
+        }
+        .video-wrapper {
+            position: relative;
+            width: 85%;
+            max-width: 960px;
+            padding-bottom: 47.8125%;
+            height: 0;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.3);
+            border: 2px solid rgba(56, 189, 248, 0.4);
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: 0;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 14px;
+            background: rgba(15, 23, 42, 0.78) !important;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            height: 54px;
+            border-radius: 14px;
+            padding: 0 28px;
+            font-size: 1.15rem !important;
+            font-weight: 700;
+            color: #94a3b8 !important;
+            border: none;
+            transition: all 0.25s ease;
+        }
+        .stTabs [aria-selected="true"] {
+            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.45);
+        }
+        .stDataFrame {
+            font-size: 1.08rem !important;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+    </style>
+    """
+else: # Auto (System preference)
+    theme_css = """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        @media (prefers-color-scheme: light) {
+            html, body, .stApp {
+                background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%) !important;
+                color: #0f172a !important;
+            }
+            p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub { color: #334155 !important; }
+            h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title { color: #0f172a !important; }
+            .hero-banner {
+                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+                border: 1px solid rgba(203, 213, 225, 0.85) !important;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
+            }
+            .web-card {
+                background: rgba(255, 255, 255, 0.92) !important;
+                border: 1px solid rgba(203, 213, 225, 0.85) !important;
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
+            }
+            .kpi-card {
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 1px solid rgba(203, 213, 225, 0.85) !important;
+                box-shadow: 0 10px 28px rgba(0,0,0,0.06) !important;
+            }
+            .stage-card {
+                background: rgba(241, 245, 249, 0.95) !important;
+                border-left: 5px solid #0284c7 !important;
+            }
+            .stTabs [data-baseweb="tab-list"] {
+                background: rgba(241, 245, 249, 0.95) !important;
+                border: 1px solid rgba(203, 213, 225, 0.85) !important;
+            }
+            .stTabs [data-baseweb="tab"] { color: #475569 !important; }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html, body, .stApp {
+                background: radial-gradient(circle at 15% 15%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.97) 50%, #080c14 100%) !important;
+                color: #f8fafc !important;
+            }
+            p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub { color: #cbd5e1 !important; }
+            h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title { color: #f8fafc !important; }
+            .hero-banner {
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            }
+            .web-card {
+                background: rgba(15, 23, 42, 0.72) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+            .kpi-card {
+                background: rgba(30, 41, 59, 0.68) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+            .stage-card {
+                background: rgba(30, 41, 59, 0.52) !important;
+                border-left: 5px solid #38bdf8 !important;
+            }
+            .stTabs [data-baseweb="tab-list"] {
+                background: rgba(15, 23, 42, 0.78) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            }
+            .stTabs [data-baseweb="tab"] { color: #94a3b8 !important; }
+        }
+    </style>
+    """
+
+st.markdown(theme_css, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------------------------------
 # Main App Header & Banner
 # ---------------------------------------------------------------------------
 st.markdown("""
@@ -499,7 +759,7 @@ with tab_intro:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>🧬 Fondasi Sains Baterai Lithium-Sulfur (Li-S)</span></div>
-        <p style="color:#f8fafc; font-size:1.2rem !important; line-height:1.75;">
+        <p>
             Baterai <b>Lithium-Sulfur (Li-S)</b> merupakan sistem penyimpanan energi sekunder generasi mendatang (<i>next-generation energy storage</i>) yang menawarkan terobosan kapasitas spesifik dan densitas energi yang luar biasa melebihi baterai Lithium-ion (Li-ion) konvensional. 
             Secara teoritis, katoda berbasis sulfur murni (<b>S<sub>8</sub></b>) menawarkan <b>kapasitas spesifik ekstrem sebesar 1675 mAh/g</b> dan <b>densitas energi spesifik hingga &approx; 2600 Wh/kg</b> — hampir 5 kali lipat dibandingkan katoda Li-ion standar (LiCoO<sub>2</sub> / NMC).
         </p>
@@ -510,7 +770,7 @@ with tab_intro:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>🔄 1. Reaksi Elektrokimia & Mekanisme Reduksi Polisulfida</span></div>
-        <p style="color:#f8fafc; font-size:1.18rem !important; line-height:1.75;">
+        <p>
             Selama proses pengosongan daya (<i>discharging</i>), reaksi konversi elektrokimia pada katoda berlangsung melalui 
             <b>reduksi bertahap sulfur murni (S<sub>8</sub>)</b> menjadi Lithium Sulfide padat (Li<sub>2</sub>S):
         </p>
@@ -571,7 +831,7 @@ with tab_intro:
     st.markdown("""
     <div class="web-card" style="border-left: 6px solid #ef4444;">
         <div class="web-card-title"><span style="background:linear-gradient(90deg, #ef4444, #f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚠️ 2. Permasalahan Utama: Efek Shuttle Polisulfida & Korosi Anoda Lithium</span></div>
-        <p style="color:#f8fafc; font-size:1.15rem !important; line-height:1.75; margin:0;">
+        <p style="margin:0;">
             <b>1. Pelarutan Katoda:</b> Intermediate <i>long-chain Lithium Polysulfides</i> (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>) yang terbentuk pada katoda sangat mudah terlarut ke dalam elektrolit organik cair (DME/DOL).<br>
             <b>2. Migrasi Lintas Separator:</b> Karena gradien konsentrasi, molekul polisulfida terlarut bermigrasi menembus separator menuju sisi anoda logam Lithium.<br>
             <b>3. Korosi Parasit pada Anoda:</b> Pada permukaan anoda Li, polisulfida terlarut bereaksi secara kimiawi (parasitik tanpa arus luar) membentuk endapan Li<sub>2</sub>S<sub>2</sub> / Li<sub>2</sub>S yang mengisolasi anoda:
@@ -582,7 +842,7 @@ with tab_intro:
     st.latex(r"\text{Li}_2\text{S}_x + (2x - 2)\text{Li} \longrightarrow x\text{Li}_2\text{S} \downarrow \quad (\text{Anodic Parasitic Corrosion})")
 
     st.markdown("""
-    <p style="color:#f8fafc; font-size:1.15rem !important; line-height:1.75;">
+    <p>
         Dampak destruktif dari fenomena ini melingkupi:
         <b>(a) Pembusukan Kapasitas Cepat</b> (kehilangan aktif material sulfur),
         <b>(b) Efisiensi Coulombik Rendah</b> (arus pemborosan internal), dan
@@ -596,7 +856,7 @@ with tab_intro:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>🛡️ 3. Alasan Dibutuhkannya Katoda Host Material & Justifikasi 5 Properti Utama</span></div>
-        <p style="color:#f8fafc; font-size:1.15rem !important; line-height:1.75; margin:0;">
+        <p style="margin:0;">
             Untuk memitigasi Efek Shuttle dan mengatasi konduktivitas sulfur murni yang sangat rendah (&approx; 5 &times; 10<sup>-30</sup> S/cm), 
             diperlukan struktur matriks penampung (<b>Cathode Host Material</b>) berbasis struktur karbon berpori tingkat tinggi seperti <b>Graphene TPMS (Triply Periodic Minimal Surfaces)</b>.
         </p>
@@ -610,7 +870,7 @@ with tab_intro:
             <div class="kpi-label">1. Band Gap (E<sub>g</sub>)</div>
             <div class="kpi-value">Metallic / Semimetal</div>
             <div class="kpi-sub">eV</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; color:#cbd5e1; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
                 <b>Alasan Penggunaan:</b> Menilai kemampuan konduktivitas listrik. Nilai Band Gap mendekati 0 eV (logam/semilogam) sangat krusial untuk mentransfer elektron secara cepat ke sulfur dan mengkompensasi sifat isolator S<sub>8</sub> dan Li<sub>2</sub>S.
             </div>
         </div>
@@ -621,7 +881,7 @@ with tab_intro:
             <div class="kpi-label">2. Formation Energy (E<sub>f</sub>)</div>
             <div class="kpi-value">Rendah / Negatif</div>
             <div class="kpi-sub">eV / atom</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; color:#cbd5e1; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
                 <b>Alasan Penggunaan:</b> Menentukan stabilitas termodinamika kristal host. Semakin rendah/negatif energi pembentukan, semakin stabil struktur matriks host saat mengalami siklus pengisian/pengosongan berulang.
             </div>
         </div>
@@ -633,7 +893,7 @@ with tab_intro:
             <div class="kpi-label">3. Bulk Modulus (K)</div>
             <div class="kpi-value">Semakin Tinggi</div>
             <div class="kpi-sub">GPa</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; color:#cbd5e1; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
                 <b>Alasan Penggunaan:</b> Mengukur ketahanan matriks host terhadap tekanan hidrostatik dan ekspansi volume sel (&approx; 80% perubahan volume dari S<sub>8</sub> ke Li<sub>2</sub>S). Ketahanan mekanis yang tinggi mencegah pembentukan retakan mikro pada katoda.
             </div>
         </div>
@@ -644,8 +904,8 @@ with tab_intro:
             <div class="kpi-label">4. Shear Modulus (G)</div>
             <div class="kpi-value">Semakin Tinggi</div>
             <div class="kpi-sub">GPa</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; color:#cbd5e1; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.08);">
-                <b>Alasan Penggunaan:</b> Mengukur kekuatan matriks host terhadap deformasi geser (shear deformation). Properti ini bersama Bulk Modulus menentukan Rasio Pugh (K/G) untuk memprediksi sifat mekanis katoda (Ductile vs Brittle).
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
+                <b>Alasan Penggunaan:</b> Mengukur kekuatan matriks host terhadap deformasi geser (shear deformation) untuk menjaga stabilitas dan ketahanan mekanis katoda.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -656,7 +916,7 @@ with tab_intro:
             <div class="kpi-label">5. Adsorption Energy (E<sub>ads</sub>)</div>
             <div class="kpi-value">Semakin Tinggi (&ge; 2.0 eV)</div>
             <div class="kpi-sub">eV</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; color:#cbd5e1; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
                 <b>Alasan Penggunaan:</b> Mengukur kekuatan penjangkaran kimiawi (<i>chemical anchoring</i>) terhadap molekul polisulfida (Li<sub>2</sub>S<sub>x</sub>). Energi adsorpsi yang kuat secara fisik terbukti mampu mengikat molekul polisulfida agar tidak larut dan tidak menembus separator.
             </div>
         </div>
@@ -668,7 +928,7 @@ with tab_intro:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>🎥 4. Visualisasi Video Prinsip Kerja Baterai Li-S (Working Principle)</span></div>
-        <p style="color:#f8fafc; font-size:1.15rem !important; line-height:1.75; margin:0;">
+        <p style="margin:0;">
             Berikut adalah animasi video interaktif prinsip kerja elektrokimia baterai Lithium-Sulfur (Working Principle) yang telah diperbesar dan ditempatkan simetris di tengah halaman:
         </p>
     </div>
@@ -689,20 +949,20 @@ with tab_intro:
 
 
 # ===========================================================================
-# TAB 2: TPMS TEST RESULTS & MULTI-CIF RANKING LEADERBOARD
+# TAB 2: TPMS TEST RESULTS & MULTI-CIF RANKING LEADERBOARD (DISPLAY ALL 5 MATERIALS & ALL PROPERTIES)
 # ===========================================================================
 with tab_tpms_rank:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>🏆 Hasil Pengujian TPMS & Inferensi CGCNN Multi-CIF</span></div>
-        <p style="color:#f8fafc; font-size:1.18rem !important; line-height:1.75; margin:0;">
+        <p style="margin:0;">
             Modul ini menyajikan <b>Hasil Pengujian Topologi Graphene TPMS (Triply Periodic Minimal Surfaces)</b>. 
-            Setiap struktur TPMS dievaluasi berdasarkan <b>5 Pilar Properti Fisika</b> dan dibobotkan secara berimbang (20% per properti) untuk menghasilkan skor komposit akhir.
+            Seluruh 5 material TPMS dievaluasi berdasarkan <b>5 Pilar Properti Fisika</b> dan dibobotkan secara berimbang (20% per properti) untuk menghasilkan skor komposit akhir.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. EVALUATION OF THE 5 GRAPHENE TPMS SHEETS
+    # 1. EVALUATION OF ALL 5 GRAPHENE TPMS SHEETS
     st.markdown("### 📊 1. Evaluasi & Ranking 5 Topologi Graphene TPMS")
 
     tpms_results = []
@@ -723,8 +983,6 @@ with tab_tpms_rank:
                 bm = float(preds["bulk_modulus_pred"])
                 sm = float(preds["shear_modulus_pred"])
                 ads = float(2.25 + 0.015 * bm - 0.45 * bg)
-                pugh = float(bm / sm) if sm > 0 else 0.0
-                pugh_type = "Ductile" if pugh > 1.75 else "Brittle"
 
                 tpms_results.append({
                     "TPMS": nice_name,
@@ -735,8 +993,6 @@ with tab_tpms_rank:
                     "Formation_Energy_eV_atom": ef,
                     "Bulk_Modulus_GPa": bm,
                     "Shear_Modulus_GPa": sm,
-                    "Pugh_Ratio": pugh,
-                    "Mechanical_Behavior": pugh_type,
                     "Adsorption_Energy_eV": ads
                 })
 
@@ -766,66 +1022,88 @@ with tab_tpms_rank:
         df_tpms = df_tpms.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
         df_tpms["Overall_Rank"] = df_tpms.index + 1
 
-        # TOP 3 HIGHLIGHT CARDS
-        col_r1, col_r2, col_r3 = st.columns(3)
-        top1 = df_tpms.iloc[0]
-        top2 = df_tpms.iloc[1]
-        top3 = df_tpms.iloc[2]
+        # DISPLAY CARDS FOR ALL 5 MATERIALS SHOWING ALL PHYSICAL PROPERTIES
+        st.markdown("#### 🏆 Detail Lengkap & Seluruh Properti Fisika Ke-5 Material Graphene TPMS")
 
-        with col_r1:
-            st.markdown(f"""
-            <div class="web-card" style="border: 2px solid #eab308; background: rgba(234, 179, 8, 0.08);">
-                <div style="color:#eab308; font-size:1.05rem !important; font-weight:800; text-transform:uppercase;">🥇 Rank 1 - Champion Host</div>
-                <div style="font-size:1.8rem !important; font-weight:800; color:#f8fafc; margin:0.4rem 0;">{top1['TPMS']}</div>
-                <div style="font-size:1.3rem !important; color:#38bdf8; font-weight:800;">Score: {top1['Overall_Score']:.4f}</div>
-                <div style="margin-top:0.8rem; font-size:1.02rem !important; color:#cbd5e1; line-height:1.6;">
-                    Band Gap: {top1['Band_Gap_eV']:.4f} eV<br>
-                    Bulk Modulus: {top1['Bulk_Modulus_GPa']:.2f} GPa<br>
-                    Adsorption: {top1['Adsorption_Energy_eV']:.3f} eV
+        badges_info = [
+            {"icon": "🥇", "label": "Rank 1 - Champion Host", "border": "#eab308", "bg_accent": "rgba(234, 179, 8, 0.12)"},
+            {"icon": "🥈", "label": "Rank 2 - Runner Up", "border": "#94a3b8", "bg_accent": "rgba(148, 163, 184, 0.12)"},
+            {"icon": "🥉", "label": "Rank 3 - High Performer", "border": "#b45309", "bg_accent": "rgba(180, 83, 9, 0.12)"},
+            {"icon": "🎖️", "label": "Rank 4 - Solid Candidate", "border": "#38bdf8", "bg_accent": "rgba(56, 189, 248, 0.12)"},
+            {"icon": "🎖️", "label": "Rank 5 - Benchmark Host", "border": "#818cf8", "bg_accent": "rgba(129, 140, 248, 0.12)"}
+        ]
+
+        # Row 1: Ranks 1, 2, 3
+        r1_cols = st.columns(3)
+        for idx in range(min(3, len(df_tpms))):
+            row_item = df_tpms.iloc[idx]
+            b_meta = badges_info[idx]
+            with r1_cols[idx]:
+                st.markdown(f"""
+                <div class="web-card" style="border: 2px solid {b_meta['border']}; background: {b_meta['bg_accent']}; padding: 1.5rem; border-radius: 20px;">
+                    <div style="color:{b_meta['border']}; font-size:1.02rem !important; font-weight:800; text-transform:uppercase;">{b_meta['icon']} {b_meta['label']}</div>
+                    <div style="font-size:1.6rem !important; font-weight:800; margin:0.3rem 0;">{row_item['TPMS']}</div>
+                    <div style="font-size:1.25rem !important; color:#0284c7; font-weight:800; margin-bottom:0.4rem;">Overall Score: {row_item['Overall_Score']:.4f}</div>
+                    <div style="font-size:0.92rem !important; margin-bottom:0.8rem;">
+                        📁 File: <code>{row_item['CIF_File']}</code> | ⚛️ <b>{row_item['Num_Atoms']} Atoms</b>
+                    </div>
+                    <div style="border-top: 1px solid rgba(148,163,184,0.3); padding-top: 0.8rem; font-size: 1.02rem !important; line-height: 1.65;">
+                        <b>⚡ Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
+                        <b>🌱 Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
+                        <b>🛡️ Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
+                        <b>📐 Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
+                        <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
+                    </div>
+                    <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
+                        <b>Breakdown 5 Pilar Skor:</b><br>
+                        BG: <b>{row_item['Score_Band_Gap']:.2f}</b> | E<sub>f</sub>: <b>{row_item['Score_Formation_Energy']:.2f}</b> | K: <b>{row_item['Score_Bulk_Modulus']:.2f}</b> | G: <b>{row_item['Score_Shear_Modulus']:.2f}</b> | E<sub>ads</sub>: <b>{row_item['Score_Adsorption_Energy']:.2f}</b>
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-        with col_r2:
-            st.markdown(f"""
-            <div class="web-card" style="border: 2px solid #94a3b8; background: rgba(148, 163, 184, 0.08);">
-                <div style="color:#94a3b8; font-size:1.05rem !important; font-weight:800; text-transform:uppercase;">🥈 Rank 2 - Runner Up</div>
-                <div style="font-size:1.8rem !important; font-weight:800; color:#f8fafc; margin:0.4rem 0;">{top2['TPMS']}</div>
-                <div style="font-size:1.3rem !important; color:#38bdf8; font-weight:800;">Score: {top2['Overall_Score']:.4f}</div>
-                <div style="margin-top:0.8rem; font-size:1.02rem !important; color:#cbd5e1; line-height:1.6;">
-                    Band Gap: {top2['Band_Gap_eV']:.4f} eV<br>
-                    Bulk Modulus: {top2['Bulk_Modulus_GPa']:.2f} GPa<br>
-                    Adsorption: {top2['Adsorption_Energy_eV']:.3f} eV
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        # Row 2: Ranks 4, 5
+        if len(df_tpms) > 3:
+            r2_cols = st.columns(2)
+            for idx in range(3, len(df_tpms)):
+                row_item = df_tpms.iloc[idx]
+                b_meta = badges_info[idx]
+                c_idx = idx - 3
+                with r2_cols[c_idx]:
+                    st.markdown(f"""
+                    <div class="web-card" style="border: 2px solid {b_meta['border']}; background: {b_meta['bg_accent']}; padding: 1.5rem; border-radius: 20px;">
+                        <div style="color:{b_meta['border']}; font-size:1.02rem !important; font-weight:800; text-transform:uppercase;">{b_meta['icon']} {b_meta['label']}</div>
+                        <div style="font-size:1.6rem !important; font-weight:800; margin:0.3rem 0;">{row_item['TPMS']}</div>
+                        <div style="font-size:1.25rem !important; color:#0284c7; font-weight:800; margin-bottom:0.4rem;">Overall Score: {row_item['Overall_Score']:.4f}</div>
+                        <div style="font-size:0.92rem !important; margin-bottom:0.8rem;">
+                            📁 File: <code>{row_item['CIF_File']}</code> | ⚛️ <b>{row_item['Num_Atoms']} Atoms</b>
+                        </div>
+                        <div style="border-top: 1px solid rgba(148,163,184,0.3); padding-top: 0.8rem; font-size: 1.02rem !important; line-height: 1.65;">
+                            <b>⚡ Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
+                            <b>🌱 Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
+                            <b>🛡️ Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
+                            <b>📐 Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
+                            <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
+                        </div>
+                        <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
+                            <b>Breakdown 5 Pilar Skor:</b><br>
+                            BG: <b>{row_item['Score_Band_Gap']:.2f}</b> | E<sub>f</sub>: <b>{row_item['Score_Formation_Energy']:.2f}</b> | K: <b>{row_item['Score_Bulk_Modulus']:.2f}</b> | G: <b>{row_item['Score_Shear_Modulus']:.2f}</b> | E<sub>ads</sub>: <b>{row_item['Score_Adsorption_Energy']:.2f}</b>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-        with col_r3:
-            st.markdown(f"""
-            <div class="web-card" style="border: 2px solid #b45309; background: rgba(180, 83, 9, 0.08);">
-                <div style="color:#b45309; font-size:1.05rem !important; font-weight:800; text-transform:uppercase;">🥉 Rank 3 - High Performer</div>
-                <div style="font-size:1.8rem !important; font-weight:800; color:#f8fafc; margin:0.4rem 0;">{top3['TPMS']}</div>
-                <div style="font-size:1.3rem !important; color:#38bdf8; font-weight:800;">Score: {top3['Overall_Score']:.4f}</div>
-                <div style="margin-top:0.8rem; font-size:1.02rem !important; color:#cbd5e1; line-height:1.6;">
-                    Band Gap: {top3['Band_Gap_eV']:.4f} eV<br>
-                    Bulk Modulus: {top3['Bulk_Modulus_GPa']:.2f} GPa<br>
-                    Adsorption: {top3['Adsorption_Energy_eV']:.3f} eV
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        st.divider()
 
-        st.markdown("#### 📋 Tabel Rangking Komprehensif Graphene TPMS")
+        st.markdown("#### 📋 Tabel Rangking Komprehensif Seluruh Properti Graphene TPMS")
         st.dataframe(
             df_tpms[[
                 "Overall_Rank", "TPMS", "Num_Atoms", "Material_Type",
-                "Band_Gap_eV", "Formation_Energy_eV_atom", "Bulk_Modulus_GPa", "Shear_Modulus_GPa", "Pugh_Ratio",
+                "Band_Gap_eV", "Formation_Energy_eV_atom", "Bulk_Modulus_GPa", "Shear_Modulus_GPa",
                 "Adsorption_Energy_eV", "Overall_Score"
             ]].style.format({
                 "Band_Gap_eV": "{:.4f}",
                 "Formation_Energy_eV_atom": "{:.4f}",
                 "Bulk_Modulus_GPa": "{:.2f}",
                 "Shear_Modulus_GPa": "{:.2f}",
-                "Pugh_Ratio": "{:.3f}",
                 "Adsorption_Energy_eV": "{:.3f}",
                 "Overall_Score": "{:.4f}"
             }),
@@ -857,13 +1135,13 @@ with tab_tpms_rank:
 
         fig_radar.update_layout(
             polar=dict(
-                radialaxis=dict(visible=True, range=[0, 1.0], color="#94a3b8", gridcolor="rgba(255,255,255,0.12)", tickfont=dict(size=12)),
-                angularaxis=dict(color="#f8fafc", gridcolor="rgba(255,255,255,0.12)", tickfont=dict(size=13))
+                radialaxis=dict(visible=True, range=[0, 1.0], color=plotly_font_color, gridcolor=plotly_grid_color, tickfont=dict(size=12)),
+                angularaxis=dict(color=plotly_font_color, gridcolor=plotly_grid_color, tickfont=dict(size=13))
             ),
-            template="plotly_dark",
+            template=plotly_template,
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=14),
+            plot_bgcolor=plotly_bg,
+            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
             height=540
         )
         st.plotly_chart(fig_radar, use_container_width=True)
@@ -909,7 +1187,6 @@ with tab_tpms_rank:
                     bm = float(preds["bulk_modulus_pred"])
                     sm = float(preds["shear_modulus_pred"])
                     ads = float(2.25 + 0.015 * bm - 0.45 * bg)
-                    pugh = float(bm / sm) if sm > 0 else 0.0
                     
                     batch_results.append({
                         "File_Name": up_file.name,
@@ -920,8 +1197,6 @@ with tab_tpms_rank:
                         "Formation_Energy_eV_atom": ef,
                         "Bulk_Modulus_GPa": bm,
                         "Shear_Modulus_GPa": sm,
-                        "Pugh_Ratio": pugh,
-                        "Mechanical_Behavior": "Ductile" if pugh > 1.75 else "Brittle",
                         "Adsorption_Energy_eV": ads
                     })
                 except Exception as ex:
@@ -947,18 +1222,36 @@ with tab_tpms_rank:
                 df_batch = df_batch.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
                 df_batch["Rank"] = df_batch.index + 1
 
-                st.markdown("#### 🏆 Leaderboard Hasil Prediksi & Ranking Multi-CIF Upload Mandiri")
+                st.markdown("#### 🏆 Card Hasil Prediksi & Properti Seluruh Material Upload")
+                b_cols = st.columns(min(3, len(df_batch)))
+                for b_idx, b_row in df_batch.iterrows():
+                    with b_cols[b_idx % len(b_cols)]:
+                        st.markdown(f"""
+                        <div class="web-card" style="border: 2px solid #0284c7; padding: 1.4rem;">
+                            <div style="color:#0284c7; font-size:1rem !important; font-weight:800;">RANK {b_row['Rank']} - {b_row['Formula']}</div>
+                            <div style="font-size:1.3rem !important; font-weight:800; margin:0.3rem 0;">{b_row['File_Name']}</div>
+                            <div style="font-size:1.15rem !important; color:#0284c7; font-weight:800;">Score: {b_row['Overall_Score']:.4f}</div>
+                            <div style="border-top:1px solid rgba(148,163,184,0.3); margin-top:0.6rem; padding-top:0.6rem; font-size:0.98rem !important; line-height:1.6;">
+                                ⚡ Band Gap: <b>{b_row['Band_Gap_eV']:.4f} eV</b> ({b_row['Material_Type']})<br>
+                                🌱 Formation E: <b>{b_row['Formation_Energy_eV_atom']:.4f} eV/atom</b><br>
+                                🛡️ Bulk Modulus: <b>{b_row['Bulk_Modulus_GPa']:.2f} GPa</b><br>
+                                📐 Shear Modulus: <b>{b_row['Shear_Modulus_GPa']:.2f} GPa</b><br>
+                                🧲 Adsorption E: <b>{b_row['Adsorption_Energy_eV']:.3f} eV</b>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                st.markdown("#### 📋 Leaderboard Tabel Hasil Prediksi & Ranking Multi-CIF Upload Mandiri")
                 st.dataframe(
                     df_batch[[
                         "Rank", "File_Name", "Formula", "Num_Atoms", "Material_Type",
-                        "Band_Gap_eV", "Formation_Energy_eV_atom", "Bulk_Modulus_GPa", "Shear_Modulus_GPa", "Pugh_Ratio",
+                        "Band_Gap_eV", "Formation_Energy_eV_atom", "Bulk_Modulus_GPa", "Shear_Modulus_GPa",
                         "Adsorption_Energy_eV", "Overall_Score"
                     ]].style.format({
                         "Band_Gap_eV": "{:.4f}",
                         "Formation_Energy_eV_atom": "{:.4f}",
                         "Bulk_Modulus_GPa": "{:.2f}",
                         "Shear_Modulus_GPa": "{:.2f}",
-                        "Pugh_Ratio": "{:.3f}",
                         "Adsorption_Energy_eV": "{:.3f}",
                         "Overall_Score": "{:.4f}"
                     }),
@@ -983,7 +1276,7 @@ with tab_viz3d:
             st.markdown(f"#### ⚛️ Render 3Dmol.js: `{cif_name_curr}`")
             viz_style = st.selectbox("Style Rendering 3D:", ["stick_sphere", "spacefill", "line"], index=0)
             supercell_val = st.slider("Ukuran Supercell:", min_value=1, max_value=3, value=1)
-            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val)
+            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
         with col_v2:
             st.markdown("#### 🕸️ Graph Crystal Network (Node & Edge 3D Plotly)")
@@ -1021,10 +1314,10 @@ with tab_viz3d:
                     name='Atoms'
                 ))
                 fig_graph.update_layout(
-                    template="plotly_dark",
+                    template=plotly_template,
                     paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(15,23,42,0.6)",
-                    font=dict(family="Plus Jakarta Sans", size=13),
+                    plot_bgcolor=plotly_bg,
+                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
                     scene=dict(
                         xaxis=dict(visible=False),
                         yaxis=dict(visible=False),
@@ -1042,15 +1335,15 @@ with tab_viz3d:
 
 
 # ===========================================================================
-# TAB 4: EDA MATERIAL ANALYTICS DASHBOARD (EXACT GRAPHICAL OUTPUTS WITH KDE & FULL PARITY METRICS)
+# TAB 4: EDA MATERIAL ANALYTICS DASHBOARD
 # ===========================================================================
 with tab_eda:
     st.markdown("""
     <div class="web-card">
         <div class="web-card-title"><span>📊 Dashboard Analisis Exploratory Data Analytics (EDA) Material Katoda</span></div>
-        <p style="color:#f8fafc; font-size:1.18rem !important; line-height:1.75; margin:0;">
+        <p style="margin:0;">
             Dashboard analitik ilmiah ini menyajikan statistik eksplorasi dataset material host katoda Li-S, 
-            mencakup distribusi frekuensi 6 properti fisika utama beserta kurva densitas KDE, 
+            mencakup distribusi frekuensi 5 properti fisika utama beserta kurva densitas KDE, 
             matriks korelasi linear Pearson, proporsi konduktivitas elektronik, kekuatan energi adsorpsi per spesies polisulfida, 
             hingga evaluasi akurasi presisi model deep-learning CGCNN.
         </p>
@@ -1108,8 +1401,8 @@ with tab_eda:
 
         st.divider()
 
-        # SECTION 1: 2x3 GRID DISTRIBUTION HISTOGRAMS WITH OVERLAID SMOOTH KDE CURVES
-        st.markdown("### 📈 Distribusi Frekuensi & Densitas (KDE) Properti Fisika Utama Material Host")
+        # SECTION 1: 5-PROPERTY DISTRIBUTION HISTOGRAMS WITH OVERLAID SMOOTH KDE CURVES
+        st.markdown("### 📈 Distribusi Frekuensi & Densitas (KDE) 5 Properti Fisika Utama Material Host")
         
         fig1_sub = make_subplots(
             rows=2, cols=3,
@@ -1119,7 +1412,7 @@ with tab_eda:
                 "(c) Distribution of Bulk Modulus (GPa)",
                 "(d) Distribution of Shear Modulus (GPa)",
                 "(e) Distribution of Adsorption Energy E_ads (eV)",
-                "(f) Distribution of Dielectric Constant (eps_avg)"
+                ""
             ],
             specs=[[{"secondary_y": True}, {"secondary_y": True}, {"secondary_y": True}],
                    [{"secondary_y": True}, {"secondary_y": True}, {"secondary_y": True}]]
@@ -1130,8 +1423,7 @@ with tab_eda:
             ("formation_energy", 1, 2, "#818cf8"),
             ("bulk_modulus", 1, 3, "#c084fc"),
             ("shear_modulus", 2, 1, "#f472b6"),
-            ("adsorption_energy_eV", 2, 2, "#fb923c"),
-            ("eps_avg", 2, 3, "#4ade80")
+            ("adsorption_energy_eV", 2, 2, "#fb923c")
         ]
 
         for col_name, r, c, color in cols_fig1:
@@ -1161,7 +1453,7 @@ with tab_eda:
                         go.Scatter(
                             x=x_kde, y=y_kde,
                             mode='lines',
-                            line=dict(color='#ffffff', width=2.2),
+                            line=dict(color=plotly_font_color, width=2.2),
                             name=f"{col_name} KDE",
                             showlegend=False
                         ),
@@ -1171,10 +1463,10 @@ with tab_eda:
                     pass
 
         fig1_sub.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=13),
+            plot_bgcolor=plotly_bg,
+            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
             height=700
         )
         fig1_sub.update_yaxes(title_text="Count", secondary_y=False)
@@ -1184,27 +1476,35 @@ with tab_eda:
 
         st.divider()
 
-        # SECTION 2: INTER-PROPERTY PEARSON CORRELATION MATRIX HEATMAP
-        st.markdown("### 🧮 Matriks Korelasi Linier Pearson Antar Properti Fisika")
+        # SECTION 2: INTER-PROPERTY PEARSON CORRELATION MATRIX HEATMAP FOR 5 CORE PROPERTIES
+        st.markdown("### 🧮 Matriks Korelasi Linier Pearson Antar 5 Properti Fisika Utama")
         
-        target_cols = ["band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV", "eps_avg"]
+        target_cols = ["band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]
         valid_targets = [c for c in target_cols if c in eda_df.columns]
 
         if valid_targets:
-            corr_mat = eda_df[valid_targets].corr()
+            rename_map = {
+                "band_gap": "Band Gap",
+                "formation_energy": "Formation Energy",
+                "bulk_modulus": "Bulk Modulus",
+                "shear_modulus": "Shear Modulus",
+                "adsorption_energy_eV": "Adsorption Energy"
+            }
+            corr_df = eda_df[valid_targets].rename(columns=rename_map)
+            corr_mat = corr_df.corr()
 
             fig2_corr = px.imshow(
                 corr_mat,
                 text_auto=".3f",
                 color_continuous_scale="YlGnBu",
-                title="Heatmap Korelasi Pearson Antar Properti Fisika Kristal Host",
+                title="Heatmap Korelasi Pearson 5 Properti Utama Kristal Host",
                 aspect="auto"
             )
             fig2_corr.update_layout(
-                template="plotly_dark",
+                template=plotly_template,
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(15,23,42,0.6)",
-                font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=14),
+                plot_bgcolor=plotly_bg,
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
                 height=520
             )
             st.plotly_chart(fig2_corr, use_container_width=True)
@@ -1227,9 +1527,9 @@ with tab_eda:
                 color_discrete_sequence=["#38bdf8", "#818cf8", "#c084fc", "#f472b6"]
             )
             fig3_donut.update_layout(
-                template="plotly_dark",
+                template=plotly_template,
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=14),
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
                 height=480
             )
             st.plotly_chart(fig3_donut, use_container_width=True)
@@ -1248,10 +1548,10 @@ with tab_eda:
                     color_discrete_sequence=px.colors.sequential.Purples
                 )
                 fig3_box.update_layout(
-                    template="plotly_dark",
+                    template=plotly_template,
                     paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(15,23,42,0.6)",
-                    font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=14),
+                    plot_bgcolor=plotly_bg,
+                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
                     height=480
                 )
                 st.plotly_chart(fig3_box, use_container_width=True)
@@ -1260,7 +1560,7 @@ with tab_eda:
 
         # SECTION 4: FULL DENSITY PARITY PLOTS WITH IN-SUBPLOT EVALUATION METRIC BOXES
         st.markdown("### 🎯 Evaluasi Akurasi Prediksi Model Deep Learning CGCNN")
-        st.markdown("Evaluasi presisi prediksi model CGCNN pada **Test Set (3,000 Sampel)** memperlihatkan seluruh persebaran titik data aktual vs prediksi, garis referensi Ideal (1:1), pita toleransi kesalahan $\pm 10\%$, dan kotak metrik evaluasi ($R^2$, MAE, RMSE):")
+        st.markdown(r"Evaluasi presisi prediksi model CGCNN pada **Test Set (3,000 Sampel)** memperlihatkan seluruh persebaran titik data aktual vs prediksi, garis referensi Ideal (1:1), pita toleransi kesalahan $\pm 10\%$, dan kotak metrik evaluasi ($R^2$, MAE, RMSE):")
 
         # Benchmarked Test Set Accuracy Metrics for 3000 Samples
         parity_metrics_3000 = {
@@ -1307,7 +1607,6 @@ with tab_eda:
             r = idx // 3 + 1
             c = idx % 3 + 1
 
-            # Generate 3,000 full test set data points
             np.random.seed(100 + idx)
             min_v, max_v = m_info["min_val"], m_info["max_val"]
             y_true_3000 = np.random.uniform(min_v, max_v, 3000)
@@ -1332,7 +1631,7 @@ with tab_eda:
                 go.Scatter(
                     x=[min_v, max_v], y=[min_v, max_v],
                     mode='lines',
-                    line=dict(color='#ffffff', dash='dash', width=2.2),
+                    line=dict(color=plotly_font_color, dash='dash', width=2.2),
                     name='Ideal (1:1)',
                     showlegend=(idx == 0)
                 ),
@@ -1345,7 +1644,7 @@ with tab_eda:
                     x=[min_v, max_v, max_v, min_v],
                     y=[min_v * 0.9, max_v * 0.9, max_v * 1.1, min_v * 1.1],
                     fill='toself',
-                    fillcolor='rgba(255, 255, 255, 0.10)',
+                    fillcolor='rgba(148, 163, 184, 0.15)',
                     line=dict(color='rgba(255, 255, 255, 0)'),
                     name='Tol. Error ±10%',
                     showlegend=(idx == 0)
@@ -1356,10 +1655,12 @@ with tab_eda:
             # 4. Evaluation Metrics In-Subplot Annotation Text Box
             box_text = f"<b>R² = {m_info['r2']:.3f}</b><br>MAE = {m_info['mae']:.3f}<br>RMSE = {m_info['rmse']:.3f}"
             
-            # Subplot axis references: x1/y1, x2/y2, x3/y3, x4/y4, x5/y5
             axis_num = idx + 1
             x_pos = min_v + 0.05 * (max_v - min_v)
             y_pos = max_v - 0.08 * (max_v - min_v)
+
+            box_bg = "rgba(241, 245, 249, 0.92)" if is_light else "rgba(15, 23, 42, 0.88)"
+            box_fc = "#0f172a" if is_light else "#ffffff"
 
             fig_parity.add_annotation(
                 x=x_pos, y=y_pos,
@@ -1367,17 +1668,17 @@ with tab_eda:
                 showarrow=False,
                 xref=f"x{axis_num}", yref=f"y{axis_num}",
                 align="left",
-                bgcolor="rgba(15, 23, 42, 0.88)",
+                bgcolor=box_bg,
                 bordercolor="rgba(56, 189, 248, 0.5)",
                 borderpad=6,
-                font=dict(color="#ffffff", size=12, family="JetBrains Mono")
+                font=dict(color=box_fc, size=12, family="JetBrains Mono")
             )
 
         fig_parity.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(family="Plus Jakarta Sans", color="#f8fafc", size=13),
+            plot_bgcolor=plotly_bg,
+            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
