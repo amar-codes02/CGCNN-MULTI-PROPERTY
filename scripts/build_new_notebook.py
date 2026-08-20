@@ -85,6 +85,7 @@ if os.path.exists(PKL_JARVIS):
         "formula": raw_jarvis.get("formula", []),
         "band_gap": raw_jarvis.get("band_gap", []),
         "formation_energy": raw_jarvis.get("formation_energy", []),
+        "e_hull": raw_jarvis.get("e_hull", [0.0] * len(raw_jarvis["band_gap"])),
         "bulk_modulus": raw_jarvis.get("bulk_modulus", []),
         "shear_modulus": raw_jarvis.get("shear_modulus", []),
         "eps_avg": raw_jarvis.get("eps_avg", [])
@@ -113,8 +114,8 @@ else:
 print(f" Total Material Terdaftar di JARVIS DFT3D: {len(df_eda):,} sampel")
 print(f" Total Entri Matched Dataset Adsorpsi Polisulfida: {len(df_matched)} entri ({df_matched['formula'].nunique()} material unik)")
 
-print("\n--- Sampel Matched Dataset Fokus 5 Properti Utama ---")
-display(df_matched[["formula", "adsorbate", "band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]].head(10).round(3))
+print("\n--- Sampel Matched Dataset Fokus 5 Properti Utama (Termasuk JARVIS e_hull) ---")
+display(df_matched[["formula", "adsorbate", "band_gap", "formation_energy", "e_hull", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]].head(10).round(3))
 """)
 
     c3_stats = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -177,28 +178,28 @@ for idx, col in enumerate(FIVE_TARGETS):
     data = df_matched[col].dropna()
     mean_val, median_val, std_val = data.mean(), data.median(), data.std()
     
+    # Plot histogram with smooth KDE curve line only (no vertical mean/median lines)
     sns.histplot(data, kde=True, ax=ax, color=color, bins=25, alpha=0.65, line_kws={"linewidth": 2.2})
-    ax.axvline(mean_val, color="#8b0000", linestyle="--", linewidth=1.8)
-    ax.axvline(median_val, color="#000000", linestyle=":", linewidth=1.8)
     
     ax.set_title(f"{SUBPLOT_LABELS[idx]} Distribution of {TARGET_LABELS[col]}", fontweight="bold", fontsize=11, pad=8)
-    ax.set_xlabel(TARGET_LABELS[col], fontweight="bold")
-    ax.set_ylabel("Frequency", fontweight="bold")
+    ax.set_xlabel(TARGET_LABELS[col], fontweight="bold", fontsize=10)
+    ax.set_ylabel("Frequency", fontweight="bold", fontsize=10)
     ax.grid(True, linestyle="--", alpha=0.4)
     
+    # Increase Y-limit headroom so statistics box never covers histogram bars or KDE curve
+    ax.set_ylim(top=ax.get_ylim()[1] * 1.30)
+    
     stats_str = (
-        f"-- Mean    : {mean_val:.2f}\n"
-        f".. Median  : {median_val:.2f}\n"
-        f"   Std Dev : {std_val:.2f}\n"
-        f"   Min     : {data.min():.2f}\n"
-        f"   Max     : {data.max():.2f}\n"
-        f"   Skew    : {data.skew():.2f}"
+        f"Mean    : {mean_val:.2f}\n"
+        f"Median  : {median_val:.2f}\n"
+        f"Std Dev : {std_val:.2f}\n"
+        f"Min     : {data.min():.2f}\n"
+        f"Max     : {data.max():.2f}\n"
+        f"Skew    : {data.skew():.2f}"
     )
-    ax.text(0.96, 0.94, stats_str, transform=ax.transAxes, fontsize=8.2, fontfamily="monospace",
+    ax.text(0.96, 0.95, stats_str, transform=ax.transAxes, fontsize=8.0, fontfamily="monospace",
             verticalalignment="top", horizontalalignment="right",
             bbox=dict(boxstyle="round,pad=0.4", facecolor="white", alpha=0.9, edgecolor="gray"))
-    
-    ax.set_ylim(top=ax.get_ylim()[1] * 1.15)
 
 axes[5].axis("off")
 
@@ -241,111 +242,82 @@ def classify_material(bg):
 
 df_matched["electronic_class"] = df_matched["band_gap"].apply(classify_material)
 class_order = ["Metal", "Semimetal", "Semiconductor"]
+class_colors = ["#2b5c8f", "#7570b3", "#4292c6"]
 
-def cat_stability(fe):
-    if fe < -1.0:
-        return "Highly Stable (<-1.0)"
-    elif fe < 0.0:
-        return "Moderately Stable (-1..0)"
+# Thermodynamic Stability Categorization (by JARVIS E_hull)
+def cat_stability(eh):
+    if eh <= 0.025:
+        return "Stable (<=0.025 eV)"
+    elif eh <= 0.1:
+        return "Metastable (0.025-0.1 eV)"
     else:
-        return "Unstable (>=0)"
+        return "Unstable (>0.1 eV)"
 
-def cat_bulk(k):
-    if k < 50:
-        return "Low (<50 GPa)"
-    elif k < 150:
-        return "Moderate (50-150 GPa)"
-    else:
-        return "High (>=150 GPa)"
-
-def cat_shear(g):
-    if g < 30:
-        return "Low (<30 GPa)"
-    elif g < 80:
-        return "Moderate (30-80 GPa)"
-    else:
-        return "High (>=80 GPa)"
-
-def cat_ads(e):
-    if e < 1.0:
-        return "Weak (<1.0 eV)"
-    elif e < 2.5:
-        return "Optimal (1.0-2.5 eV)"
-    else:
-        return "Strong (>=2.5 eV)"
-
-df_matched["cat_stab"] = df_matched["formation_energy"].apply(cat_stability)
-df_matched["cat_bulk"] = df_matched["bulk_modulus"].apply(cat_bulk)
-df_matched["cat_shear"] = df_matched["shear_modulus"].apply(cat_shear)
-df_matched["cat_ads"] = df_matched["adsorption_energy_eV"].apply(cat_ads)
+df_matched["cat_stab"] = df_matched["e_hull"].apply(cat_stability)
 
 fig, axes = plt.subplots(2, 3, figsize=(16, 9.5))
 axes = axes.flatten()
 
-ct_a = df_matched["electronic_class"].value_counts().reindex(class_order).fillna(0)
-x_a = np.arange(len(class_order))
-rects_a = axes[0].bar(x_a, ct_a.values, color=["#2b5c8f", "#7570b3", "#4292c6"], width=0.5, edgecolor="black", linewidth=1.0)
-for rect in rects_a:
-    h = rect.get_height()
-    if h > 0:
-        axes[0].annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
-                         xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
-
-axes[0].set_xticks(x_a)
-axes[0].set_xticklabels(class_order, fontweight="bold", fontsize=9.5)
-axes[0].set_title("(a) Electronic Conductivity (Total Count)", fontweight="bold", fontsize=11, pad=8)
-axes[0].set_xlabel("Electronic Conductivity Class", fontweight="bold", fontsize=10)
-axes[0].set_ylabel("Material Count", fontweight="bold", fontsize=10)
-axes[0].grid(True, linestyle="--", alpha=0.4, axis="y")
-axes[0].set_ylim(top=axes[0].get_ylim()[1] * 1.15)
-
-def plot_grouped_breakdown(ax, cat_col, categories, cat_colors, title):
-    ct = pd.crosstab(df_matched["electronic_class"], df_matched[cat_col]).reindex(index=class_order, columns=categories).fillna(0)
+def plot_simple_count(ax, title, ylabel="Material Count"):
+    ct = df_matched["electronic_class"].value_counts().reindex(class_order).fillna(0)
     x = np.arange(len(class_order))
-    num_cats = len(categories)
-    width = 0.72 / num_cats
-    
-    for i, cat in enumerate(categories):
-        vals = ct[cat].values
-        rects = ax.bar(x + (i - (num_cats - 1) / 2) * width, vals, width, label=cat, color=cat_colors[i], edgecolor="black", linewidth=0.8)
-        for rect in rects:
-            h = rect.get_height()
-            if h > 0:
-                ax.annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
-                            xytext=(0, 2), textcoords="offset points", ha='center', va='bottom', fontsize=7.5, fontweight='bold')
-                            
+    rects = ax.bar(x, ct.values, color=class_colors, width=0.5, edgecolor="black", linewidth=1.0)
+    for rect in rects:
+        h = rect.get_height()
+        if h > 0:
+            ax.annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                        xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(class_order, fontweight="bold", fontsize=9.5)
     ax.set_title(title, fontweight="bold", fontsize=11, pad=8)
     ax.set_xlabel("Electronic Conductivity Class", fontweight="bold", fontsize=10)
-    ax.set_ylabel("Material Count", fontweight="bold", fontsize=10)
+    ax.set_ylabel(ylabel, fontweight="bold", fontsize=10)
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
-    ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=8, loc="upper right")
-    ax.set_ylim(top=ax.get_ylim()[1] * 1.18)
+    ax.set_ylim(top=ax.get_ylim()[1] * 1.15)
 
-plot_grouped_breakdown(axes[1], "cat_stab",
-                       ["Highly Stable (<-1.0)", "Moderately Stable (-1..0)", "Unstable (>=0)"],
-                       ["#2ca02c", "#ff7f0e", "#d62728"],
-                       "(b) Thermodynamic Stability Breakdown")
+# Subplot (a): Electronic Conductivity (Total Count)
+plot_simple_count(axes[0], "(a) Electronic Conductivity (Total Count)")
 
-plot_grouped_breakdown(axes[2], "cat_bulk",
-                       ["Low (<50 GPa)", "Moderate (50-150 GPa)", "High (>=150 GPa)"],
-                       ["#9467bd", "#1f77b4", "#17becf"],
-                       "(c) Bulk Modulus Stiffness Breakdown")
+# Subplot (b): Thermodynamic Stability Breakdown (by JARVIS E_hull)
+categories_b = ["Stable (<=0.025 eV)", "Metastable (0.025-0.1 eV)", "Unstable (>0.1 eV)"]
+colors_b = ["#2ca02c", "#ff7f0e", "#d62728"]
 
-plot_grouped_breakdown(axes[3], "cat_shear",
-                       ["Low (<30 GPa)", "Moderate (30-80 GPa)", "High (>=80 GPa)"],
-                       ["#e377c2", "#8c564b", "#bcbd22"],
-                       "(d) Shear Modulus Strength Breakdown")
+ct_b = pd.crosstab(df_matched["electronic_class"], df_matched["cat_stab"]).reindex(index=class_order, columns=categories_b).fillna(0)
+x = np.arange(len(class_order))
+num_cats = len(categories_b)
+width = 0.72 / num_cats
 
-plot_grouped_breakdown(axes[4], "cat_ads",
-                       ["Weak (<1.0 eV)", "Optimal (1.0-2.5 eV)", "Strong (>=2.5 eV)"],
-                       ["#f08080", "#2e8b57", "#4169e1"],
-                       "(e) Polysulfide Adsorption Energy Breakdown")
+for i, cat in enumerate(categories_b):
+    vals = ct_b[cat].values
+    rects = axes[1].bar(x + (i - (num_cats - 1) / 2) * width, vals, width, label=cat, color=colors_b[i], edgecolor="black", linewidth=0.8)
+    for rect in rects:
+        h = rect.get_height()
+        if h > 0:
+            axes[1].annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                             xytext=(0, 2), textcoords="offset points", ha='center', va='bottom', fontsize=7.5, fontweight='bold')
 
+axes[1].set_xticks(x)
+axes[1].set_xticklabels(class_order, fontweight="bold", fontsize=9.5)
+axes[1].set_title("(b) Thermodynamic Stability Breakdown (by JARVIS $E_{hull}$)", fontweight="bold", fontsize=11, pad=8)
+axes[1].set_xlabel("Electronic Conductivity Class", fontweight="bold", fontsize=10)
+axes[1].set_ylabel("Material Count", fontweight="bold", fontsize=10)
+axes[1].grid(True, linestyle="--", alpha=0.4, axis="y")
+axes[1].legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=8, loc="upper right")
+axes[1].set_ylim(top=axes[1].get_ylim()[1] * 1.18)
+
+# Subplot (c): Bulk Modulus (Material Count per Class)
+plot_simple_count(axes[2], "(c) Bulk Modulus ($K$) Material Count")
+
+# Subplot (d): Shear Modulus (Material Count per Class)
+plot_simple_count(axes[3], "(d) Shear Modulus ($G$) Material Count")
+
+# Subplot (e): Adsorption Energy (Material Count per Class)
+plot_simple_count(axes[4], "(e) Polysulfide Adsorption Energy ($E_{ads}$) Material Count")
+
+# Subplot (f): Turned off
 axes[5].axis("off")
 
-plt.suptitle("Material Properties Breakdown Across Electronic Conductivity Classes (Metal, Semimetal, Semiconductor)", fontsize=13, fontweight="bold", y=0.99)
+plt.suptitle("Material Properties Breakdown Across Electronic Conductivity Classes (5 Core Physical Properties)", fontsize=13, fontweight="bold", y=0.99)
 plt.tight_layout()
 save_paper_fig(fig, "fig3_eda_material_classification")
 plt.show()

@@ -5,3 +5,4 @@ data/graph_cache.pkl
 *.zip
 *.tar.gz
 .DS_Store
+.~lock.*
