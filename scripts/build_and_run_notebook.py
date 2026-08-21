@@ -8,12 +8,12 @@ def create_notebook():
     nb = nbf.v4.new_notebook()
 
     # Title & Scientific Rationale Markdown Header
-    m_title = nbf.v4.new_markdown_cell(r"""# 🧪 CGCNN 5-Property Prediction, Matched Polysulfide Adsorption Integration & Material Screening Pipeline for Graphene TPMS Cathode Hosts
+    m_title = nbf.v4.new_markdown_cell(r"""# CGCNN 5-Property Prediction, Matched Polysulfide Adsorption Integration & Material Screening Pipeline for Graphene TPMS Cathode Hosts
 ### *Comprehensive Computational Informatics Workflow Focused on 5 Core Physical Properties for Lithium-Sulfur (Li-S) Battery Screening*
 
 ---
 
-## 🧬 Focus Target Properties: 5 Properti Fisik Utama Skrining Material Katoda
+## Focus Target Properties: 5 Core Physical Target Properties for Cathode Screening
 
 Notebook ini secara eksplisit difokuskan pada **5 properti fisik utama** untuk mengevaluasi dan meranking keunggulan material *host* katoda:
 1. **Band Gap ($E_g$, eV)**
@@ -24,7 +24,7 @@ Notebook ini secara eksplisit difokuskan pada **5 properti fisik utama** untuk m
 
 ---
 
-## 🧬 Justifikasi Ilmiah: Mengapa 5 Properti Ini Digunakan untuk Baterai Li-S?
+## Scientific Rationale: 5 Target Properties for Li-S Battery Host Screening
 
 Baterai Lithium-Sulfur (Li-S) menawarkan kapasitas spesifik teoritis yang sangat tinggi ($\approx 1675\text{ mAh/g}$), namun menghadapi hambatan seperti konduktivitas listrik sulfur yang buruk, ekspansi volume hingga $\approx 80\%$ saat reaksi redoks, dan pelarutan *polysulfide shuttle*. Oleh karena itu, 5 properti ini dipilih sebagai kriteria skrining utama:
 
@@ -41,7 +41,7 @@ Baterai Lithium-Sulfur (Li-S) menawarkan kapasitas spesifik teoritis yang sangat
 
 ---
 
-## 🏛️ Rasional Struktural: Mengapa Menggunakan Lembaran TPMS (Triply Periodic Minimal Surfaces)?
+## Structural Rationale: Triply Periodic Minimal Surfaces (TPMS) Graphene Sheets
 
 Topologi **Triply Periodic Minimal Surfaces (TPMS)** seperti *Neovius, Gyroid, IWP, Diamond,* dan *Primitive* dipilih sebagai arsitektur *host* katoda karena keunggulan geometris dan mekanis berikut:
 
@@ -197,7 +197,7 @@ df_stats_matched["unit"] = [TARGET_UNITS[c] for c in FIVE_TARGETS]
 df_stats_matched = df_stats_matched[["unit", "count", "mean", "std", "min", "25%", "50%", "75%", "max", "skewness"]]
 
 print("================================================================================")
-print(" 📊 COMPREHENSIVE DESCRIPTIVE STATISTICS TABLE (5 CORE TARGET PROPERTIES)")
+print(" COMPREHENSIVE DESCRIPTIVE STATISTICS TABLE (5 CORE TARGET PROPERTIES)")
 print("================================================================================")
 display(df_stats_matched.round(3))
 """)
@@ -792,7 +792,7 @@ df_tpms = df_tpms.sort_values("Overall_Score", ascending=False).reset_index(drop
 df_tpms["Overall_Rank"] = df_tpms.index + 1
 
 print("================================================================================")
-print(" 🏆 GRAPHENE TPMS CATHODE HOST PERFORMANCE RANKING (5 CORE PHYSICAL PROPERTIES)")
+print(" GRAPHENE TPMS CATHODE HOST PERFORMANCE RANKING (5 CORE PHYSICAL PROPERTIES)")
 print("================================================================================")
 display(df_tpms[[
     "Overall_Rank", "TPMS", "Num_Atoms",
@@ -897,7 +897,7 @@ df_pub.columns = [
 ]
 
 print("================================================================================")
-print(" 📜 SUMMARY TABLE FOR PUBLICATION (5 CORE PHYSICAL PROPERTIES)")
+print(" SUMMARY TABLE FOR PUBLICATION (5 CORE PHYSICAL PROPERTIES)")
 print("================================================================================")
 display(df_pub.round(3))
 
@@ -909,7 +909,7 @@ latex_table = df_pub.round(3).to_latex(
 )
 
 print("================================================================================")
-print(" 📄 KODE LATEX TABEL PUBLIKASI (READY FOR MANUSCRIPT):")
+print(" KODE LATEX TABEL PUBLIKASI (READY FOR MANUSCRIPT):")
 print("================================================================================")
 print(latex_table)
 """)

@@ -9,7 +9,7 @@ def generate_complete_notebook():
     nb = nbf.v4.new_notebook()
 
     # Title Markdown
-    m_title = nbf.v4.new_markdown_cell(r"""# 🔬 Material Property Screening & Polysulfide Adsorption Analysis Pipeline
+    m_title = nbf.v4.new_markdown_cell(r"""# Material Property Screening & Polysulfide Adsorption Analysis Pipeline
 
 > **Research Focus**: Computational Screening of Host Materials for Lithium-Sulfur (Li-S) Battery Cathodes via JARVIS-DFT Data Extraction, Exploratory Data Analysis, Multi-Target CGCNN Modeling, and Graphene TPMS Evaluation.
 > **Target Properties**: Band Gap ($E_g$), Formation Energy ($E_f$), Bulk Modulus ($K$), Shear Modulus ($G$), and Polysulfide Adsorption Energy ($E_{ads}$).
@@ -157,7 +157,7 @@ df_stats_matched["unit"] = [TARGET_UNITS[c] for c in FIVE_TARGETS]
 df_stats_matched = df_stats_matched[["unit", "count", "mean", "std", "min", "25%", "50%", "75%", "max", "skewness"]]
 
 print("================================================================================")
-print(" 📊 COMPREHENSIVE DESCRIPTIVE STATISTICS TABLE (5 CORE TARGET PROPERTIES)")
+print(" COMPREHENSIVE DESCRIPTIVE STATISTICS TABLE (5 CORE TARGET PROPERTIES)")
 print("================================================================================")
 display(df_stats_matched.round(3))
 """)
@@ -758,7 +758,7 @@ df_tpms = df_tpms.sort_values("Overall_Score", ascending=False).reset_index(drop
 df_tpms["Overall_Rank"] = df_tpms.index + 1
 
 print("================================================================================")
-print(" 🏆 GRAPHENE TPMS CATHODE HOST PERFORMANCE RANKING (5 CORE PHYSICAL PROPERTIES)")
+print(" GRAPHENE TPMS CATHODE HOST PERFORMANCE RANKING (5 CORE PHYSICAL PROPERTIES)")
 print("================================================================================")
 display(df_tpms[[
     "Overall_Rank", "TPMS", "Num_Atoms",
@@ -863,7 +863,7 @@ df_pub.columns = [
 ]
 
 print("================================================================================")
-print(" 📜 SUMMARY TABLE FOR PUBLICATION (5 CORE PHYSICAL PROPERTIES)")
+print(" SUMMARY TABLE FOR PUBLICATION (5 CORE PHYSICAL PROPERTIES)")
 print("================================================================================")
 display(df_pub.round(3))
 
@@ -874,7 +874,7 @@ latex_table = df_pub.round(3).to_latex(
 )
 
 print("================================================================================")
-print(" 📄 KODE LATEX TABEL PUBLIKASI (READY FOR MANUSCRIPT):")
+print(" KODE LATEX TABEL PUBLIKASI (READY FOR MANUSCRIPT):")
 print("================================================================================")
 print(latex_table)
 """)
