@@ -767,6 +767,20 @@ with tab_intro:
     </div>
     """, unsafe_allow_html=True)
 
+    # FIGURE 1 WILEY GRAPHIC EMBED
+    fig1_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_1.png")
+    if not os.path.exists(fig1_path):
+        fig1_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_1.png")
+    
+    if os.path.exists(fig1_path):
+        st.markdown("#### 🖼️ Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion (Wiley Manuscript Graphic)")
+        st.image(
+            fig1_path,
+            caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
+            use_container_width=True
+        )
+        st.divider()
+
     # SECTION 1: DETAILED ELECTROCHEMICAL REACTION MECHANISM & FORMULAS
     st.markdown("""
     <div class="web-card">
@@ -850,6 +864,19 @@ with tab_intro:
         <b>(c) Pasivasi Anoda & Pertumbuhan Dendrit Lithium</b> yang memicu arus pendek sel (<i>short-circuit</i>).
     </p>
     """, unsafe_allow_html=True)
+
+    # FIGURE 2 WILEY GRAPHIC EMBED
+    fig2_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_2.png")
+    if not os.path.exists(fig2_path):
+        fig2_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_2.png")
+
+    if os.path.exists(fig2_path):
+        st.markdown("#### 🖼️ Figure 2: Tantangan Utama & Degradasi Baterai Li-S (Wiley Manuscript Graphic)")
+        st.image(
+            fig2_path,
+            caption="Figure 2: The main degradation issues and challenges of Lithium-Sulfur (Li-S) battery system.",
+            use_container_width=True
+        )
 
     st.divider()
 
