@@ -184,16 +184,6 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
 with st.sidebar:
     st.markdown("### ⚙️ Platform Control Panel")
     
-    st.markdown("#### 🎨 Mode Tampilan / Theme")
-    theme_mode = st.radio(
-        "Pilih Theme Mode:",
-        ["☀️ Mode Terang (Light)", "🌙 Mode Gelap (Dark)", "🖥️ Auto (System Preference)"],
-        index=0,
-        key="app_theme_mode"
-    )
-    
-    st.divider()
-
     st.markdown("#### 📁 Structure Viewer Selector")
     input_mode = st.radio("Pilih Sumber File CIF Single:", ["Gunakan Contoh TPMS", "Upload File .CIF Single"], index=0)
     
@@ -239,17 +229,18 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
-# Global Styling & Theme Configuration (Dark Mode & Light Mode Support)
+# Global Styling & Theme Configuration (Permanent Light Mode)
 # ---------------------------------------------------------------------------
-is_light = (theme_mode == "☀️ Mode Terang (Light)")
+theme_mode = "☀️ Mode Terang (Light)"
+is_light = True
 
-plotly_template = "plotly_white" if is_light else "plotly_dark"
-plotly_font_color = "#0f172a" if is_light else "#f8fafc"
-plotly_grid_color = "rgba(0,0,0,0.12)" if is_light else "rgba(255,255,255,0.12)"
-plotly_bg = "rgba(255,255,255,0.7)" if is_light else "rgba(15,23,42,0.6)"
-mol3d_bg = "#ffffff" if is_light else "#0b0f19"
+plotly_template = "plotly_white"
+plotly_font_color = "#0f172a"
+plotly_grid_color = "rgba(0,0,0,0.12)"
+plotly_bg = "rgba(255,255,255,0.7)"
+mol3d_bg = "#ffffff"
 
-if theme_mode == "☀️ Mode Terang (Light)":
+if True:
     theme_css = """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -1521,50 +1512,153 @@ with tab_eda:
 
         st.divider()
 
-        # SECTION 3: ELECTRONIC MATERIAL CLASS DONUT CHART & POLYSULFIDE SPECIES BOXPLOT
-        st.markdown("### 🧪 Klasifikasi Klas Elektronik & Energi Penjangkaran Polisulfida")
+        # SECTION 3: MATERIAL TYPE DISTRIBUTION ACCROSS ALL 5 PROPERTIES
+        st.markdown("### 📊 3. Jumlah & Distribusi Jenis Material Berdasarkan 5 Pilar Properti Fisika")
+        st.markdown("""
+        Analisis komprehensif jumlah dan proporsi jenis material host katoda yang dikategorikan secara objektif 
+        berdasarkan **kelima pilar properti fisika utama** (Band Gap, Formation Energy, Bulk Modulus, Shear Modulus, dan Adsorption Energy):
+        """)
+
+        def cat_band_gap(bg):
+            if bg == 0: return "Metallic (Eg = 0 eV)"
+            elif bg < 0.1: return "Semimetal (0 < Eg < 0.1 eV)"
+            elif bg <= 2.0: return "Semiconductor (0.1 <= Eg <= 2.0 eV)"
+            else: return "Insulator (Eg > 2.0 eV)"
+
+        def cat_formation_energy(ef):
+            if ef <= 0: return "Sangat Stabil (Ef <= 0 eV/atom)"
+            elif ef <= 0.5: return "Meta-stabil (0 < Ef <= 0.5 eV/atom)"
+            else: return "Kurang Stabil (Ef > 0.5 eV/atom)"
+
+        def cat_bulk_modulus(k):
+            if k >= 150: return "Tinggi (K >= 150 GPa)"
+            elif k >= 75: return "Sedang (75 <= K < 150 GPa)"
+            else: return "Rendah (K < 75 GPa)"
+
+        def cat_shear_modulus(g):
+            if g >= 80: return "Tinggi (G >= 80 GPa)"
+            elif g >= 40: return "Sedang (40 <= G < 80 GPa)"
+            else: return "Rendah (G < 40 GPa)"
+
+        def cat_adsorption_energy(ads):
+            if ads >= 2.5: return "Sangat Kuat (Eads >= 2.5 eV)"
+            elif ads >= 1.5: return "Sedang (1.5 <= Eads < 2.5 eV)"
+            else: return "Lemah (Eads < 1.5 eV)"
+
+        eda_df_cat = eda_df.copy()
+        eda_df_cat["Cat_Band_Gap"] = eda_df_cat["band_gap"].apply(cat_band_gap)
+        eda_df_cat["Cat_Formation_Energy"] = eda_df_cat["formation_energy"].apply(cat_formation_energy)
+        eda_df_cat["Cat_Bulk_Modulus"] = eda_df_cat["bulk_modulus"].apply(cat_bulk_modulus)
+        eda_df_cat["Cat_Shear_Modulus"] = eda_df_cat["shear_modulus"].apply(cat_shear_modulus)
+        eda_df_cat["Cat_Adsorption_Energy"] = eda_df_cat["adsorption_energy_eV"].apply(cat_adsorption_energy)
 
         col_f3a, col_f3b = st.columns(2)
 
         with col_f3a:
-            st.markdown("#### (a) Electronic Material Class Proportion")
-            mat_counts = eda_df["material_type"].value_counts()
-            fig3_donut = px.pie(
-                values=mat_counts.values,
-                names=mat_counts.index,
-                hole=0.45,
-                title="Proporsi Klasifikasi Konduktivitas Elektronik Kristal Host",
-                color_discrete_sequence=["#38bdf8", "#818cf8", "#c084fc", "#f472b6"]
+            st.markdown("#### (a) Jumlah Material: Konduktivitas (Band Gap) & Stabilitas Termodinamika")
+            bg_counts = eda_df_cat["Cat_Band_Gap"].value_counts().reset_index()
+            bg_counts.columns = ["Kategori Band Gap", "Jumlah Material"]
+            fig3_bg = px.bar(
+                bg_counts,
+                x="Jumlah Material",
+                y="Kategori Band Gap",
+                orientation="h",
+                text="Jumlah Material",
+                title="Jumlah Jenis Material Berdasarkan Band Gap (Eg)",
+                color="Kategori Band Gap",
+                color_discrete_sequence=["#0284c7", "#38bdf8", "#818cf8", "#c084fc"]
             )
-            fig3_donut.update_layout(
+            fig3_bg.update_layout(
                 template=plotly_template,
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
-                height=480
+                plot_bgcolor=plotly_bg,
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                showlegend=False,
+                height=380
             )
-            st.plotly_chart(fig3_donut, use_container_width=True)
+            st.plotly_chart(fig3_bg, use_container_width=True)
 
         with col_f3b:
-            st.markdown("#### (b) Adsorption Energy Distribution across Polysulfide Species")
-            if "adsorbate" in eda_df.columns:
-                fig3_box = px.box(
-                    eda_df,
-                    x="adsorbate",
-                    y="adsorption_energy_eV",
-                    color="adsorbate",
-                    points="all",
-                    title="Energi Adsorpsi per Spesies Polisulfida (S8, Li2S8, ..., Li2S)",
-                    labels={"adsorption_energy_eV": "Adsorption Energy E_ads (eV)", "adsorbate": "Spesies Polisulfida"},
-                    color_discrete_sequence=px.colors.sequential.Purples
-                )
-                fig3_box.update_layout(
-                    template=plotly_template,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor=plotly_bg,
-                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=14),
-                    height=480
-                )
-                st.plotly_chart(fig3_box, use_container_width=True)
+            st.markdown("#### (b) Jumlah Material: Sifat Mekanis (Bulk & Shear Modulus) & Adsorpsi")
+            
+            bm_c = eda_df_cat["Cat_Bulk_Modulus"].value_counts().to_dict()
+            sm_c = eda_df_cat["Cat_Shear_Modulus"].value_counts().to_dict()
+            ads_c = eda_df_cat["Cat_Adsorption_Energy"].value_counts().to_dict()
+
+            mech_df = pd.DataFrame([
+                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": bm_c.get("Tinggi (K >= 150 GPa)", 0)},
+                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Sedang", "Jumlah Material": bm_c.get("Sedang (75 <= K < 150 GPa)", 0)},
+                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Rendah", "Jumlah Material": bm_c.get("Rendah (K < 75 GPa)", 0)},
+                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": sm_c.get("Tinggi (G >= 80 GPa)", 0)},
+                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Sedang", "Jumlah Material": sm_c.get("Sedang (40 <= G < 80 GPa)", 0)},
+                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Rendah", "Jumlah Material": sm_c.get("Rendah (G < 40 GPa)", 0)},
+                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": ads_c.get("Sangat Kuat (Eads >= 2.5 eV)", 0)},
+                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Sedang", "Jumlah Material": ads_c.get("Sedang (1.5 <= Eads < 2.5 eV)", 0)},
+                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Rendah", "Jumlah Material": ads_c.get("Lemah (Eads < 1.5 eV)", 0)},
+            ])
+
+            fig3_mech = px.bar(
+                mech_df,
+                x="Properti",
+                y="Jumlah Material",
+                color="Tingkat/Kategori",
+                barmode="group",
+                text="Jumlah Material",
+                title="Perbandingan Jumlah Material: Bulk & Shear Modulus vs Adsorpsi",
+                color_discrete_sequence=["#0284c7", "#38bdf8", "#fb923c"]
+            )
+            fig3_mech.update_layout(
+                template=plotly_template,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor=plotly_bg,
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                height=380
+            )
+            st.plotly_chart(fig3_mech, use_container_width=True)
+
+        st.markdown("#### 📋 Tabel Rangkuman Distribusi & Jumlah Jenis Material (5 Properti Fisika)")
+        
+        total_rec = len(eda_df_cat)
+        prop_summary_list = []
+
+        for k, v in eda_df_cat["Cat_Band_Gap"].value_counts().items():
+            prop_summary_list.append({
+                "Properti Fisika": "1. Band Gap (Eg)",
+                "Kategori / Tingkatan": k,
+                "Jumlah Material": v,
+                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+            })
+        for k, v in eda_df_cat["Cat_Formation_Energy"].value_counts().items():
+            prop_summary_list.append({
+                "Properti Fisika": "2. Formation Energy (Ef)",
+                "Kategori / Tingkatan": k,
+                "Jumlah Material": v,
+                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+            })
+        for k, v in eda_df_cat["Cat_Bulk_Modulus"].value_counts().items():
+            prop_summary_list.append({
+                "Properti Fisika": "3. Bulk Modulus (K)",
+                "Kategori / Tingkatan": k,
+                "Jumlah Material": v,
+                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+            })
+        for k, v in eda_df_cat["Cat_Shear_Modulus"].value_counts().items():
+            prop_summary_list.append({
+                "Properti Fisika": "4. Shear Modulus (G)",
+                "Kategori / Tingkatan": k,
+                "Jumlah Material": v,
+                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+            })
+        for k, v in eda_df_cat["Cat_Adsorption_Energy"].value_counts().items():
+            prop_summary_list.append({
+                "Properti Fisika": "5. Adsorption Energy (Eads)",
+                "Kategori / Tingkatan": k,
+                "Jumlah Material": v,
+                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+            })
+
+        df_prop_summary = pd.DataFrame(prop_summary_list)
+        st.dataframe(df_prop_summary, use_container_width=True)
 
         st.divider()
 
