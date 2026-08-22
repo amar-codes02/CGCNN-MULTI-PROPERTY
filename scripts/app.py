@@ -776,7 +776,7 @@ with tab_intro:
     if os.path.exists(fig1_path):
         try:
             img1 = Image.open(fig1_path)
-            st.markdown("#### 🖼️ Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion (Wiley Manuscript Graphic)")
+            st.markdown("#### Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion")
             st.image(
                 img1,
                 caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
@@ -878,7 +878,7 @@ with tab_intro:
     if os.path.exists(fig2_path):
         try:
             img2 = Image.open(fig2_path)
-            st.markdown("#### 🖼️ Figure 2: Tantangan Utama & Degradasi Baterai Li-S (Wiley Manuscript Graphic)")
+            st.markdown("#### Figure 2: Tantangan Utama & Degradasi Baterai Li-S")
             st.image(
                 img2,
                 caption="Figure 2: The main degradation issues and challenges of Lithium-Sulfur (Li-S) battery system.",
