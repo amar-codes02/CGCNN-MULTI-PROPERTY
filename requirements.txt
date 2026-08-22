@@ -4,6 +4,11 @@ streamlit
 pymatgen
 numpy
 pandas
+scipy
 matplotlib
 seaborn
 plotly
+py3Dmol
+stmol
+ipython_genutils
+Pillow

@@ -1,122 +1,126 @@
-# CGCNN Material Property Predictor — Streamlit App
+# AMARUS: CGCNN Multi-Property Screening Platform for Li-S Battery Cathode Hosts 🔋⚡
 
-Aplikasi ini dibuat dari notebook `Final_jarvis_EN.ipynb`. Ada 3 hal yang bisa
-diupload lewat browser:
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-ee4c2c.svg)](https://pytorch.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Interactive%20UI-ff4b4b.svg)](https://streamlit.io/)
+[![Pymatgen](https://img.shields.io/badge/Pymatgen-Crystal%20Structure-green.svg)](https://pymatgen.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-1. **Dataset** (di tab EDA) — file `.pkl` seperti `dataset_jarvis_dft3d.pkl`,
-   atau `.csv` dengan kolom `band_gap`, `formation_energy`, `bulk_modulus`,
-   `shear_modulus`.
-2. **Model checkpoint** (`.pt`, di sidebar) — hasil training dari notebook.
-3. **File CIF** (di bagian atas halaman) — material yang mau diprediksi/divisualisasikan.
+**AMARUS** (*Advanced Material Architectures for Rechargeable Ultra-Storage*) adalah platform riset komputasional berbasis **Crystal Graph Convolutional Neural Network (CGCNN)** yang dirancang untuk melakukan penapisan (*screening*) cepat dan evaluasi multi-properti pada material katoda kandidat untuk **Baterai Lithium-Sulfur (Li-S)** generasi mendatang.
 
-Kalau dataset atau model belum diupload, aplikasi tetap jalan: tab EDA
-menampilkan data demo/sintetis, dan aplikasi otomatis mencoba memakai file di
-`models/cgcnn_model.pt` kalau ada.
+---
 
-## 1. Struktur folder
+## 🌟 Fitur Utama
 
+- **Multi-Property Predictive Modeling**: Prediksi simultan 5 properti fisik & termodinamika kritis:
+  1. **Band Gap ($E_g$)** [eV] — Penilaian sifat konduktivitas elektronik.
+  2. **Formation Energy ($E_f$)** [eV/atom] — Evaluasi stabilitas termodinamika kristal.
+  3. **Bulk Modulus ($K$)** [GPa] — Ketahanan terhadap deformasi volume.
+  4. **Shear Modulus ($G$)** [GPa] — Ketahanan terhadap deformasi geser.
+  5. **Polysulfide Adsorption Energy ($E_{ads}$)** [eV] — Kemampuan penjangkaran molekul polisulfida ($\text{Li}_2\text{S}_x$) untuk memitigasi *shuttle effect*.
+- **Interactive 3D Visualizer**: Rendering struktur kristal 3D interaktif berbasis `py3Dmol` dan `stmol` dengan kontrol supercell dinamis ($n_a, n_b, n_c$).
+- **Atomic Graph Representation**: Visualisasi graf kristal CGCNN (atom = node, ikatan tetangga = edge) sesuai radius cutoff 8.0 Å.
+- **Exploratory Data Analysis (EDA)**: Dashboard analitik komprehensif dengan breakdown kuantitatif material berbasis 5 pilar properti fisika.
+- **Publication-Ready Figures**: Integrasi diagram skematik dan mekanisme reaksi elektrokimia berstandar Wiley & Chemistry Europe.
+
+---
+
+## 📁 Struktur Repositori
+
+```text
+AMARUS/
+├── app.py                             # Wrapper entry point utama Streamlit
+├── requirements.txt                   # Daftar dependensi Python
+├── README.md                          # Dokumentasi resmi repositori
+├── .gitignore                         # Konfigurasi pengabaian berkas sensitif/cache
+│
+├── models/                            # Arsitektur & Checkpoint Deep Learning
+│   ├── cgcnn_model.py                 # Implementasi PyTorch CGCNN (Graph Builder & Network)
+│   └── cgcnn_model.pt                 # Checkpoint bobot trained multi-property model
+│
+├── data/                              # Dataset & Cache Profiling
+│   └── dataset_jarvis_dft3d_matched.pkl # Dataset multi-properti JARVIS-DFT3D
+│
+├── notebooks/                         # Pipeline Riset & Eksperimen Jupyter Notebook
+│   ├── LiS_Material_Screening_Pipeline.ipynb # Pipeline screening material Li-S utama
+│   ├── JARVIS_DFT3D_Data_Extraction.ipynb    # Ekstraksi & preprocessing data DFT3D
+│   └── DFT_GPAW_TPMS_Calculation.ipynb       # Perhitungan Ab-initio GPAW DFT
+│
+├── scripts/                           # Skrip Eksekusi Modul & Dashboard UI
+│   ├── app.py                         # Logika utama dasbor antarmuka Streamlit
+│   ├── build_new_notebook.py          # Skrip penyusun notebook riset
+│   └── build_and_run_notebook.py      # Eksekutor otomatisasi pipeline
+│
+└── structures/                        # Berkas Struktur Kristal CIF
+    └── Graphene_TPMS_Sheet/           # Topologi Graphene TPMS (P, G, D, I-WP, Neovius)
 ```
-streamlit_app/
-├── app.py                 # aplikasi utama
-├── cgcnn_model.py          # arsitektur CGCNN + graph builder (di-port dari notebook)
-├── eda_precompute.py       # opsional: bikin cache EDA lokal (lihat bagian 4)
-├── requirements.txt
-├── models/
-│   └── cgcnn_model.pt      # opsional: kalau ditaruh di sini, tidak perlu upload model tiap buka app
-└── data/
-    └── eda_cache.csv       # opsional: kalau ditaruh di sini, dipakai sebagai default sebelum upload
-```
 
-## 2. Instalasi
+---
 
+## 🚀 Panduan Instalasi & Eksekusi Lokal
+
+### 1. Kloning Repositori
 ```bash
-cd streamlit_app
+git clone https://github.com/amar-codes02/CGCNN-MULTI-PROPERTY.git
+cd CGCNN-MULTI-PROPERTY
+```
+
+### 2. Buat Lingkungan Virtual (Virtual Environment)
+```bash
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+source venv/bin/activate  # Untuk Linux/macOS
+# Pada Windows gunakan: venv\Scripts\activate
+```
+
+### 3. Instal Dependensi
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-> Catatan GPU: `pip install torch` di atas menginstall versi CPU secara default.
-> Kalau Anda punya GPU dan CUDA terpasang, install torch versi CUDA sesuai
-> instruksi di https://pytorch.org/get-started/locally/ sebelum menjalankan app.
-
-## 3. Jalankan aplikasi
-
+### 4. Jalankan Dashboard Streamlit
 ```bash
 streamlit run app.py
 ```
+Aplikasi akan secara otomatis terbuka di peramban web Anda pada alamat `http://localhost:8501`.
 
-## 4. Cara pakai di browser
+---
 
-1. **Tab EDA Dataset** — kosong sampai Anda upload dataset di tab ini:
-   - `.pkl` seperti `dataset_jarvis_dft3d.pkl` (dict dengan key `names`,
-     `band_gap`, `formation_energy`, `bulk_modulus`, `shear_modulus`), atau
-   - `.csv` dengan kolom `band_gap`, `formation_energy`, `bulk_modulus`,
-     `shear_modulus` (kolom `name` opsional).
-   Begitu file terupload, statistik, histogram, korelasi, scatter plot, dan
-   klasifikasi metal/semimetal/semikonduktor/insulator langsung muncul.
+## 💻 Modul Dasbor Interactive UI
 
-2. **Sidebar** — upload file checkpoint model (`cgcnn_model.pt`, hasil
-   `MODEL_CHECKPOINT_FILE` dari notebook). Tanpa ini, tab **Prediksi** tidak
-   aktif, tapi tab Struktur Kristal & Graph Model tetap bisa dipakai (tidak
-   butuh model).
+Platform AMARUS memiliki 4 Tab Navigasi Utama:
 
-3. Di bagian atas halaman, **upload 1 file `.cif`** milik Anda.
+1. **🧬 Tab 1: Fondasi Sains & Reaksi Elektrokimia Li-S**
+   - Menjelaskan mekanisme reaksi reduksi 4-tahap sulfur ($S_8 \to \text{Li}_2\text{S}$).
+   - Menyajikan analisis fenomena korosi anoda parasitik dan *shuttle effect*.
+   - Menyematkan grafik publikasi jurnal (Figure 1: Komparasi Baterai Li-S vs Li-ion & Figure 2: Tantangan Degradasi Baterai).
 
-4. **Tab Prediksi Sifat Material** — otomatis menampilkan prediksi 4 sifat
-   (band gap, formation energy, bulk modulus, shear modulus).
+2. **🏆 Tab 2: Hasil Pengujian TPMS & Ranking Multi-CIF**
+   - Evaluasi performa penapisan pada 5 struktur Triply Periodic Minimal Surface (TPMS) Graphene.
+   - Fitur upload multi-file CIF kustom untuk prediksi properti serentak.
 
-5. **Tab Struktur Kristal** — visualisasi 3D interaktif (bisa diputar/di-zoom),
-   dengan 3 slider (`na`, `nb`, `nc`) untuk mengatur ukuran supercell.
+3. **🧊 Tab 3: Visualisasi Kristal & Graph 3D**
+   - Visualisasi kristal 3D interaktif dengan pengubah ukuran *supercell* dinamis.
+   - Representasi graf atomik CGCNN yang memperlihatkan konektivitas ikatan antar atom.
 
-6. **Tab Graph Model** — visualisasi graph (node = atom, edge = ikatan/tetangga)
-   yang menjadi input CGCNN, dengan slider radius cutoff & jumlah tetangga
-   maksimum untuk eksplorasi (tidak mengubah hasil prediksi, yang selalu
-   memakai radius=8.0 Å dan maks. 12 tetangga sesuai training).
+4. **📊 Tab 4: Dashboard Analisis Exploratory Data Analytics (EDA)**
+   - Distribusi statistik dan klasifikasi material berdasarkan 5 pilar properti fisika (Band Gap, Formation Energy, Bulk Modulus, Shear Modulus, dan Adsorption Energy).
 
-## 5. (Opsional) Skip upload berulang
+---
 
-Kalau Anda malas upload dataset/model tiap kali buka app, taruh saja:
-- checkpoint di `models/cgcnn_model.pt`
-- cache EDA (`.csv`, buat dengan `python eda_precompute.py`) di `data/eda_cache.csv`
+## 🧠 Arsitektur Model CGCNN
 
-Aplikasi akan otomatis memakainya sebagai default bila belum ada file yang
-diupload lewat UI pada sesi tersebut.
+Model **Crystal Graph Convolutional Neural Network (CGCNN)** mengonversi struktur kristal padat menjadi graf atomik di mana:
+- **Node Feature ($v_i$)**: Vektor fitur atomik 114-dimensi (nomor atom, elektronegativitas, jari-jari atom, valensi, dll.).
+- **Edge Feature ($u_{ij}$)**: Vektor ekspansi fungsi Gaussian dari jarak antar-atom $r_{ij}$ dengan batas radius cutoff $R_c = 8.0\text{ \AA}$.
+- **Convolutional Layer**: Memperbarui representasi atomik melalui *neighboring message passing* dengan fungsi aktivasi non-linear dan *gated mechanism*:
 
-## 6. Troubleshooting: "Paket py3Dmol dan stmol belum terinstall"
+$$v_i^{(t+1)} = v_i^{(t)} + \sum_{j \in N(i)} \sigma(z_{ij}^{(t)} W_f + b_f) \odot g(z_{ij}^{(t)} W_g + b_g)$$
 
-Kalau tab **Struktur Kristal** menampilkan pesan ini padahal sudah `pip install`,
-biasanya penyebabnya salah satu dari ini:
+di mana $z_{ij}^{(t)} = v_i^{(t)} \oplus v_j^{(t)} \oplus u_{ij}$.
 
-1. **Install di environment yang salah.** Kalau pakai virtualenv/conda, pastikan
-   `pip install` dan `streamlit run` dijalankan di environment (venv) yang sama.
-   Cek dengan:
-   ```bash
-   which python
-   which streamlit
-   python -c "import py3Dmol, stmol; print('OK')"
-   ```
-   Kalau baris terakhir error, berarti env-nya beda.
+---
 
-2. **Versi tidak cocok.** `stmol` cukup sensitif terhadap versi `py3Dmol`.
-   Install versi yang sudah pasti kompatibel (sudah dipin di `requirements.txt`):
-   ```bash
-   pip uninstall -y py3Dmol stmol
-   pip install py3Dmol==2.0.4 stmol==0.0.9 ipython_genutils
-   ```
+## 📜 Lisensi & Kontribusi
 
-3. **Streamlit Cloud / server tanpa restart.** Kalau deploy di Streamlit Cloud,
-   pastikan `py3Dmol`, `stmol`, `ipython_genutils` ada di `requirements.txt`
-   lalu **reboot app** (Manage app → Reboot), bukan cuma refresh browser --
-   package baru butuh rebuild environment.
-
-4. Setelah install, **restart proses `streamlit run`** (bukan cuma refresh
-   tab browser) supaya modul barunya ke-load.
-
-
-
-- Prediksi hanya seakurat model yang di-training (lihat evaluasi R²/MAE di
-  notebook asli). Untuk material yang jauh berbeda dari domain JARVIS-DFT,
-  hasil bisa kurang akurat.
-- Skor kesesuaian seperti "host katoda Li-S" di notebook adalah proksi kasar,
-  bukan pengganti perhitungan DFT adsorpsi/eksperimen.
+Proyek ini dilisensikan di bawah **MIT License**. Hak cipta penuh atas data riset dan pengembangan materi publikasi dikelola oleh tim peneliti AMARUS.
