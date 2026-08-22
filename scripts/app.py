@@ -15,9 +15,16 @@ import torch
 from pymatgen.core import Structure
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(APP_DIR, "models")
+if os.path.basename(APP_DIR) == "scripts":
+    PROJECT_ROOT = os.path.dirname(APP_DIR)
+else:
+    PROJECT_ROOT = APP_DIR
+
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 if MODELS_DIR not in sys.path:
     sys.path.insert(0, MODELS_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from cgcnn_model import (
     load_trained_model,
@@ -39,17 +46,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-DEFAULT_MODEL_PATH = os.path.join(APP_DIR, "models", "cgcnn_model.pt")
+DEFAULT_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "cgcnn_model.pt")
 if not os.path.exists(DEFAULT_MODEL_PATH):
-    DEFAULT_MODEL_PATH = os.path.join(APP_DIR, "cgcnn_model.pt")
+    DEFAULT_MODEL_PATH = os.path.join(PROJECT_ROOT, "cgcnn_model.pt")
 
-DEFAULT_DATASET_PATH = os.path.join(APP_DIR, "data", "dataset_jarvis_dft3d_matched.pkl")
+DEFAULT_DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "dataset_jarvis_dft3d_matched.pkl")
 if not os.path.exists(DEFAULT_DATASET_PATH):
-    DEFAULT_DATASET_PATH = os.path.join(APP_DIR, "dataset_jarvis_dft3d_matched.pkl")
+    DEFAULT_DATASET_PATH = os.path.join(PROJECT_ROOT, "dataset_jarvis_dft3d_matched.pkl")
 
-TPMS_DIR = os.path.join(APP_DIR, "structures", "Graphene_TPMS_Sheet")
+TPMS_DIR = os.path.join(PROJECT_ROOT, "structures", "Graphene_TPMS_Sheet")
 if not os.path.exists(TPMS_DIR):
-    TPMS_DIR = os.path.join(APP_DIR, "Graphene_TPMS_Sheet")
+    TPMS_DIR = os.path.join(PROJECT_ROOT, "Graphene_TPMS_Sheet")
 
 # ---------------------------------------------------------------------------
 # Background Resources Loader (Cached)
