@@ -187,7 +187,7 @@ with st.sidebar:
     st.markdown("#### 🎨 Mode Tampilan / Theme")
     theme_mode = st.radio(
         "Pilih Theme Mode:",
-        ["🌙 Mode Gelap (Dark)", "☀️ Mode Terang (Light)", "🖥️ Auto (System Preference)"],
+        ["☀️ Mode Terang (Light)", "🌙 Mode Gelap (Dark)", "🖥️ Auto (System Preference)"],
         index=0,
         key="app_theme_mode"
     )
