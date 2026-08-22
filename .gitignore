@@ -6,3 +6,7 @@ data/graph_cache.pkl
 *.tar.gz
 .DS_Store
 .~lock.*
+
+# Exclude submission documents and wiley graphics per user request
+submission_documents/
+wiley_graphics/
