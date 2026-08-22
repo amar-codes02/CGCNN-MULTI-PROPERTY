@@ -13,6 +13,7 @@ from plotly.subplots import make_subplots
 import torch
 
 from pymatgen.core import Structure
+from PIL import Image
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 if os.path.basename(APP_DIR) == "scripts":
@@ -773,13 +774,17 @@ with tab_intro:
         fig1_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_1.png")
     
     if os.path.exists(fig1_path):
-        st.markdown("#### 🖼️ Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion (Wiley Manuscript Graphic)")
-        st.image(
-            fig1_path,
-            caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
-            use_container_width=True
-        )
-        st.divider()
+        try:
+            img1 = Image.open(fig1_path)
+            st.markdown("#### 🖼️ Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion (Wiley Manuscript Graphic)")
+            st.image(
+                img1,
+                caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
+                use_container_width=True
+            )
+            st.divider()
+        except Exception as e:
+            st.warning(f"Tidak dapat memuat Figure 1: {e}")
 
     # SECTION 1: DETAILED ELECTROCHEMICAL REACTION MECHANISM & FORMULAS
     st.markdown("""
@@ -871,12 +876,16 @@ with tab_intro:
         fig2_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_2.png")
 
     if os.path.exists(fig2_path):
-        st.markdown("#### 🖼️ Figure 2: Tantangan Utama & Degradasi Baterai Li-S (Wiley Manuscript Graphic)")
-        st.image(
-            fig2_path,
-            caption="Figure 2: The main degradation issues and challenges of Lithium-Sulfur (Li-S) battery system.",
-            use_container_width=True
-        )
+        try:
+            img2 = Image.open(fig2_path)
+            st.markdown("#### 🖼️ Figure 2: Tantangan Utama & Degradasi Baterai Li-S (Wiley Manuscript Graphic)")
+            st.image(
+                img2,
+                caption="Figure 2: The main degradation issues and challenges of Lithium-Sulfur (Li-S) battery system.",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.warning(f"Tidak dapat memuat Figure 2: {e}")
 
     st.divider()
 
