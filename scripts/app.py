@@ -769,7 +769,9 @@ with tab_intro:
     """, unsafe_allow_html=True)
 
     # FIGURE 1 WILEY GRAPHIC EMBED
-    fig1_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_1.png")
+    fig1_path = os.path.join(PROJECT_ROOT, "assets", "figures", "Figure_1.png")
+    if not os.path.exists(fig1_path):
+        fig1_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_1.png")
     if not os.path.exists(fig1_path):
         fig1_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_1.png")
     
@@ -871,7 +873,9 @@ with tab_intro:
     """, unsafe_allow_html=True)
 
     # FIGURE 2 WILEY GRAPHIC EMBED
-    fig2_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_2.png")
+    fig2_path = os.path.join(PROJECT_ROOT, "assets", "figures", "Figure_2.png")
+    if not os.path.exists(fig2_path):
+        fig2_path = os.path.join(PROJECT_ROOT, "wiley_graphics", "Figure_2.png")
     if not os.path.exists(fig2_path):
         fig2_path = os.path.join(PROJECT_ROOT, "submission_documents", "wiley_graphics", "Figure_2.png")
 
