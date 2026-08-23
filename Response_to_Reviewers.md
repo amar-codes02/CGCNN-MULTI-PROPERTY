@@ -1,105 +1,105 @@
-# 📝 Formal Response to Peer Reviewers
+# 📝 Dokumen Tanggapan Resmi terhadap Reviewer (Response to Reviewers)
 
-**Manuscript Title:** Machine Learning-Accelerated Screening of Multi-Property Host Materials and TPMS Scaffold Architectures for Lithium-Sulfur Batteries  
-**Primary Notebook:** `notebooks/JARVIS_DFT3D_Data_Extraction.ipynb`  
-**Platform:** AMARUS (CGCNN-Multi-Property Framework)
-
----
-
-## 📑 General Response & Summary of Revisions
-
-We sincerely thank the reviewers for their constructive, rigorous, and insightful feedback. The comments highlighted three critical methodological aspects of our machine learning and materials screening pipeline:
-1. **Unrealistic $R^2$ performance metrics ($R^2 \approx 0.998$)** suggesting potential data/target leakage.
-2. **Bulk crystal graph modeling of surface/interface adsorption phenomena ($E_{ads}$)** without explicit surface termination descriptors.
-3. **Scale conflation between atomic crystal-scale CGCNN predictions and mesoscale TPMS electrode geometry**.
-
-We have thoroughly addressed each of these points in the revised manuscript and updated our research notebook (`notebooks/JARVIS_DFT3D_Data_Extraction.ipynb`). Below is our detailed point-by-point response.
+**Judul Naskah:** Penyeleksian Material Inang Multi-Properti dan Arsitektur Scaffold TPMS Berbasis Machine Learning untuk Baterai Lithium-Sulfur  
+**Notebook Utama:** `notebooks/JARVIS_DFT3D_Data_Extraction.ipynb`  
+**Platform:** AMARUS (Kerangka Kerja CGCNN-Multi-Property)
 
 ---
 
-## 🔍 Point-by-Point Response to Reviewer Objections
+## 📑 Tanggapan Umum & Ringkasan Revisi
 
-### 🔴 **Reviewer Objection 1: Implausibly High Predictive Performance ($R^2 \approx 0.998$) & Data Leakage**
+Kami mengucapkan terima kasih yang sebesar-besarnya kepada para *reviewer* atas masukan yang sangat konstruktif, kritis, dan mendalam. Tanggapan ini menyoroti tiga aspek metodologis utama dalam alur kerja *machine learning* dan penyeleksian material kami:
+1. **Metrik performa prediktif yang tidak realistis ($R^2 \approx 0.998$)** yang mengindikasikan potensi kebocoran data (*data/target leakage*).
+2. **Pemodelan fenomena adsorpsi permukaan/antarmuka ($E_{ads}$)** menggunakan graf kristal *bulk* tanpa deskriptor terminasi permukaan yang eksplisit.
+3. **Kerancuan skala (*scale conflation*)** antara prediksi model CGCNN pada skala kristal atomik dengan geometri arsitektur elektroda TPMS pada mesoskala.
 
-> **Reviewer Comment:**  
+Kami telah memperbaiki seluruh poin tersebut secara menyeluruh di dalam naskah revisi serta memperbarui notebook penelitian kami (`notebooks/JARVIS_DFT3D_Data_Extraction.ipynb`). Berikut adalah tanggapan rinci poin demi poin.
+
+---
+
+## 🔍 Tanggapan Rinci Poin demi Poin terhadap Keberatan Reviewer
+
+### 🔴 **Keberatan Reviewer 1: Performa Prediksi Terlalu Tinggi ($R^2 \approx 0.998$) & Kebocoran Data (Data Leakage)**
+
+> **Kritik Reviewer:**  
 > *"The claimed predictive performance (R2 up to 0.998 across five diverse properties) is implausibly high for the task and data sources used, strongly suggesting target leakage, data leakage, or other methodological issues."*
 
-#### **Author Response & Clarification:**
-We agree with the reviewer that an $R^2$ of 0.998 across all 5 properties on raw split datasets is unrealistic for generalizable crystal graph neural networks and indicates data leakage during early train/test split generation (e.g., polymorphs or near-identical unit cells present in both train and test sets).
+#### **Tanggapan & Klarifikasi Penulis:**
+Kami sependapat dengan *reviewer* bahwa nilai $R^2 = 0.998$ secara bersamaan pada 5 properti kristal menggunakan pemisahan data acak (*random split*) tidak realistis untuk *crystal graph neural network* yang mengeneralisasi, serta mengindikasikan adanya kebocoran data (*data leakage*) pada pemisahan awal (misalnya keberadaan polimorf atau sel satuan yang hampir identik pada data latih dan data uji).
 
-#### **Corrective Actions Taken in Notebook & Pipeline:**
-1. **Strict Group-Based Out-of-Sample Partitioning**:
-   - We implemented a **GroupKFold (80/10/10 Train/Val/Test split)** partitioned by **Chemical Formula Group**, ensuring no polymorphs or stoichiometry duplicates of the same material system exist across training and testing splits.
-2. **Realistic & Honest Test Benchmarking**:
-   - We re-evaluated the CGCNN model on the strictly held-out 10% test set ($N = 3,000$ independent crystal samples from JARVIS-DFT).
-   - The updated, scientifically valid performance metrics are:
-     - **Formation Energy ($E_f$)**: $R^2 = 0.954$, $\text{MAE} = 0.048\text{ eV/atom}$
-     - **Band Gap ($E_g$)**: $R^2 = 0.921$, $\text{MAE} = 0.112\text{ eV}$
-     - **Bulk Modulus ($K$)**: $R^2 = 0.938$, $\text{MAE} = 6.42\text{ GPa}$
-     - **Shear Modulus ($G$)**: $R^2 = 0.915$, $\text{MAE} = 4.85\text{ GPa}$
-     - **Polysulfide Adsorption ($E_{ads}$ Proxy)**: $R^2 = 0.892$, $\text{MAE} = 0.185\text{ eV}$
-3. **Data Leakage Verification**:
-   - Confirmed that no target column or proxy metric was included in the atom/bond feature matrix.
+#### **Langkah Perbaikan yang Telah Dilakukan pada Notebook & Pipeline:**
+1. **Pemisahan Data Ketat Berbasis Kelompok (Group-Based Out-of-Sample Partitioning)**:
+   - Kami menerapkan **GroupKFold (Pemisahan Data Latih/Validasi/Uji 80/10/10)** yang dikelompokkan berdasarkan **Kelompok Formula Kimia**, sehingga dipastikan tidak ada polimorf atau duplikat stoikiometri dari sistem material yang sama di antara kumpulan data latih dan data uji.
+2. **Evaluasi Pengujian yang Realistis & Jujur**:
+   - Kami mengevaluasi ulang model CGCNN pada kumpulan data uji independen 10% (*held-out test set*, $N = 3.000$ sampel kristal dari JARVIS-DFT).
+   - Metrik performa baru yang sah secara ilmiah adalah:
+     - **Energi Pembentukan ($E_f$)**: $R^2 = 0.954$, $\text{MAE} = 0.048\text{ eV/atom}$
+     - **Celah Pita Energi ($E_g$)**: $R^2 = 0.921$, $\text{MAE} = 0.112\text{ eV}$
+     - **Modulus Bulk ($K$)**: $R^2 = 0.938$, $\text{MAE} = 6.42\text{ GPa}$
+     - **Modulus Geser ($G$)**: $R^2 = 0.915$, $\text{MAE} = 4.85\text{ GPa}$
+     - **Energi Adsorpsi Polisulfida ($E_{ads}$ Surogat)**: $R^2 = 0.892$, $\text{MAE} = 0.185\text{ eV}$
+3. **Verifikasi Kebocoran Data**:
+   - Dipastikan tidak ada kolom target atau metrik surogat yang dimasukkan ke dalam matriks fitur atom/ikatan.
 
 ---
 
-### 🔴 **Reviewer Objection 2: Predicting Surface/Interface Adsorption Energy ($E_{ads}$) from Bulk Crystal Graphs**
+### 🔴 **Keberatan Reviewer 2: Memprediksi Energi Adsorpsi Permukaan ($E_{ads}$) dari Graf Kristal Bulk**
 
-> **Reviewer Comment:**  
+> **Kritik Reviewer:**  
 > *“Adsorption energy” is treated as a bulk-crystal property predicted from CIFs, yet adsorption is inherently a surface/interface phenomenon requiring explicit surface terminations, adsorption sites, and adsorbate states—its learnability from bulk crystal graphs alone is scientifically questionable without additional surface/adsorbate features.*
 
-#### **Author Response & Clarification:**
-The reviewer raises an essential physical point. Adsorption is a localized surface phenomenon governed by surface termination, Miller index $(hkl)$, active site coordination number ($CN$), and adsorbate species ($\text{Li}_2\text{S}_x$). Bulk 3D crystal graphs alone cannot uniquely determine a specific slab surface energy without explicit surface features.
+#### **Tanggapan & Klarifikasi Penulis:**
+*Reviewer* menyoroti prinsip fisika yang sangat krusial. Adsorpsi merupakan fenomena permukaan terlokalisasi yang dikontrol oleh orientasi bidang permukaan (indeks Miller $(hkl)$), jumlah koordinasi situs aktif ($CN$), dan fasa spesies adsorbat ($\text{Li}_2\text{S}_x$). Graf kristal 3D *bulk* saja tidak dapat menentukan energi permukaan *slab* secara unik tanpa fitur permukaan eksplisit.
 
-#### **Corrective Actions & Methodological Refinement:**
-1. **Re-framing as a Two-Stage Screening Surrogate**:
-   - We have explicitly re-framed the CGCNN bulk prediction as a **High-Throughput Bulk Descriptor Proxy ($E_{ads}^{proxy}$)**. The model uses bulk electronic features (d-band center proxy, bulk formation energy, Fermi level, and metal-nonmetal electronegativity ratio) to estimate intrinsic host reactivity prior to expensive DFT slab calculations.
-2. **Integration of Surface & Adsorbate Descriptors**:
-   - We updated the feature representation by coupling the CGCNN bulk graph embeddings with **explicit surface & adsorbate features**:
+#### **Perbaikan & Penyempurnaan Metodologi:**
+1. **Re-framing sebagai Surogat Deskriptor Bulk Dua-Tahap**:
+   - Kami secara eksplisit merumuskan ulang prediksi *bulk* CGCNN sebagai **Surogat Deskriptor Bulk Ber-throughput Tinggi ($E_{ads}^{proxy}$)**. Model menggunakan fitur elektronik *bulk* (proxy pusat pita-d, energi pembentukan *bulk*, tingkat Fermi, dan rasio elektronegativitas logam-nonlogam) untuk mengestimasi reaktivitas intrinsik material inang sebelum kalkulasi *slab* DFT yang mahal dilakukan.
+2. **Integrasi Deskriptor Permukaan & Adsorbat**:
+   - Kami memperbarui representasi fitur dengan menggabungkan *embedding* graf kristal *bulk* CGCNN dengan **fitur permukaan & adsorbat eksplisit**:
      $$\mathbf{X}_{input} = \Big[ \mathbf{h}_{bulk}^{CGCNN} \,||\, (hkl)_{facet} \,||\, CN_{surface} \,||\, \chi_{metal}/\chi_{nonmetal} \,||\, x_{polysulfide} \Big]$$
-   - Where $x_{polysulfide} \in \{S_8, Li_2S_8, Li_2S_6, Li_2S_4, Li_2S_2\}$ explicitly parameterizes the reduction chain state.
-3. **Explicit Surface DFT Validation**:
-   - For the top 5 host candidate materials, explicit (101)/(001) surface slabs with 15 Å vacuum layers were constructed and evaluated using DFT to benchmark against the proxy model.
+   - Di mana $x_{polysulfide} \in \{S_8, Li_2S_8, Li_2S_6, Li_2S_4, Li_2S_2\}$ memodelkan status reduksi rantai polisulfida secara eksplisit.
+3. **Validasi DFT Permukaan Eksplisit**:
+   - Untuk 5 kandidat material inang teratas, struktur *slab* permukaan (101)/(001) dengan lapisan vakum 15 Å dibangun dan dihitung menggunakan DFT untuk menyoroti keandalan model surogat.
 
 ---
 
-### 🔴 **Reviewer Objection 3: Conflation of Atomic Crystal Properties with Mesoscale TPMS Gyroid Architecture**
+### 🔴 **Keberatan Reviewer 3: Kerancuan Skala Antara Properti Kristal Atomik dan Arsitektur TPMS Gyroid Mesoskala**
 
-> **Reviewer Comment:**  
+> **Kritik Reviewer:**  
 > *The introduction of TPMS gyroid as the “most promising cathode” conflates mesoscale electrode architecture (geometry) with crystal-scale host material properties and is not a property that a CGCNN on CIFs can meaningfully rank; no coupling model (e.g., mechanics, transport, or interfacial kinetics) is provided to bridge these scales.*
 
-#### **Author Response & Clarification:**
-We fully acknowledge this scale conflation. A CGCNN operating on atomic unit cells ($\text{\AA}$ scale) evaluates atomic-scale intrinsic properties (band gap, formation energy, adsorption strength), whereas Triply Periodic Minimal Surfaces (TPMS, e.g., Gyroid, Schwarz P, Diamond) describe mesoscale porous electrode scaffolds ($\text{nm}-\mu\text{m}$ scale) governing fluid transport, tortuosity, and mechanical load distribution.
+#### **Tanggapan & Klarifikasi Penulis:**
+Kami mengakui adanya kerancuan skala (*scale conflation*) tersebut. Model CGCNN yang beroperasi pada sel satuan atomik (skala $\text{\AA}$) mengevaluasi properti intrinsik atomik (celah pita, energi pembentukan, kekuatan adsorpsi), sedangkan *Triply Periodic Minimal Surfaces* (TPMS, seperti Gyroid, Schwarz P, Diamond) mendeskripsikan *scaffold* porositas elektroda mesoskala (skala $\text{nm}-\mu\text{m}$) yang mengatur transpor fluida, tortuositas, dan distribusi beban mekanis.
 
-#### **Corrective Actions & Multiscale Coupling Framework:**
-1. **De-conflation of Scales**:
-   - We explicitly separate the evaluation into **Scale I: Atomic/Electronic Host Material Screening** (via CGCNN) and **Scale II: Mesoscale Structural Architecture Evaluation** (via Continuum Mechanics & Transport Coupling).
-2. **Implementation of Multiscale Coupling Equations**:
-   We introduced analytical coupling equations bridging the atomic predictions to mesoscale TPMS performance:
+#### **Langkah Perbaikan & Kerangka Pengangkut Multiskala (Multiscale Coupling Framework):**
+1. **Pemisahan Skala**:
+   - Kami memisahkan evaluasi secara tegas menjadi **Skala I: Penyeleksian Material Inang Atomik/Elektronik** (melalui CGCNN) dan **Skala II: Evaluasi Arsitektur Struktural Mesoskala** (melalui Pemodelan Transpor & Mekanika Kontinum).
+2. **Implementasi Persamaan Pengait Multiskala**:
+   Kami memperkenalkan persamaan pengait analitis untuk menjembatani prediksi atomik ke performa elektroda TPMS mesoskala:
 
-   - **A. Interfacial Kinetics & Reaction Rate Scaling**:
+   - **A. Skala Laju Reaksi & Kinetika Antarmuka**:
      $$j_{effective} = j_0 \cdot S_v \cdot \exp\left(-\frac{E_{ads}^{CGCNN}}{k_B T}\right)$$
-     Where $S_v = \frac{A_{TPMS}}{V_{unit}}$ is the mesoscale specific surface area of the TPMS topology.
+     Di mana $S_v = \frac{A_{TPMS}}{V_{unit}}$ adalah luas permukaan spesifik mesoskala dari topologi TPMS.
    
-   - **B. Effective Ionic Transport & Tortuosity ($\tau$)**:
+   - **B. Transpor Ionik Efektif & Tortuositas ($\tau$)**:
      $$\sigma_{eff} = \sigma_{bulk} \frac{\phi}{\tau_{TPMS}}$$
-     Where $\phi$ is porosity, and $\tau_{Gyroid} \approx 1.15 < \tau_{Schwarz\,P} \approx 1.42$, confirming superior ion transport kinetics in the Gyroid architecture.
+     Di mana $\phi$ adalah porositas, dan $\tau_{Gyroid} \approx 1.15 < \tau_{Schwarz\,P} \approx 1.42$, mengonfirmasi kinetika transpor ionik Gyroid yang lebih unggul.
 
-   - **C. Effective Mechanical Load Capacity**:
+   - **C. Kapasitas Menahan Beban Mekanis Efektif**:
      $$K_{eff} = K_{bulk}^{CGCNN} (1 - \phi)^{n}, \quad G_{eff} = G_{bulk}^{CGCNN} (1 - \phi)^{m}$$
 
-3. **Re-worded Manuscript & Notebook Conclusions**:
-   - We updated all claims: The TPMS Gyroid is recommended not because CGCNN directly "predicts" gyroid geometry, but because **Gyroid provides the optimal mesoscale geometric scaffold ($S_v = 3.82\text{ nm}^{-1}, \tau = 1.15$) to host the top-ranked atomic CGCNN material candidate (single-layer Graphene / $\text{MoS}_2$)**.
+3. **Penyempurnaan Kesimpulan Naskah & Notebook**:
+   - Kami memperbarui seluruh klaim: TPMS Gyroid direkomendasikan bukan karena CGCNN memprediksi geometri gyroid secara langsung, melainkan karena **Gyroid menyediakan matriks arsitektur mesoskala paling optimal ($S_v = 3.82\text{ nm}^{-1}, \tau = 1.15$) untuk menopang kandidat material inang atomik teratas hasil prediksi CGCNN (seperti Graphene tunggal / $\text{MoS}_2$)**.
 
 ---
 
-## 📊 Summary Table of Methodological Improvements
+## 📊 Tabel Ringkasan Perbaikan Metodologi
 
-| Aspect | Original Implementation | Revised Implementation | Impact on Scientific Validity |
+| Aspek | Implementasi Awal | Implementasi Revisi | Dampak terhadap Keabsahan Ilmiah |
 | :--- | :--- | :--- | :--- |
-| **Model Metrics** | $R^2 = 0.998$ (Potential Leakage) | $R^2 = 0.892 - 0.954$ (Out-of-Group Test Set) | Eliminates data leakage, reflects true generalization |
-| **Adsorption Model** | Bulk CIF only | Bulk CGCNN + Surface Facet $(hkl)$ + Adsorbate State $x$ | Accurately models surface interface physics |
-| **TPMS Evaluation** | Conflated atomic & mesoscale | Multiscale Coupling ($S_v, \tau, \sigma_{eff}, E_{eff}$) | Bridges atomic DFT/CGCNN to electrode architecture |
+| **Metrik Model** | $R^2 = 0.998$ (Potensi Kebocoran) | $R^2 = 0.892 - 0.954$ (Uji Kelompok Out-of-Group) | Menghilangkan kebocoran data, mencerminkan generalisasi sejati |
+| **Model Adsorpsi** | Halaman CIF *Bulk* saja | CGCNN *Bulk* + Faset Permukaan $(hkl)$ + Status Adsorbat $x$ | Memodelkan fisika antarmuka permukaan secara akurat |
+| **Evaluasi TPMS** | Kerancuan atomik & mesoskala | Pengaitan Multiskala ($S_v, \tau, \sigma_{eff}, E_{eff}$) | Menjembatani DFT/CGCNN atomik ke arsitektur elektroda |
 
 ---
-*All code cells and explanatory markdown in `notebooks/JARVIS_DFT3D_Data_Extraction.ipynb` have been updated to reflect these corrections.*
+*Seluruh sel kode dan penjelasan markdown di notebook `notebooks/JARVIS_DFT3D_Data_Extraction.ipynb` telah diperbarui untuk mencerminkan perbaikan ini.*
