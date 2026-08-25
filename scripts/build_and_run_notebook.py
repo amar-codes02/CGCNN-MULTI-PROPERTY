@@ -128,14 +128,14 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
         for col in df.columns:
             cell_strs = [str(col)] + [str(v) for v in df[col].values]
             max_len = max([len(s) for s in cell_strs]) if cell_strs else len(str(col))
-            col_lens.append(max_len + 4)
+            col_lens.append(max_len + 5)
         tot_len = sum(col_lens)
         col_widths = [l / tot_len for l in col_lens]
 
     if figsize is None:
         tot_chars = sum([max([len(str(v)) for v in [col] + df[col].tolist()]) for col in df.columns])
-        fig_w = max(13.0, min(18.0, tot_chars * 0.16 + n_cols * 0.6))
-        fig_h = max(3.0, (n_rows + 1.5) * 0.55)
+        fig_w = max(16.0, min(24.0, tot_chars * 0.24 + n_cols * 0.9))
+        fig_h = max(4.5, (n_rows + 2.0) * 0.75)
         figsize = (fig_w, fig_h)
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -146,20 +146,20 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     table = ax.table(cellText=table_data, colWidths=col_widths, loc="center", cellLoc="center")
 
     table.auto_set_font_size(False)
-    table.set_fontsize(11.5)
-    table.scale(1.0, 2.0)
+    table.set_fontsize(14.5)
+    table.scale(1.0, 2.5)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
             cell.set_facecolor("#2b5c8f")
-            cell.set_text_props(color="white", fontweight="bold")
+            cell.set_text_props(color="white", fontweight="bold", fontsize=15.5)
         else:
             cell.set_facecolor("#f9f9f9" if r % 2 == 0 else "white")
-            cell.set_text_props(color="#222222")
+            cell.set_text_props(color="#111111", fontsize=14.0)
 
     if title:
         clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
-        ax.set_title(clean_title, fontsize=15.0, fontweight="bold", pad=20)
+        ax.set_title(clean_title, fontsize=17.0, fontweight="bold", pad=22)
 
     plt.tight_layout()
     if filename:
