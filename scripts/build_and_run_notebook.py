@@ -78,31 +78,31 @@ from torch.utils.data import Dataset, DataLoader
 from pymatgen.core import Structure, Lattice
 
 # ── Wiley / Chemistry-Europe Publication Style ─────────────────────────────
-# Enlarged figure canvas & high-contrast typography, 300 DPI.
+# Enlarged figure canvas & high-contrast typography, 300 DPI export / 120 DPI inline viewer.
 plt.rcParams.update({
     'font.family':         'sans-serif',
     'font.sans-serif':     ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'font.size':           10.0,         # default text (tick labels, annotations)
-    'axes.titlesize':      12.0,         # subplot panel title
+    'font.size':           11.0,         # default text (tick labels, annotations)
+    'axes.titlesize':      13.5,         # subplot panel title
     'axes.titleweight':    'bold',
-    'axes.titlepad':       8.0,          # gap between panel title and axes
-    'axes.labelsize':      11.0,         # x / y axis labels
+    'axes.titlepad':       10.0,         # gap between panel title and axes
+    'axes.labelsize':      12.0,         # x / y axis labels
     'axes.labelweight':    'bold',
-    'axes.labelpad':       6.0,
-    'xtick.labelsize':     10.0,
-    'ytick.labelsize':     10.0,
-    'xtick.major.pad':     4.0,
-    'ytick.major.pad':     4.0,
-    'legend.fontsize':     9.5,
-    'legend.title_fontsize': 9.5,
-    'figure.titlesize':    14.5,         # fig.suptitle
+    'axes.labelpad':       8.0,
+    'xtick.labelsize':     11.0,
+    'ytick.labelsize':     11.0,
+    'xtick.major.pad':     5.0,
+    'ytick.major.pad':     5.0,
+    'legend.fontsize':     10.5,
+    'legend.title_fontsize': 10.5,
+    'figure.titlesize':    16.0,         # fig.suptitle
     'figure.titleweight':  'bold',
     'axes.edgecolor':      '#222222',
-    'axes.linewidth':      1.0,
-    'figure.dpi':          300,
-    'savefig.dpi':         300,
+    'axes.linewidth':      1.2,
+    'figure.dpi':          120,          # enlarged inline notebook viewer DPI
+    'savefig.dpi':         300,          # 300 DPI for Wiley paper publication
     'savefig.bbox':        'tight',
-    'savefig.pad_inches':  0.1
+    'savefig.pad_inches':  0.12
 })
 
 # Directory output for publication-ready figures
@@ -133,8 +133,8 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
 
     if figsize is None:
         tot_chars = sum([max([len(str(v)) for v in [col] + df[col].tolist()]) for col in df.columns])
-        fig_w = max(11.5, min(16.0, tot_chars * 0.14 + n_cols * 0.5))
-        fig_h = max(2.5, (n_rows + 1.5) * 0.48)
+        fig_w = max(13.0, min(18.0, tot_chars * 0.16 + n_cols * 0.6))
+        fig_h = max(3.0, (n_rows + 1.5) * 0.55)
         figsize = (fig_w, fig_h)
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -145,8 +145,8 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     table = ax.table(cellText=table_data, colWidths=col_widths, loc="center", cellLoc="center")
 
     table.auto_set_font_size(False)
-    table.set_fontsize(10.5)
-    table.scale(1.0, 1.85)
+    table.set_fontsize(11.5)
+    table.scale(1.0, 2.0)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
@@ -158,7 +158,7 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
 
     if title:
         clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
-        ax.set_title(clean_title, fontsize=14.0, fontweight="bold", pad=18)
+        ax.set_title(clean_title, fontsize=15.0, fontweight="bold", pad=20)
 
     plt.tight_layout()
     if filename:
