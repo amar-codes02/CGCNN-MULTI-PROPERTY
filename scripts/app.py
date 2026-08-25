@@ -1063,12 +1063,12 @@ with tab_intro:
 
     st.divider()
 
-    # SECTION 5: 2D MONOLAYER FLAT GRAPHENE SHEET WITH ALL 5 POLYSULFIDE ADSORBATES
+    # SECTION 5: ILUSTRASI LIPS DI HOST MATERIAL CATHODE
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>💠 2D Monolayer Flat Graphene Sheet & Multi-Polysulfide (Li<sub>2</sub>S<sub>8</sub> → Li<sub>2</sub>S) Adsorption Complex</span></div>
+        <div class="web-card-title"><span>💠 Ilustrasi Lithium Polysulfide (LiPS) di Host Material Cathode & Adsorption Complex</span></div>
         <p style="margin:0;">
-            Unified structural visualization of a <b>Pristine 2D Monolayer Flat Graphene Sheet</b> containing <b>ALL 5 Polysulfide Reduction Products (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S)</b> attached simultaneously across the host surface.
+            Visualisasi skematik & 3D interaktif <b>Ilustrasi LiPS di Host Material Cathode</b> yang memuat <b>seluruh 5 produk reduksi polisulfida (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, dan Li<sub>2</sub>S)</b> yang teradsorpsi secara simultan pada permukaan host material katoda.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1109,7 +1109,7 @@ with tab_intro:
                 with col_f1:
                     t1_fmt_choice = st.radio("3D Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t1_fmt_choice", horizontal=True)
 
-                st.markdown("##### 📐 Graphene Sheet Expansion (X x Y x Z, up to 3x3x3)")
+                st.markdown("##### 📐 Cathode Host Material Expansion (X x Y x Z, up to 3x3x3)")
                 t1_sc1, t1_sc2, t1_sc3 = st.columns(3)
                 with t1_sc1:
                     t1_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t1_sc_x")
@@ -1135,8 +1135,8 @@ with tab_intro:
             </div>
             """, unsafe_allow_html=True)
 
-            # Flat Graphene Metrics
-            st.markdown("#### ⚡ 2D Monolayer Flat Graphene Physical Metrics")
+            # Cathode Host Material Metrics
+            st.markdown("#### ⚡ Cathode Host Material Physical Metrics")
             m_c1, m_c2 = st.columns(2)
             with m_c1:
                 st.metric(label="Band Gap (E_g)", value="0.00 eV", delta="Metallic Semi-Metal")
@@ -1149,7 +1149,7 @@ with tab_intro:
 
         with col_viz_t1:
             if "Journal Figure" in t1_display_mode or "Matrix" in t1_display_mode:
-                st.markdown("#### 📊 Academic Journal Figure: Top View vs Side View Adsorption Matrix")
+                st.markdown("#### 📊 Academic Journal Figure: Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material")
                 top_side_fig_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_top_side_views_figure.png")
                 
                 sub_tab1, sub_tab2 = st.tabs(["📸 High-Res Journal Figure (Format Publikasi Jurnal)", "🐍 Python Matplotlib Render (Dynamic Code Plot)"])
@@ -1157,14 +1157,14 @@ with tab_intro:
                     if os.path.exists(top_side_fig_path):
                         st.image(
                             top_side_fig_path,
-                            caption="📊 Publication-Ready Scientific Figure: Top View vs Side View Comparison of Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S Adsorption on Monolayer Flat Graphene Sheet",
+                            caption="📊 Publication-Ready Scientific Figure: Top View vs Side View Comparison of Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material",
                             use_container_width=True
                         )
                         with open(top_side_fig_path, "rb") as img_file:
                             st.download_button(
                                 label="📥 Download Journal Figure (PNG Image)",
                                 data=img_file,
-                                file_name="flat_graphene_top_side_adsorption_figure.png",
+                                file_name="lips_cathode_host_material_adsorption_figure.png",
                                 mime="image/png",
                                 key="dl_t1_top_side_figure_png"
                             )
@@ -1174,31 +1174,31 @@ with tab_intro:
                     st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Matplotlib.")
 
             elif "Python" in t1_display_mode:
-                st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Graphene Sheet + Polysulfides")
+                st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Ilustrasi LiPS di Host Material Cathode")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
                 st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Matplotlib code.")
             elif "Illustration" in t1_display_mode or "AI" in t1_display_mode:
-                st.markdown("#### 🖼️ 2D Academic Schematic Diagram: Graphene Monolayer + Polysulfides")
+                st.markdown("#### 🖼️ 2D Academic Schematic Diagram: Ilustrasi LiPS di Host Material Cathode")
                 schematic_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_polysulfide_schematic.png")
                 if os.path.exists(schematic_path):
                     st.image(
                         schematic_path,
-                        caption="🖼️ High-Resolution 2D Academic Diagram: Pristine 2D Flat Graphene Monolayer Sheet with Adsorbed Polysulfide Species (Li₂S₈ → Li₂S)",
+                        caption="🖼️ High-Resolution 2D Academic Diagram: Ilustrasi Lithium Polysulfide (LiPS) Adsorption di Host Material Cathode",
                         use_container_width=True
                     )
                     with open(schematic_path, "rb") as img_file:
                         st.download_button(
                             label="📥 Download 2D Schematic Diagram (PNG Image)",
                             data=img_file,
-                            file_name="flat_graphene_polysulfides_schematic.png",
+                            file_name="lips_cathode_host_material_schematic.png",
                             mime="image/png",
                             key="dl_t1_schematic_png"
                         )
                 else:
                     st.info("2D Schematic image not found.")
             else:
-                st.markdown("#### 🧊 3D Interface: 2D Monolayer Flat Graphene + All 5 Polysulfides (Li₂S₈ → Li₂S)")
+                st.markdown("#### 🧊 3D Interface: Ilustrasi LiPS di Host Material Cathode (Li₂S₈ → Li₂S)")
                 
                 flat_cif = get_flat_graphene_all_polysulfides_cif(
                     supercell_x=t1_sc_x,
@@ -1222,23 +1222,23 @@ with tab_intro:
                         bg_color="#ffffff"
                     )
                     
-                    st.caption("💡 **3D Interaction**: Click and drag to rotate the 2D flat graphene sheet + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
+                    st.caption("💡 **3D Interaction**: Click and drag to rotate the Cathode Host Material + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
 
-                    st.markdown("##### 📥 Export Multi-Adsorbate 2D Flat Graphene Complex Structure")
+                    st.markdown("##### 📥 Export Multi-Adsorbate Cathode Host Material Structure")
                     dl1, dl2 = st.columns(2)
                     with dl1:
                         st.download_button(
-                            label="📥 Download CIF (graphene_flat_all_polysulfides.cif)",
+                            label="📥 Download CIF (lips_cathode_host_material.cif)",
                             data=flat_cif,
-                            file_name="flat_graphene_adsorbed_all_polysulfides.cif",
+                            file_name="lips_cathode_host_material.cif",
                             mime="chemical/x-cif",
                             key=f"dl_t1_cif_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
                         )
                     with dl2:
                         st.download_button(
-                            label="📥 Download XYZ (graphene_flat_all_polysulfides.xyz)",
+                            label="📥 Download XYZ (lips_cathode_host_material.xyz)",
                             data=flat_xyz,
-                            file_name="flat_graphene_adsorbed_all_polysulfides.xyz",
+                            file_name="lips_cathode_host_material.xyz",
                             mime="chemical/x-xyz",
                             key=f"dl_t1_xyz_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
                         )
