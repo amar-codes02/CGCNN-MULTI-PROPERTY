@@ -195,7 +195,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Platform Control Panel")
     
     st.markdown("#### 📁 Structure Viewer Selector")
-    input_mode = st.radio("Select Single CIF Source:", ["Use Sample TPMS", "Upload Single .CIF File"], index=0)
+    input_mode = st.radio("Select Single CIF Source:", ["Use Sample TPMS", "Upload Single .CIF File"], index=0, key="sb_input_mode")
     
     cif_text = None
     cif_name = None
@@ -207,7 +207,7 @@ with st.sidebar:
             cif_name = uploaded_file.name
     else:
         if sample_cif_files:
-            selected_sample = st.selectbox("Select Sample TPMS Material:", list(sample_cif_files.keys()))
+            selected_sample = st.selectbox("Select Sample TPMS Material:", list(sample_cif_files.keys()), key="sb_selected_sample")
             sample_path = sample_cif_files[selected_sample]
             with open(sample_path, "r", encoding="utf-8") as f:
                 cif_text = f.read()
@@ -217,12 +217,10 @@ with st.sidebar:
 
     if cif_text:
         try:
-            struct = Structure.from_str(cif_text, fmt="cif")
             st.session_state["cif_text"] = cif_text
-            st.session_state["cif_structure"] = struct
             st.session_state["cif_name"] = cif_name
         except Exception as e:
-            st.error(f"Error parsing CIF: {e}")
+            st.error(f"Error reading CIF: {e}")
 
     st.divider()
     st.markdown("#### 📊 Model Checkpoint Status")
@@ -1037,17 +1035,20 @@ with tab_tpms_rank:
 with tab_viz3d:
     st.markdown("### 🧊 3D Crystal Structure & Atomic Graph Visualization")
     
-    if "cif_structure" in st.session_state and "cif_text" in st.session_state:
-        struct = st.session_state["cif_structure"]
+    if "cif_text" in st.session_state:
         cif_text_curr = st.session_state["cif_text"]
         cif_name_curr = st.session_state.get("cif_name", "CIF Structure")
+        try:
+            struct = Structure.from_str(cif_text_curr, fmt="cif")
+        except Exception:
+            struct = None
         
         col_v1, col_v2 = st.columns([1, 1])
 
         with col_v1:
             st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
-            viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0)
-            supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)")
+            viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
+            supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t3_supercell_val")
             render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
         with col_v2:
@@ -1618,7 +1619,7 @@ with tab_polysulfide:
             "IWP Graphene TPMS": "graphene_sheet_iwp.cif",
         }
         
-        selected_tpms_name = st.selectbox("1. Select Graphene TPMS Host Scaffold:", list(tpms_options.keys()), index=0)
+        selected_tpms_name = st.selectbox("1. Select Graphene TPMS Host Scaffold:", list(tpms_options.keys()), index=0, key="t5_tpms_name")
         
         species_options = {
             "Li2S8 (Lithium Octasulfide - Soluble Long Chain)": "Li2S8",
@@ -1628,7 +1629,7 @@ with tab_polysulfide:
             "Li2S (Lithium Sulfide - Insoluble End Product)": "Li2S",
         }
         
-        selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1)
+        selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1, key="t5_species_label")
         species_code = species_options[selected_species_label]
 
         st.markdown("#### 🎨 3D Rendering Options")
@@ -1639,9 +1640,10 @@ with tab_polysulfide:
                 "stick_sphere": "Stick & Sphere (Ball & Stick)",
                 "spacefill": "Spacefill (CPK Van der Waals Radii)",
                 "line": "Wireframe Line"
-            }[x]
+            }[x],
+            key="t5_render_style"
         )
-        supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)")
+        supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t5_supercell_n")
 
         tpms_key = selected_tpms_name.split()[0]
         eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
