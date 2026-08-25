@@ -235,7 +235,7 @@ print(f" Total Entri Matched Dataset Adsorpsi Polisulfida: {len(df_matched)} ent
 # Display dataframe as rendered figure image
 df_preview = df_matched[["formula", "adsorbate", "band_gap", "formation_energy", "e_hull", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]].head(10).round(3)
 df_preview.columns = ["Formula", "Adsorbate", "Eg (eV)", "Ef (eV/at)", "Ehull (eV)", "K (GPa)", "G (GPa)", "E_ads (eV)"]
-render_df_to_fig(df_preview, title="Dataset Sample Preview — 5 Core Physical Target Properties", filename="table_preview_df")
+render_df_to_fig(df_preview, title="", filename="table_preview_df")
 """)
 
     c5_md = nbf.v4.new_markdown_cell(r"""### 1.1 Statistik Deskriptif 5 Properti Fisik Utama
@@ -281,7 +281,7 @@ df_stats_matched["unit"] = [TARGET_UNITS[c] for c in FIVE_TARGETS]
 df_stats_matched = df_stats_matched[["unit", "count", "mean", "std", "min", "25%", "50%", "75%", "max", "skewness"]].round(3).reset_index()
 df_stats_matched.columns = ["Property", "Unit", "Count", "Mean", "Std", "Min", "25%", "50%", "75%", "Max", "Skewness"]
 
-render_df_to_fig(df_stats_matched, title="Descriptive Statistics — 5 Core Physical Target Properties", filename="table_descriptive_stats")
+render_df_to_fig(df_stats_matched, title="", filename="table_descriptive_stats")
 """)
 
     c6 = nbf.v4.new_markdown_cell(r"""---
@@ -753,7 +753,21 @@ for target in FIVE_TARGETS:
     })
 
 df_metrics = pd.DataFrame(metrics_summary)
-render_df_to_fig(df_metrics, title="CGCNN Model Evaluation Metrics Across 5 Target Properties", filename="table_model_metrics")
+render_df_to_fig(df_metrics, title="", filename="table_model_metrics")
+
+# Render Actual vs Predicted Test Data Comparison Table Image
+df_test_comp = pd.DataFrame({
+    "Formula": df_test_eval["formula"].head(8).values,
+    "Eg Act": np.round(y_true_dict["band_gap"][:8], 2),
+    "Eg Pred": np.round(y_pred_dict["band_gap"][:8], 2),
+    "Ef Act": np.round(y_true_dict["formation_energy"][:8], 2),
+    "Ef Pred": np.round(y_pred_dict["formation_energy"][:8], 2),
+    "K Act": np.round(y_true_dict["bulk_modulus"][:8], 1),
+    "K Pred": np.round(y_pred_dict["bulk_modulus"][:8], 1),
+    "Eads Act": np.round(y_true_dict["adsorption_energy_eV"][:8], 2),
+    "Eads Pred": np.round(y_pred_dict["adsorption_energy_eV"][:8], 2),
+})
+render_df_to_fig(df_test_comp, title="", filename="table_actual_vs_predicted_test")
 
 # Generate predictions across full dataset domain (1000 points) for visualization density
 np.random.seed(202)
@@ -898,14 +912,8 @@ df_user_host["Overall_Score"] = (
 
 df_user_host = df_user_host.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
 df_user_host["Rank"] = df_user_host.index + 1
-
-df_top10_table = df_user_host[[
-    "Rank", "formula", "band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV", "Overall_Score"
-]].head(10).round(3)
-df_top10_table.columns = ["Rank", "Formula", "Eg (eV)", "Ef (eV/at)", "K (GPa)", "G (GPa)", "E_ads (eV)", "Score"]
-
-render_df_to_fig(df_top10_table, title="Top 10 Candidate Host Materials Leaderboard (Matched Dataset)", filename="table_top10_hosts")
-""")
+print(f" Candidate Host Materials Composite Ranking Complete (Top 5: {', '.join(df_user_host['formula'].head(5).tolist())})")
+""")""")
 
     c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Visualisasi Top 5 Leaderboard Per Properti & Radar Map 5 Aksis (Gambar 6 & 8)
 > Grafik batang vertikal yang menampilkan Top 5 material kandidat per properti target beserta perbandingan radar map 5 aksis untuk Top 5 material host teratas (`WB2`, `MoC`, `Co3O4`, `Ti3O5`, `Mo2C`).
@@ -1237,7 +1245,7 @@ df_tpms_table = df_tpms[[
 ]].round(3)
 df_tpms_table.columns = ["Rank", "Topology", "Atoms", "Eg (eV)", "Ef (eV/at)", "K (GPa)", "G (GPa)", "E_ads (eV)", "Score"]
 
-render_df_to_fig(df_tpms_table, title="Graphene TPMS Sheet Topologies Screening Leaderboard", filename="table_tpms_topologies")
+render_df_to_fig(df_tpms_table, title="", filename="table_tpms_topologies")
 """)
 
     c21_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.2 Visualisasi Grafik Batang Properti & Radar Map 5 Aksis TPMS (Gambar 9 & 10)
@@ -1374,7 +1382,7 @@ plt.show()
 # 16. Summary Publication Tables (Host Materials & Graphene TPMS) & CSV Exporter
 # ==============================================================================
 # 1. Summary Table for User Matched Dataset Top Host Candidates
-df_pub_user = df_user_host.head(10)[[
+df_pub_user = df_user_host.head(5)[[
     "Rank", "formula", "band_gap", "formation_energy",
     "bulk_modulus", "shear_modulus", "adsorption_energy_eV", "Overall_Score"
 ]].copy()
@@ -1384,7 +1392,7 @@ df_pub_user.columns = [
     "K (GPa)", "G (GPa)", "E_ads (eV)", "Composite Score"
 ]
 
-render_df_to_fig(df_pub_user.round(3), title="Publication Summary: Top Candidate Host Materials", filename="table_pub_summary_hosts")
+render_df_to_fig(df_pub_user.round(3), title="", filename="table_pub_summary_hosts")
 
 # 2. Summary Table for Graphene TPMS Sheet Topologies
 df_pub_tpms = df_tpms[[
@@ -1397,7 +1405,7 @@ df_pub_tpms.columns = [
     "K (GPa)", "G (GPa)", "E_ads (eV)", "Composite Score"
 ]
 
-render_df_to_fig(df_pub_tpms.round(3), title="Publication Summary: Top Graphene TPMS Topologies", filename="table_pub_summary_tpms")
+render_df_to_fig(df_pub_tpms.round(3), title="", filename="table_pub_summary_tpms")
 
 # Export summary CSV files
 df_pub_user.round(3).to_csv("summary_table_host_materials.csv", index=False)
@@ -1411,7 +1419,7 @@ print("   - summary_table_tpms_topologies.csv")
         c0, c1, c2, c1_setup, c2_load, c5_md, c3_stats,
         c6, c7_md, c4_dist, c8_md, c5_corr, c9_md, c6_class,
         c10, c11_md, c7_feat, c12_md, c8_model, c13_md, c9_curves, c14_md, c10_eval, c15_md, c11_parity,
-        c16_user, c17_user_md, c12_user_score, c18_user_md, c13_user_vis, c18_act_pred_md, c13_act_pred_vis,
+        c16_user, c17_user_md, c12_user_score, c18_user_md, c13_user_vis, c13_6_radar_vis, c18_act_pred_md, c13_act_pred_vis,
         c19_tpms, c20_tpms_md, c14_tpms, c21_tpms_md, c15_vis_tpms,
         c22_latex, c16_latex_out
     ]
