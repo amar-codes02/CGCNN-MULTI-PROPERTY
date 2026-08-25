@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import torch
 
-from pymatgen.core import Structure
+from pymatgen.core import Structure, Lattice
 from PIL import Image
 import warnings
 
@@ -202,7 +202,8 @@ def get_flat_graphene_all_polysulfides_cif(supercell_x=1, supercell_y=1, superce
             struct.make_supercell([sx, sy, sz])
 
         return struct.to(fmt="cif")
-    except Exception:
+    except Exception as e:
+        print("ERROR IN GRAPHENE FLAT CIF:", e)
         return ""
 
 
