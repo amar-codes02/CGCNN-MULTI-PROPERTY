@@ -130,16 +130,18 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
         for col in df.columns:
             cell_strs = [str(col)] + [str(v) for v in df[col].values]
             max_len = max([len(s) for s in cell_strs]) if cell_strs else len(str(col))
-            col_lens.append(max_len + 3)
+            col_lens.append(max_len + 4)
         tot_len = sum(col_lens)
         col_widths = [l / tot_len for l in col_lens]
 
+    max_col_char = max([len(str(c)) for c in df.columns])
+
     if figsize is None:
-        fig_w = 9.5 if n_cols <= 6 else 11.5
-        fig_h = (n_rows + 1.2) * 0.48
+        fig_w = max(11.0, min(16.0, n_cols * 2.2))
+        fig_h = (n_rows + 1.4) * 0.52
         if title:
-            fig_h += 0.5
-        fig_h = max(1.5, fig_h)
+            fig_h += 0.6
+        fig_h = max(1.8, fig_h)
         figsize = (fig_w, fig_h)
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -151,11 +153,18 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
 
     table.auto_set_font_size(False)
 
-    header_font = 21.0 if n_cols <= 6 else 18.0
-    body_font = 19.0 if n_cols <= 6 else 16.0
+    if max_col_char > 18:
+        header_font = 14.5
+        body_font = 14.5
+    elif max_col_char > 12:
+        header_font = 16.0
+        body_font = 15.5
+    else:
+        header_font = 18.0
+        body_font = 16.5
 
     table.set_fontsize(body_font)
-    table.scale(1.0, 2.3)
+    table.scale(1.0, 2.4)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
@@ -772,16 +781,23 @@ prop_file_map = {
     "adsorption_energy_eV": "table_actual_vs_predicted_adsorption_energy",
 }
 
+prop_col_map = {
+    "band_gap": ("Actual Eg (eV)", "Predicted Eg (eV)"),
+    "formation_energy": ("Actual Ef (eV/at)", "Predicted Ef (eV/at)"),
+    "bulk_modulus": ("Actual K (GPa)", "Predicted K (GPa)"),
+    "shear_modulus": ("Actual G (GPa)", "Predicted G (GPa)"),
+    "adsorption_energy_eV": ("Actual Eads (eV)", "Predicted Eads (eV)"),
+}
+
 for target in FIVE_TARGETS:
-    prop_short = TARGET_LABELS[target].split(" (")[0]
-    unit = TARGET_UNITS[target]
+    act_col, pred_col = prop_col_map[target]
     yt_s = y_true_dict[target][:10]
     yp_s = y_pred_dict[target][:10]
 
     df_prop_table = pd.DataFrame({
         "Formula": df_test_eval["formula"].head(10).values,
-        f"Actual {prop_short} ({unit})": np.round(yt_s, 3),
-        f"Predicted {prop_short} ({unit})": np.round(yp_s, 3),
+        act_col: np.round(yt_s, 3),
+        pred_col: np.round(yp_s, 3),
         "Difference": np.round(yp_s - yt_s, 3),
         "Abs Error": np.round(np.abs(yp_s - yt_s), 3),
     })
