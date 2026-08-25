@@ -912,7 +912,7 @@ with tab_intro:
     <div class="web-card">
         <div class="web-card-title"><span>💠 2D Monolayer Flat Graphene Sheet & Multi-Polysulfide (Li<sub>2</sub>S<sub>8</sub> → Li<sub>2</sub>S) Adsorption Complex</span></div>
         <p style="margin:0;">
-            Unified 3D structural visualization of a <b>Pristine 2D Monolayer Flat Graphene Sheet</b> containing <b>ALL 5 Polysulfide Reduction Products (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S)</b> attached simultaneously across the host surface in a single integrated interface.
+            Unified structural visualization of a <b>Pristine 2D Monolayer Flat Graphene Sheet</b> containing <b>ALL 5 Polysulfide Reduction Products (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S)</b> attached simultaneously across the host surface.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -922,33 +922,44 @@ with tab_intro:
         col_ctrl_t1, col_viz_t1 = st.columns([1.1, 1.9])
 
         with col_ctrl_t1:
-            st.markdown("#### ⚙️ 3D Rendering & Format Controls")
+            st.markdown("#### ⚙️ Display Mode & Rendering Controls")
+            t1_display_mode = st.radio(
+                "Visual Mode / Tampilan Interface:",
+                ["🖼️ 2D Academic Schematic Diagram (Gambar Skematik)", "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3D)"],
+                index=0,
+                key="t1_display_mode"
+            )
 
-            st.markdown("#### 🎨 3D Representation Style & Format")
-            col_s1, col_f1 = st.columns([1.1, 0.9])
-            with col_s1:
-                t1_render_style = st.selectbox(
-                    "3D Representation Style:",
-                    ["stick_sphere", "spacefill", "stick", "line"],
-                    format_func=lambda x: {
-                        "stick_sphere": "Stick & Sphere (Ball & Stick)",
-                        "spacefill": "Spacefill (CPK Spheres)",
-                        "stick": "Stick Only (Cylinders)",
-                        "line": "Wireframe Line"
-                    }[x],
-                    key="t1_render_style"
-                )
-            with col_f1:
-                t1_fmt_choice = st.radio("3D Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t1_fmt_choice", horizontal=True)
+            if "3D" in t1_display_mode:
+                st.markdown("#### 🎨 3D Representation Style & Format")
+                col_s1, col_f1 = st.columns([1.1, 0.9])
+                with col_s1:
+                    t1_render_style = st.selectbox(
+                        "3D Representation Style:",
+                        ["stick_sphere", "spacefill", "stick", "line"],
+                        format_func=lambda x: {
+                            "stick_sphere": "Stick & Sphere (Ball & Stick)",
+                            "spacefill": "Spacefill (CPK Spheres)",
+                            "stick": "Stick Only (Cylinders)",
+                            "line": "Wireframe Line"
+                        }[x],
+                        key="t1_render_style"
+                    )
+                with col_f1:
+                    t1_fmt_choice = st.radio("3D Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t1_fmt_choice", horizontal=True)
 
-            st.markdown("##### 📐 Graphene Sheet Expansion (X x Y x Z, up to 3x3x3)")
-            t1_sc1, t1_sc2, t1_sc3 = st.columns(3)
-            with t1_sc1:
-                t1_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t1_sc_x")
-            with t1_sc2:
-                t1_sc_y = st.slider("Expansion Y:", min_value=1, max_value=3, value=1, key="t1_sc_y")
-            with t1_sc3:
-                t1_sc_z = st.slider("Expansion Z:", min_value=1, max_value=3, value=1, key="t1_sc_z")
+                st.markdown("##### 📐 Graphene Sheet Expansion (X x Y x Z, up to 3x3x3)")
+                t1_sc1, t1_sc2, t1_sc3 = st.columns(3)
+                with t1_sc1:
+                    t1_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t1_sc_x")
+                with t1_sc2:
+                    t1_sc_y = st.slider("Expansion Y:", min_value=1, max_value=3, value=1, key="t1_sc_y")
+                with t1_sc3:
+                    t1_sc_z = st.slider("Expansion Z:", min_value=1, max_value=3, value=1, key="t1_sc_z")
+            else:
+                t1_render_style = "stick_sphere"
+                t1_fmt_choice = "CIF (.cif)"
+                t1_sc_x, t1_sc_y, t1_sc_z = 1, 1, 1
 
             # Polysulfide Layout Badge Legend
             st.markdown("#### 🏷️ Polysulfide Adsorbate Spatial Layout")
@@ -976,50 +987,70 @@ with tab_intro:
             st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            st.markdown("#### 🧊 3D Interface: 2D Monolayer Flat Graphene + All 5 Polysulfides (Li₂S₈ → Li₂S)")
-            
-            flat_cif = get_flat_graphene_all_polysulfides_cif(
-                supercell_x=t1_sc_x,
-                supercell_y=t1_sc_y,
-                supercell_z=t1_sc_z
-            )
-
-            if flat_cif:
-                fmt_code_t1 = "xyz" if "XYZ" in t1_fmt_choice else "cif"
-                flat_xyz = cif_to_xyz(flat_cif)
-                render_data_t1 = flat_xyz if fmt_code_t1 == "xyz" else flat_cif
-
-                render_structure_3d(
-                    render_data_t1,
-                    fmt=fmt_code_t1,
-                    height=560,
-                    style=t1_render_style,
+            if "2D" in t1_display_mode:
+                st.markdown("#### 🖼️ 2D Academic Schematic Diagram: Graphene Monolayer + Polysulfides")
+                schematic_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_polysulfide_schematic.png")
+                if os.path.exists(schematic_path):
+                    st.image(
+                        schematic_path,
+                        caption="🖼️ High-Resolution 2D Academic Diagram: Pristine 2D Flat Graphene Monolayer Sheet with Adsorbed Polysulfide Species (Li₂S₈ → Li₂S)",
+                        use_container_width=True
+                    )
+                    with open(schematic_path, "rb") as img_file:
+                        st.download_button(
+                            label="📥 Download 2D Schematic Diagram (PNG Image)",
+                            data=img_file,
+                            file_name="flat_graphene_polysulfides_schematic.png",
+                            mime="image/png",
+                            key="dl_t1_schematic_png"
+                        )
+                else:
+                    st.info("2D Schematic image not found.")
+            else:
+                st.markdown("#### 🧊 3D Interface: 2D Monolayer Flat Graphene + All 5 Polysulfides (Li₂S₈ → Li₂S)")
+                
+                flat_cif = get_flat_graphene_all_polysulfides_cif(
                     supercell_x=t1_sc_x,
                     supercell_y=t1_sc_y,
-                    supercell_z=t1_sc_z,
-                    bg_color="#ffffff"
+                    supercell_z=t1_sc_z
                 )
-                
-                st.caption("💡 **3D Interaction**: Click and drag to rotate the 2D flat graphene sheet + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
 
-                st.markdown("##### 📥 Export Multi-Adsorbate 2D Flat Graphene Complex Structure")
-                dl1, dl2 = st.columns(2)
-                with dl1:
-                    st.download_button(
-                        label="📥 Download CIF (graphene_flat_all_polysulfides.cif)",
-                        data=flat_cif,
-                        file_name="flat_graphene_adsorbed_all_polysulfides.cif",
-                        mime="chemical/x-cif",
-                        key=f"dl_t1_cif_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                if flat_cif:
+                    fmt_code_t1 = "xyz" if "XYZ" in t1_fmt_choice else "cif"
+                    flat_xyz = cif_to_xyz(flat_cif)
+                    render_data_t1 = flat_xyz if fmt_code_t1 == "xyz" else flat_cif
+
+                    render_structure_3d(
+                        render_data_t1,
+                        fmt=fmt_code_t1,
+                        height=560,
+                        style=t1_render_style,
+                        supercell_x=t1_sc_x,
+                        supercell_y=t1_sc_y,
+                        supercell_z=t1_sc_z,
+                        bg_color="#ffffff"
                     )
-                with dl2:
-                    st.download_button(
-                        label="📥 Download XYZ (graphene_flat_all_polysulfides.xyz)",
-                        data=flat_xyz,
-                        file_name="flat_graphene_adsorbed_all_polysulfides.xyz",
-                        mime="chemical/x-xyz",
-                        key=f"dl_t1_xyz_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
-                    )
+                    
+                    st.caption("💡 **3D Interaction**: Click and drag to rotate the 2D flat graphene sheet + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
+
+                    st.markdown("##### 📥 Export Multi-Adsorbate 2D Flat Graphene Complex Structure")
+                    dl1, dl2 = st.columns(2)
+                    with dl1:
+                        st.download_button(
+                            label="📥 Download CIF (graphene_flat_all_polysulfides.cif)",
+                            data=flat_cif,
+                            file_name="flat_graphene_adsorbed_all_polysulfides.cif",
+                            mime="chemical/x-cif",
+                            key=f"dl_t1_cif_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                        )
+                    with dl2:
+                        st.download_button(
+                            label="📥 Download XYZ (graphene_flat_all_polysulfides.xyz)",
+                            data=flat_xyz,
+                            file_name="flat_graphene_adsorbed_all_polysulfides.xyz",
+                            mime="chemical/x-xyz",
+                            key=f"dl_t1_xyz_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                        )
 
     render_tab1_graphene_fragment()
 
