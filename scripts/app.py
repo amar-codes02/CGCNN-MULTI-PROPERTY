@@ -304,7 +304,7 @@ def generate_matplotlib_graphene_fig():
             ax.plot([lx, lx], [ly, ly - 0.6], color="#0284c7", linestyle=":", linewidth=1.5, zorder=3)
         ax.scatter(li_x, li_y, s=90, color="#a855f7", edgecolors="#581c87", linewidth=1.0, zorder=4, label="Lithium (Li)" if name=="Li2S8" else "")
 
-    ax.set_title("2D Monolayer Flat Graphene + Polysulfides (Pure Python Matplotlib Schematic)", fontsize=13, fontweight="bold", pad=15)
+    ax.set_title("Schematic illustration of LiPS adsorption on the host material", fontsize=13, fontweight="bold", pad=15)
     ax.set_aspect("equal")
     ax.axis("off")
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=10)
@@ -1255,7 +1255,7 @@ with tab_intro:
                     st.divider()
 
             elif "Surface" in t1_display_mode or "Overview" in t1_display_mode:
-                st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Ilustrasi LiPS di Host Material Cathode")
+                st.markdown("#### 🐍 2D Vector Plot: Schematic illustration of LiPS adsorption on the host material")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
                 st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Python Matplotlib code.")
