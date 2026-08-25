@@ -209,6 +209,46 @@ def get_flat_graphene_all_polysulfides_cif(supercell_x=1, supercell_y=1, superce
 
 
 @st.cache_data
+def get_flat_graphene_single_polysulfide_cif(sp_name="Li2S8", supercell_x=1, supercell_y=1, supercell_z=1):
+    """Build 2D monolayer Cathode Host Material with a SINGLE specific lithium polysulfide species (Li2S8, Li2S6, Li2S4, Li2S2, or Li2S) anchored at the center."""
+    sx = max(1, min(int(supercell_x), 3))
+    sy = max(1, min(int(supercell_y), 3))
+    sz = max(1, min(int(supercell_z), 3))
+
+    try:
+        lattice = Lattice.from_parameters(a=2.46, b=2.46, c=22.0, alpha=90, beta=90, gamma=120)
+        unit_graphene = Structure(lattice, ["C", "C"], [[1/3, 2/3, 0.5], [2/3, 1/3, 0.5]])
+        struct = unit_graphene * (6, 6, 1)
+
+        coords_cart = struct.cart_coords
+        center_sheet = coords_cart.mean(axis=0)
+        center_z = center_sheet[2] + 1.50
+
+        poly_geoms = {
+            "Li2S8": [("Li", [0.0, 0.0, 0.0]), ("Li", [3.2, 0.0, 0.1]), ("S", [0.8, 1.2, 0.2]), ("S", [2.2, 1.2, 0.2]), ("S", [3.0, 0.2, 0.7]), ("S", [2.0, -0.8, 0.9]), ("S", [0.5, -1.0, 0.7]), ("S", [-0.5, -0.2, 0.4]), ("S", [-1.0, 1.0, 0.2]), ("S", [0.0, 1.8, 0.5])],
+            "Li2S6": [("Li", [0.0, 0.0, 0.0]), ("Li", [2.8, 0.0, 0.1]), ("S", [0.6, 1.0, 0.2]), ("S", [1.8, 1.0, 0.2]), ("S", [2.4, 0.2, 0.7]), ("S", [1.6, -0.6, 0.8]), ("S", [0.4, -0.8, 0.5]), ("S", [-0.4, 0.2, 0.3])],
+            "Li2S4": [("Li", [0.0, 0.0, 0.0]), ("Li", [2.4, 0.0, 0.1]), ("S", [0.5, 0.8, 0.2]), ("S", [1.5, 0.8, 0.2]), ("S", [2.0, 0.1, 0.6]), ("S", [1.0, -0.5, 0.7])],
+            "Li2S2": [("Li", [0.0, 0.0, 0.0]), ("Li", [2.1, 0.0, 0.1]), ("S", [0.4, 0.6, 0.2]), ("S", [1.4, 0.6, 0.2])],
+            "Li2S":  [("Li", [0.0, 0.0, 0.0]), ("Li", [2.0, 0.0, 0.1]), ("S", [1.0, 0.3, 0.2])],
+        }
+
+        geom = poly_geoms.get(sp_name, poly_geoms["Li2S8"])
+        sp_center = center_sheet
+        sp_center[2] = center_z
+        for elem, rel_pos in geom:
+            pos = sp_center + np.array(rel_pos)
+            struct.append(elem, pos, coords_are_cartesian=True)
+
+        if sx > 1 or sy > 1 or sz > 1:
+            struct.make_supercell([sx, sy, sz])
+
+        return struct.to(fmt="cif")
+    except Exception as e:
+        print("ERROR IN SINGLE SPECIES CIF:", e)
+        return ""
+
+
+@st.cache_data
 def generate_matplotlib_graphene_fig():
     """Generate a pure Python Matplotlib 2D vector schematic plot of 2D Pristine Monolayer Flat Graphene with adsorbed polysulfides."""
     import matplotlib.pyplot as plt
@@ -1084,8 +1124,9 @@ with tab_intro:
                 "Visual Mode / Tampilan Interface:",
                 [
                     "📊 2D Journal Figure Matrix: Top View vs Side View (Kodingan Python Murni 100%)",
+                    "🧊 3D Journal Matrix: Individual 5-Species 3D Viewers (Format Jurnal Interaktif 3Dmol.js)",
                     "🐍 2D Host Surface Adsorption Overview (Kodingan Python Murni 100%)",
-                    "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3Dmol.js)"
+                    "🧊 3D Combined Surface: All 5 Species Simultaneous (Visual Interaktif 3Dmol.js)"
                 ],
                 index=0,
                 key="t1_display_mode"
@@ -1148,18 +1189,78 @@ with tab_intro:
             st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            if "Journal Figure Matrix" in t1_display_mode:
+            if "2D Journal Figure Matrix" in t1_display_mode:
                 st.markdown("#### 📊 Academic Journal Figure: Top View vs Side View Matrix (Pure Python Matplotlib)")
                 fig_grid = generate_matplotlib_top_side_grid_fig()
                 st.pyplot(fig_grid)
                 st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Python Matplotlib code.")
+            
+            elif "3D Journal Matrix" in t1_display_mode:
+                st.markdown("#### 🧊 3D Interactive Journal Matrix: Individual 5-Species Adsorption (3Dmol.js WebGL)")
+                st.caption("💡 **100% Interactive WebGL Code**: Rotate and inspect each of the 5 lithium polysulfide species individually in full 3D.")
+                
+                species_list = [
+                    ("Li2S8", "Li₂S₈ (Long-Chain Polysulfide)", "2.45 eV", "1.98 Å"),
+                    ("Li2S6", "Li₂S₆ (Intermediate Polysulfide)", "2.15 eV", "1.95 Å"),
+                    ("Li2S4", "Li₂S₄ (Medium-Chain Polysulfide)", "1.92 eV", "1.91 Å"),
+                    ("Li2S2", "Li₂S₂ (Short-Chain Polysulfide)", "1.78 eV", "1.86 Å"),
+                    ("Li2S",  "Li₂S (Insoluble Discharge Product)", "1.55 eV", "1.80 Å"),
+                ]
+
+                for sp_id, sp_label, e_ads_val, d_val in species_list:
+                    st.markdown(f"##### ⚛️ {sp_label}")
+                    c_3d_vis, c_3d_meta = st.columns([1.5, 0.8])
+                    
+                    sp_cif = get_flat_graphene_single_polysulfide_cif(
+                        sp_name=sp_id,
+                        supercell_x=t1_sc_x,
+                        supercell_y=t1_sc_y,
+                        supercell_z=t1_sc_z
+                    )
+                    
+                    with c_3d_vis:
+                        if sp_cif:
+                            fmt_code_sp = "xyz" if "XYZ" in t1_fmt_choice else "cif"
+                            sp_xyz = cif_to_xyz(sp_cif)
+                            render_data_sp = sp_xyz if fmt_code_sp == "xyz" else sp_cif
+                            render_structure_3d(
+                                render_data_sp,
+                                fmt=fmt_code_sp,
+                                height=300,
+                                style=t1_render_style,
+                                supercell_x=t1_sc_x,
+                                supercell_y=t1_sc_y,
+                                supercell_z=t1_sc_z,
+                                bg_color="#ffffff"
+                            )
+                    
+                    with c_3d_meta:
+                        st.markdown(f"""
+                        <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 0.8rem; border-radius: 10px; font-size: 0.88rem; margin-top: 0.2rem;">
+                            <b>Adsorption Metrics:</b><br>
+                            • <b>E<sub>ads</sub></b>: {e_ads_val}<br>
+                            • <b>d<sub>Li-C</sub></b>: {d_val}<br>
+                            • <b>Host Base</b>: Monolayer 6x6<br>
+                            • <b>Site</b>: Hollow / Bridge
+                        </div>
+                        """, unsafe_allow_html=True)
+                        if sp_cif:
+                            st.download_button(
+                                label=f"📥 Download {sp_id} CIF",
+                                data=sp_cif,
+                                file_name=f"{sp_id}_cathode_host_material.cif",
+                                mime="chemical/x-cif",
+                                key=f"dl_3d_matrix_{sp_id}_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                            )
+                    st.divider()
+
             elif "Surface" in t1_display_mode or "Overview" in t1_display_mode:
                 st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Ilustrasi LiPS di Host Material Cathode")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
                 st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Python Matplotlib code.")
             else:
-                st.markdown("#### 🧊 3D Interface: Ilustrasi LiPS di Host Material Cathode (Li₂S₈ → Li₂S)")
+                st.markdown("#### 🧊 3D Combined Surface: All 5 Species Simultaneous (Li₂S₈ → Li₂S)")
                 
                 flat_cif = get_flat_graphene_all_polysulfides_cif(
                     supercell_x=t1_sc_x,
