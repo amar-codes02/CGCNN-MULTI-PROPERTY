@@ -41,7 +41,7 @@ from cgcnn_model import (
 # Page Configuration
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Li-S Battery Graphene TPMS Research Platform",
+    page_title="CGCNN-MULTI-PROPERTY: Material Property Screening & Graphene TPMS Research Platform",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -62,7 +62,7 @@ if not os.path.exists(TPMS_DIR):
 # ---------------------------------------------------------------------------
 # Background Resources Loader (Cached)
 # ---------------------------------------------------------------------------
-@st.cache_resource(show_spinner="Memuat Model CGCNN (cgcnn_model.pt) ...")
+@st.cache_resource(show_spinner="Loading CGCNN Model (cgcnn_model.pt) ...")
 def load_default_model(checkpoint_path):
     if not os.path.exists(checkpoint_path):
         return None
@@ -71,7 +71,7 @@ def load_default_model(checkpoint_path):
     return {"model": model, "t_mean": t_mean, "t_std": t_std, "meta": meta, "device": device}
 
 
-@st.cache_data(show_spinner="Memuat Dataset Adsorpsi Polisulfida & JARVIS-DFT 3D ...")
+@st.cache_data(show_spinner="Loading Polysulfide Adsorption & JARVIS-DFT 3D Dataset ...")
 def load_default_eda(dataset_path):
     if not os.path.exists(dataset_path):
         return None
@@ -127,7 +127,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
         (function() {{
           var el = document.getElementById("viewer3dmol");
           if (!el || typeof $3Dmol === "undefined") {{
-            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Gagal memuat library 3Dmol.js. Periksa koneksi internet Anda.</p>";
+            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Failed to load 3Dmol.js library. Please check network connection.</p>";
             return;
           }}
           var cifData = `{safe_cif}`;
@@ -186,25 +186,25 @@ with st.sidebar:
     st.markdown("### ⚙️ Platform Control Panel")
     
     st.markdown("#### 📁 Structure Viewer Selector")
-    input_mode = st.radio("Pilih Sumber File CIF Single:", ["Gunakan Contoh TPMS", "Upload File .CIF Single"], index=0)
+    input_mode = st.radio("Select Single CIF Source:", ["Use Sample TPMS", "Upload Single .CIF File"], index=0)
     
     cif_text = None
     cif_name = None
     
-    if input_mode == "Upload File .CIF Single":
-        uploaded_file = st.file_uploader("Unggah 1 file CIF kristal:", type=["cif"], key="single_cif_up")
+    if input_mode == "Upload Single .CIF File":
+        uploaded_file = st.file_uploader("Upload 1 crystal CIF file:", type=["cif"], key="single_cif_up")
         if uploaded_file is not None:
             cif_text = uploaded_file.getvalue().decode("utf-8", errors="ignore")
             cif_name = uploaded_file.name
     else:
         if sample_cif_files:
-            selected_sample = st.selectbox("Pilih Contoh Material TPMS:", list(sample_cif_files.keys()))
+            selected_sample = st.selectbox("Select Sample TPMS Material:", list(sample_cif_files.keys()))
             sample_path = sample_cif_files[selected_sample]
             with open(sample_path, "r", encoding="utf-8") as f:
                 cif_text = f.read()
             cif_name = os.path.basename(sample_path)
         else:
-            st.warning("Folder TPMS tidak ditemukan.")
+            st.warning("TPMS folder not found.")
 
     if cif_text:
         try:
@@ -218,21 +218,21 @@ with st.sidebar:
     st.divider()
     st.markdown("#### 📊 Model Checkpoint Status")
     if bundle is not None:
-        st.success("Model CGCNN Loaded (`cgcnn_model.pt`) ✅")
+        st.success("CGCNN Model Loaded (`cgcnn_model.pt`) ✅")
         st.caption(f"Device: `{bundle['device']}` | Val MAE: `{bundle['meta'].get('val_loss', 0.0):.4f}`")
     else:
-        st.error("Model `cgcnn_model.pt` tidak ditemukan!")
+        st.error("Model `cgcnn_model.pt` not found!")
 
     if eda_df is not None:
         st.success(f"Matched Polysulfide Dataset Loaded (`{len(eda_df):,}` records) ✅")
     else:
-        st.warning("Dataset EDA tidak ditemukan.")
+        st.warning("EDA Dataset not found.")
 
 
 # ---------------------------------------------------------------------------
-# Global Styling & Theme Configuration (Permanent Light Mode)
+# Global Styling & Theme Configuration (Clean Light Design System)
 # ---------------------------------------------------------------------------
-theme_mode = "☀️ Mode Terang (Light)"
+theme_mode = "☀️ Light Mode"
 is_light = True
 
 plotly_template = "plotly_white"
@@ -241,491 +241,213 @@ plotly_grid_color = "rgba(0,0,0,0.12)"
 plotly_bg = "rgba(255,255,255,0.7)"
 mol3d_bg = "#ffffff"
 
-if True:
-    theme_css = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-        
-        html, body, .stApp {
-            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%) !important;
-            color: #0f172a !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 18px;
-        }
+theme_css = """
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    
+    html, body, .stApp {
+        background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%) !important;
+        color: #0f172a !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 18px;
+    }
 
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid #f1f5f9; }
-        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid #f1f5f9; }
+    ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
 
-        p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
-            text-align: justify !important;
-            text-justify: inter-word !important;
-            font-size: 1.15rem !important;
-            line-height: 1.75 !important;
-            color: #334155 !important;
-        }
-        h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title {
-            color: #0f172a !important;
-        }
+    p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        font-size: 1.15rem !important;
+        line-height: 1.75 !important;
+        color: #334155 !important;
+    }
+    h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title {
+        color: #0f172a !important;
+    }
 
-        .hero-banner {
-            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-            border: 1px solid rgba(203, 213, 225, 0.85) !important;
-            border-radius: 24px;
-            padding: 2.8rem 3.2rem;
-            margin-bottom: 2.2rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
-        }
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(2, 132, 199, 0.12);
-            border: 1px solid rgba(2, 132, 199, 0.35);
-            color: #0284c7;
-            font-size: 0.95rem !important;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.09em;
-            padding: 8px 18px;
-            border-radius: 30px;
-            margin-bottom: 1.2rem;
-        }
-        .hero-title {
-            font-size: 3.1rem !important;
-            font-weight: 800;
-            line-height: 1.2;
-            background: linear-gradient(90deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-            text-align: left !important;
-        }
-        .hero-subtitle {
-            color: #334155 !important;
-            font-size: 1.22rem !important;
-            line-height: 1.75 !important;
-            max-width: 1000px;
-            font-weight: 400;
-        }
-        .web-card {
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(203, 213, 225, 0.85) !important;
-            border-radius: 22px;
-            padding: 1.8rem 2.2rem;
-            margin-bottom: 1.8rem;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .web-card:hover {
-            border-color: rgba(2, 132, 199, 0.5) !important;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12) !important;
-            transform: translateY(-2px);
-        }
-        .web-card-title {
-            font-size: 1.65rem !important;
-            font-weight: 800;
-            color: #0f172a !important;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: left !important;
-        }
-        .web-card-title span {
-            background: linear-gradient(90deg, #0284c7, #4f46e5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .kpi-card {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(203, 213, 225, 0.85) !important;
-            border-radius: 20px;
-            padding: 1.6rem;
-            text-align: center;
-            box-shadow: 0 10px 28px rgba(0,0,0,0.06) !important;
-            transition: transform 0.25s ease, border-color 0.25s ease;
-        }
-        .kpi-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(2, 132, 199, 0.5) !important;
-        }
-        .kpi-label {
-            font-size: 0.92rem !important;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #64748b !important;
-            margin-bottom: 0.6rem;
-            text-align: center !important;
-        }
-        .kpi-value {
-            font-size: 2.6rem !important;
-            font-weight: 800;
-            background: linear-gradient(90deg, #0284c7, #9333ea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.3rem;
-            text-align: center !important;
-        }
-        .kpi-sub {
-            font-size: 0.95rem !important;
-            color: #475569 !important;
-            font-weight: 600;
-            text-align: center !important;
-        }
-        .stage-card {
-            background: rgba(241, 245, 249, 0.95) !important;
-            border-left: 5px solid #0284c7;
-            border-radius: 14px;
-            padding: 1.5rem 1.8rem;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.05) !important;
-        }
-        .stage-header {
-            font-size: 1.3rem !important;
-            font-weight: 800;
-            color: #0284c7;
-            margin-bottom: 0.6rem;
-            text-align: left !important;
-        }
-        .stage-desc {
-            color: #334155 !important;
-            font-size: 1.12rem !important;
-            line-height: 1.75 !important;
-            text-align: justify !important;
-        }
-        .video-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2.2rem 0;
-            width: 100%;
-        }
-        .video-wrapper {
-            position: relative;
-            width: 85%;
-            max-width: 960px;
-            padding-bottom: 47.8125%;
-            height: 0;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.15), 0 0 40px rgba(2, 132, 199, 0.2);
-            border: 2px solid rgba(2, 132, 199, 0.4);
-        }
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; border: 0;
-        }
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 14px;
-            background: rgba(241, 245, 249, 0.95) !important;
-            padding: 12px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(203, 213, 225, 0.85) !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            height: 54px;
-            border-radius: 14px;
-            padding: 0 28px;
-            font-size: 1.15rem !important;
-            font-weight: 700;
-            color: #475569 !important;
-            border: none;
-            transition: all 0.25s ease;
-        }
-        .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
-            color: #ffffff !important;
-            box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
-        }
-        .stDataFrame {
-            font-size: 1.08rem !important;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-    </style>
-    """
-elif theme_mode == "🌙 Mode Gelap (Dark)":
-    theme_css = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-        
-        html, body, .stApp {
-            background: radial-gradient(circle at 15% 15%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.97) 50%, #080c14 100%) !important;
-            color: #f8fafc !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 18px;
-        }
-
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 6px; border: 2px solid #0b0f19; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-
-        p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub {
-            text-align: justify !important;
-            text-justify: inter-word !important;
-            font-size: 1.15rem !important;
-            line-height: 1.75 !important;
-            color: #cbd5e1 !important;
-        }
-        h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title {
-            color: #f8fafc !important;
-        }
-
-        .hero-banner {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 24px;
-            padding: 2.8rem 3.2rem;
-            margin-bottom: 2.2rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-        }
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(56, 189, 248, 0.18);
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #38bdf8;
-            font-size: 0.95rem !important;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.09em;
-            padding: 8px 18px;
-            border-radius: 30px;
-            margin-bottom: 1.2rem;
-        }
-        .hero-title {
-            font-size: 3.1rem !important;
-            font-weight: 800;
-            line-height: 1.2;
-            background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-            text-align: left !important;
-        }
-        .hero-subtitle {
-            color: #cbd5e1 !important;
-            font-size: 1.22rem !important;
-            line-height: 1.75 !important;
-            max-width: 1000px;
-            font-weight: 400;
-        }
-        .web-card {
-            background: rgba(15, 23, 42, 0.72) !important;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 22px;
-            padding: 1.8rem 2.2rem;
-            margin-bottom: 1.8rem;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38) !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .web-card:hover {
-            border-color: rgba(56, 189, 248, 0.4) !important;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55) !important;
-            transform: translateY(-2px);
-        }
-        .web-card-title {
-            font-size: 1.65rem !important;
-            font-weight: 800;
-            color: #f8fafc !important;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: left !important;
-        }
-        .web-card-title span {
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .kpi-card {
-            background: rgba(30, 41, 59, 0.68) !important;
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 20px;
-            padding: 1.6rem;
-            text-align: center;
-            box-shadow: 0 10px 28px rgba(0,0,0,0.3) !important;
-            transition: transform 0.25s ease, border-color 0.25s ease;
-        }
-        .kpi-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(56, 189, 248, 0.45) !important;
-        }
-        .kpi-label {
-            font-size: 0.92rem !important;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #94a3b8 !important;
-            margin-bottom: 0.6rem;
-            text-align: center !important;
-        }
-        .kpi-value {
-            font-size: 2.6rem !important;
-            font-weight: 800;
-            background: linear-gradient(90deg, #38bdf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.3rem;
-            text-align: center !important;
-        }
-        .kpi-sub {
-            font-size: 0.95rem !important;
-            color: #64748b !important;
-            font-weight: 600;
-            text-align: center !important;
-        }
-        .stage-card {
-            background: rgba(30, 41, 59, 0.52) !important;
-            border-left: 5px solid #38bdf8;
-            border-radius: 14px;
-            padding: 1.5rem 1.8rem;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25) !important;
-        }
-        .stage-header {
-            font-size: 1.3rem !important;
-            font-weight: 800;
-            color: #38bdf8;
-            margin-bottom: 0.6rem;
-            text-align: left !important;
-        }
-        .stage-desc {
-            color: #cbd5e1 !important;
-            font-size: 1.12rem !important;
-            line-height: 1.75 !important;
-            text-align: justify !important;
-        }
-        .video-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2.2rem 0;
-            width: 100%;
-        }
-        .video-wrapper {
-            position: relative;
-            width: 85%;
-            max-width: 960px;
-            padding-bottom: 47.8125%;
-            height: 0;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.3);
-            border: 2px solid rgba(56, 189, 248, 0.4);
-        }
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; border: 0;
-        }
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 14px;
-            background: rgba(15, 23, 42, 0.78) !important;
-            padding: 12px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            height: 54px;
-            border-radius: 14px;
-            padding: 0 28px;
-            font-size: 1.15rem !important;
-            font-weight: 700;
-            color: #94a3b8 !important;
-            border: none;
-            transition: all 0.25s ease;
-        }
-        .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%) !important;
-            color: #ffffff !important;
-            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.45);
-        }
-        .stDataFrame {
-            font-size: 1.08rem !important;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-    </style>
-    """
-else: # Auto (System preference)
-    theme_css = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-
-        @media (prefers-color-scheme: light) {
-            html, body, .stApp {
-                background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%) !important;
-                color: #0f172a !important;
-            }
-            p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub { color: #334155 !important; }
-            h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title { color: #0f172a !important; }
-            .hero-banner {
-                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-                border: 1px solid rgba(203, 213, 225, 0.85) !important;
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
-            }
-            .web-card {
-                background: rgba(255, 255, 255, 0.92) !important;
-                border: 1px solid rgba(203, 213, 225, 0.85) !important;
-                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
-            }
-            .kpi-card {
-                background: rgba(255, 255, 255, 0.95) !important;
-                border: 1px solid rgba(203, 213, 225, 0.85) !important;
-                box-shadow: 0 10px 28px rgba(0,0,0,0.06) !important;
-            }
-            .stage-card {
-                background: rgba(241, 245, 249, 0.95) !important;
-                border-left: 5px solid #0284c7 !important;
-            }
-            .stTabs [data-baseweb="tab-list"] {
-                background: rgba(241, 245, 249, 0.95) !important;
-                border: 1px solid rgba(203, 213, 225, 0.85) !important;
-            }
-            .stTabs [data-baseweb="tab"] { color: #475569 !important; }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            html, body, .stApp {
-                background: radial-gradient(circle at 15% 15%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.97) 50%, #080c14 100%) !important;
-                color: #f8fafc !important;
-            }
-            p, li, div.stMarkdown, .hero-subtitle, .web-card p, .stage-desc, .kpi-sub { color: #cbd5e1 !important; }
-            h1, h2, h3, h4, h5, h6, .hero-title, .web-card-title { color: #f8fafc !important; }
-            .hero-banner {
-                background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
-                border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            }
-            .web-card {
-                background: rgba(15, 23, 42, 0.72) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            }
-            .kpi-card {
-                background: rgba(30, 41, 59, 0.68) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            }
-            .stage-card {
-                background: rgba(30, 41, 59, 0.52) !important;
-                border-left: 5px solid #38bdf8 !important;
-            }
-            .stTabs [data-baseweb="tab-list"] {
-                background: rgba(15, 23, 42, 0.78) !important;
-                border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            }
-            .stTabs [data-baseweb="tab"] { color: #94a3b8 !important; }
-        }
-    </style>
-    """
+    .hero-banner {
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+        border: 1px solid rgba(203, 213, 225, 0.85) !important;
+        border-radius: 24px;
+        padding: 2.8rem 3.2rem;
+        margin-bottom: 2.2rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(2, 132, 199, 0.12);
+        border: 1px solid rgba(2, 132, 199, 0.35);
+        color: #0284c7;
+        font-size: 0.95rem !important;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        padding: 8px 18px;
+        border-radius: 30px;
+        margin-bottom: 1.2rem;
+    }
+    .hero-title {
+        font-size: 3.1rem !important;
+        font-weight: 800;
+        line-height: 1.2;
+        background: linear-gradient(90deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        text-align: left !important;
+    }
+    .hero-subtitle {
+        color: #334155 !important;
+        font-size: 1.22rem !important;
+        line-height: 1.75 !important;
+        max-width: 1000px;
+        font-weight: 400;
+    }
+    .web-card {
+        background: rgba(255, 255, 255, 0.92) !important;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(203, 213, 225, 0.85) !important;
+        border-radius: 22px;
+        padding: 1.8rem 2.2rem;
+        margin-bottom: 1.8rem;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .web-card:hover {
+        border-color: rgba(2, 132, 199, 0.5) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12) !important;
+        transform: translateY(-2px);
+    }
+    .web-card-title {
+        font-size: 1.65rem !important;
+        font-weight: 800;
+        color: #0f172a !important;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left !important;
+    }
+    .web-card-title span {
+        background: linear-gradient(90deg, #0284c7, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .kpi-card {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(203, 213, 225, 0.85) !important;
+        border-radius: 20px;
+        padding: 1.6rem;
+        text-align: center;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.06) !important;
+        transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(2, 132, 199, 0.5) !important;
+    }
+    .kpi-label {
+        font-size: 0.92rem !important;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b !important;
+        margin-bottom: 0.6rem;
+        text-align: center !important;
+    }
+    .kpi-value {
+        font-size: 2.6rem !important;
+        font-weight: 800;
+        background: linear-gradient(90deg, #0284c7, #9333ea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.3rem;
+        text-align: center !important;
+    }
+    .kpi-sub {
+        font-size: 0.95rem !important;
+        color: #475569 !important;
+        font-weight: 600;
+        text-align: center !important;
+    }
+    .stage-card {
+        background: rgba(241, 245, 249, 0.95) !important;
+        border-left: 5px solid #0284c7;
+        border-radius: 14px;
+        padding: 1.5rem 1.8rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05) !important;
+    }
+    .stage-header {
+        font-size: 1.3rem !important;
+        font-weight: 800;
+        color: #0284c7;
+        margin-bottom: 0.6rem;
+        text-align: left !important;
+    }
+    .stage-desc {
+        color: #334155 !important;
+        font-size: 1.12rem !important;
+        line-height: 1.75 !important;
+        text-align: justify !important;
+    }
+    .video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 2.2rem 0;
+        width: 100%;
+    }
+    .video-wrapper {
+        position: relative;
+        width: 85%;
+        max-width: 960px;
+        padding-bottom: 47.8125%;
+        height: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.15), 0 0 40px rgba(2, 132, 199, 0.2);
+        border: 2px solid rgba(2, 132, 199, 0.4);
+    }
+    .video-wrapper iframe {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%; border: 0;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 14px;
+        background: rgba(241, 245, 249, 0.95) !important;
+        padding: 12px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(203, 213, 225, 0.85) !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 54px;
+        border-radius: 14px;
+        padding: 0 28px;
+        font-size: 1.15rem !important;
+        font-weight: 700;
+        color: #475569 !important;
+        border: none;
+        transition: all 0.25s ease;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+    }
+    .stDataFrame {
+        font-size: 1.08rem !important;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+</style>
+"""
 
 st.markdown(theme_css, unsafe_allow_html=True)
 
@@ -738,8 +460,8 @@ st.markdown("""
     <div class="hero-badge">⚡ Advanced Computational Material Screening</div>
     <div class="hero-title">Li-S Research Platform & Graphene TPMS Screening</div>
     <div class="hero-subtitle">
-        Platform Riset Baterai Lithium-Sulfur (Li-S): Analisis Fondasi Sains Elektrokimia, Reaksi Polisulfida, 
-        Pengujian Topologi Graphene TPMS, dan Screening CGCNN Multi-CIF Berstandar Jurnal Ilmiah.
+        Lithium-Sulfur (Li-S) Battery Research Platform: Electrochemical Rationale, Polysulfide Kinetics, 
+        Graphene TPMS Topology Screening, and Multi-Property CGCNN Machine Learning Inference.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -747,10 +469,10 @@ st.markdown("""
 
 # Main Navigation Tabs
 tab_intro, tab_tpms_rank, tab_viz3d, tab_eda = st.tabs([
-    "🧬 Fondasi Sains & Reaksi Elektrokimia Li-S",
-    "🏆 Hasil Pengujian TPMS & Ranking Multi-CIF",
-    "🧊 Visualisasi Kristal & Graph 3D",
-    "📊 Dashboard Analisis Exploratory Data Analytics (EDA)"
+    "🧬 Scientific Foundations & Li-S Electrochemistry",
+    "🏆 TPMS Evaluation & Multi-CIF Leaderboard",
+    "🧊 3D Crystal & Atomic Graph Viewer",
+    "📊 Exploratory Data Analytics (EDA) Dashboard"
 ])
 
 
@@ -760,10 +482,10 @@ tab_intro, tab_tpms_rank, tab_viz3d, tab_eda = st.tabs([
 with tab_intro:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🧬 Fondasi Sains Baterai Lithium-Sulfur (Li-S)</span></div>
+        <div class="web-card-title"><span>🧬 Scientific Foundations of Lithium-Sulfur (Li-S) Batteries</span></div>
         <p>
-            Baterai <b>Lithium-Sulfur (Li-S)</b> merupakan sistem penyimpanan energi sekunder generasi mendatang (<i>next-generation energy storage</i>) yang menawarkan terobosan kapasitas spesifik dan densitas energi yang luar biasa melebihi baterai Lithium-ion (Li-ion) konvensional. 
-            Secara teoritis, katoda berbasis sulfur murni (<b>S<sub>8</sub></b>) menawarkan <b>kapasitas spesifik ekstrem sebesar 1675 mAh/g</b> dan <b>densitas energi spesifik hingga &approx; 2600 Wh/kg</b> — hampir 5 kali lipat dibandingkan katoda Li-ion standar (LiCoO<sub>2</sub> / NMC).
+            <b>Lithium-Sulfur (Li-S) batteries</b> represent a next-generation secondary energy storage technology offering remarkable theoretical energy density and specific capacity far surpassing conventional Lithium-ion (Li-ion) batteries. 
+            Theoretically, elemental sulfur cathodes (<b>S<sub>8</sub></b>) deliver an extreme <b>specific capacity of 1,675 mAh/g</b> and a <b>specific energy density up to &approx; 2,600 Wh/kg</b> — nearly 5 times higher than standard Li-ion cathode materials (LiCoO<sub>2</sub> / NMC).
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -778,7 +500,7 @@ with tab_intro:
     if os.path.exists(fig1_path):
         try:
             img1 = Image.open(fig1_path)
-            st.markdown("#### Figure 1: Komparasi Teknologi Baterai Li-S vs Li-ion")
+            st.markdown("#### Figure 1: Technology Comparison of Li-S vs Li-ion Batteries")
             st.image(
                 img1,
                 caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
@@ -786,30 +508,29 @@ with tab_intro:
             )
             st.divider()
         except Exception as e:
-            st.warning(f"Tidak dapat memuat Figure 1: {e}")
+            st.warning(f"Unable to load Figure 1: {e}")
 
     # SECTION 1: DETAILED ELECTROCHEMICAL REACTION MECHANISM & FORMULAS
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🔄 1. Reaksi Elektrokimia & Mekanisme Reduksi Polisulfida</span></div>
+        <div class="web-card-title"><span>🔄 1. Electrochemical Reactions & Polysulfide Reduction Mechanisms</span></div>
         <p>
-            Selama proses pengosongan daya (<i>discharging</i>), reaksi konversi elektrokimia pada katoda berlangsung melalui 
-            <b>reduksi bertahap sulfur murni (S<sub>8</sub>)</b> menjadi Lithium Sulfide padat (Li<sub>2</sub>S):
+            During discharge, cathode electrochemical conversion proceeds via the step-wise reduction of elemental sulfur (S<sub>8</sub>) into solid Lithium Sulfide (Li<sub>2</sub>S):
         </p>
     </div>
     """, unsafe_allow_html=True)
 
     st.latex(r"\text{S}_8 + 16\text{Li}^+ + 16e^- \longleftrightarrow 8\text{Li}_2\text{S}")
 
-    st.markdown("Reaksi elektrokimia ini berjalan melalui **4 Tahapan Utama Fasa Polisulfida Terlarut (Li<sub>2</sub>S<sub>x</sub>)**:", unsafe_allow_html=True)
+    st.markdown("This multi-step electrochemical reaction involves **4 Main Stages of Soluble Lithium Polysulfide Intermediates (Li<sub>2</sub>S<sub>x</sub>)**:", unsafe_allow_html=True)
 
     c_s1, c_s2 = st.columns(2)
     with c_s1:
         st.markdown("""
         <div class="stage-card">
-            <div class="stage-header">Tahap I: Reduksi Fasa Padat-ke-Cair (2.40 V → 2.30 V)</div>
+            <div class="stage-header">Stage I: Solid-to-Liquid Phase Reduction (2.40 V → 2.30 V)</div>
             <div class="stage-desc">
-                Sulfur padat murni (S<sub>8</sub>) tereduksi oleh kation Li<sup>+</sup> dan elektron e<sup>-</sup> membentuk molekul <b>Octasulfide (Li<sub>2</sub>S<sub>8</sub>)</b> yang melarut ke dalam elektrolit cair.
+                Pure solid sulfur (S<sub>8</sub>) is reduced by Li<sup>+</sup> cations and electrons e<sup>-</sup> forming soluble <b>Octasulfide (Li<sub>2</sub>S<sub>8</sub>)</b> molecules that dissolve into the liquid electrolyte.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -817,9 +538,9 @@ with tab_intro:
 
         st.markdown("""
         <div class="stage-card" style="border-left-color:#818cf8;">
-            <div class="stage-header" style="color:#818cf8;">Tahap II: Reduksi Fasa Cair Rantai Menengah (2.30 V → 2.15 V)</div>
+            <div class="stage-header" style="color:#818cf8;">Stage II: Liquid Phase Intermediate Chain Reduction (2.30 V → 2.15 V)</div>
             <div class="stage-desc">
-                Polisulfida rantai panjang Li<sub>2</sub>S<sub>8</sub> mengalami reduksi bertahap menjadi <b>Hexasulfide (Li<sub>2</sub>S<sub>6</sub>)</b> dan <b>Tetrasulfide (Li<sub>2</sub>S<sub>4</sub>)</b> yang sangat mudah terlarut dalam elektrolit cair.
+                Long-chain Li<sub>2</sub>S<sub>8</sub> undergoes step-wise reduction into highly soluble <b>Hexasulfide (Li<sub>2</sub>S<sub>6</sub>)</b> and <b>Tetrasulfide (Li<sub>2</sub>S<sub>4</sub>)</b> species.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -829,9 +550,9 @@ with tab_intro:
     with c_s2:
         st.markdown("""
         <div class="stage-card" style="border-left-color:#c084fc;">
-            <div class="stage-header" style="color:#c084fc;">Tahap III: Nukleasi Fasa Cair-ke-Padat (2.15 V → 2.10 V)</div>
+            <div class="stage-header" style="color:#c084fc;">Stage III: Liquid-to-Solid Phase Nucleation (2.15 V → 2.10 V)</div>
             <div class="stage-desc">
-                Li<sub>2</sub>S<sub>4</sub> terlarut mengalami reduksi lanjutan membentuk endapan padat <b>Lithium Disulfide (Li<sub>2</sub>S<sub>2</sub>)</b> yang tidak konduktif secara elektronik.
+                Dissolved Li<sub>2</sub>S<sub>4</sub> undergoes further reduction to form solid, electronically insulating <b>Lithium Disulfide (Li<sub>2</sub>S<sub>2</sub>)</b> precipitates.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -839,9 +560,9 @@ with tab_intro:
 
         st.markdown("""
         <div class="stage-card" style="border-left-color:#f472b6;">
-            <div class="stage-header" style="color:#f472b6;">Tahap IV: Pengendapan Akhir Fasa Padat (2.10 V → 1.70 V)</div>
+            <div class="stage-header" style="color:#f472b6;">Stage IV: Final Solid Phase Precipitation (2.10 V → 1.70 V)</div>
             <div class="stage-desc">
-                Endapan Li<sub>2</sub>S<sub>2</sub> bertransformasi sepenuhnya menjadi <b>Lithium Sulfide padat (Li<sub>2</sub>S)</b> yang bersifat isolator total.
+                Solid Li<sub>2</sub>S<sub>2</sub> precipitates fully transform into fully insulating solid <b>Lithium Sulfide (Li<sub>2</sub>S)</b>.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -852,11 +573,11 @@ with tab_intro:
     # SECTION 2: POLYSULFIDE SHUTTLE EFFECT & ANODE CORROSION
     st.markdown("""
     <div class="web-card" style="border-left: 6px solid #ef4444;">
-        <div class="web-card-title"><span style="background:linear-gradient(90deg, #ef4444, #f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚠️ 2. Permasalahan Utama: Efek Shuttle Polisulfida & Korosi Anoda Lithium</span></div>
+        <div class="web-card-title"><span style="background:linear-gradient(90deg, #ef4444, #f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚠️ 2. Core Challenges: Polysulfide Shuttle Effect & Anode Parasitic Corrosion</span></div>
         <p style="margin:0;">
-            <b>1. Pelarutan Katoda:</b> Intermediate <i>long-chain Lithium Polysulfides</i> (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>) yang terbentuk pada katoda sangat mudah terlarut ke dalam elektrolit organik cair (DME/DOL).<br>
-            <b>2. Migrasi Lintas Separator:</b> Karena gradien konsentrasi, molekul polisulfida terlarut bermigrasi menembus separator menuju sisi anoda logam Lithium.<br>
-            <b>3. Korosi Parasit pada Anoda:</b> Pada permukaan anoda Li, polisulfida terlarut bereaksi secara kimiawi (parasitik tanpa arus luar) membentuk endapan Li<sub>2</sub>S<sub>2</sub> / Li<sub>2</sub>S yang mengisolasi anoda:
+            <b>1. Cathode Dissolution:</b> Intermediate <i>long-chain Lithium Polysulfides</i> (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>) readily dissolve into liquid organic electrolytes (DME/DOL).<br>
+            <b>2. Cross-Separator Migration:</b> Driven by concentration gradients, dissolved polysulfides shuttle across the separator toward the Lithium metal anode.<br>
+            <b>3. Parasitic Anode Corrosion:</b> At the Li anode surface, shuttled polysulfides react chemically (parasitic reaction without external current), forming insulating Li<sub>2</sub>S<sub>2</sub> / Li<sub>2</sub>S passivating layers:
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -865,10 +586,10 @@ with tab_intro:
 
     st.markdown("""
     <p>
-        Dampak destruktif dari fenomena ini melingkupi:
-        <b>(a) Pembusukan Kapasitas Cepat</b> (kehilangan aktif material sulfur),
-        <b>(b) Efisiensi Coulombik Rendah</b> (arus pemborosan internal), dan
-        <b>(c) Pasivasi Anoda & Pertumbuhan Dendrit Lithium</b> yang memicu arus pendek sel (<i>short-circuit</i>).
+        The destructive consequences of this shuttle effect include:
+        <b>(a) Rapid Capacity Fading</b> (loss of active sulfur material),
+        <b>(b) Low Coulombic Efficiency</b> (internal self-discharge parasitic current), and
+        <b>(c) Anode Passivation & Dendrite Growth</b> triggering short-circuit risks.
     </p>
     """, unsafe_allow_html=True)
 
@@ -882,24 +603,24 @@ with tab_intro:
     if os.path.exists(fig2_path):
         try:
             img2 = Image.open(fig2_path)
-            st.markdown("#### Figure 2: Tantangan Utama & Degradasi Baterai Li-S")
+            st.markdown("#### Figure 2: Main Challenges & Degradation Mechanisms in Li-S Batteries")
             st.image(
                 img2,
                 caption="Figure 2: The main degradation issues and challenges of Lithium-Sulfur (Li-S) battery system.",
                 use_container_width=True
             )
         except Exception as e:
-            st.warning(f"Tidak dapat memuat Figure 2: {e}")
+            st.warning(f"Unable to load Figure 2: {e}")
 
     st.divider()
 
     # SECTION 3: RATIONALE FOR HOST MATERIALS & 5 TARGET PROPERTIES
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🛡️ 3. Alasan Dibutuhkannya Katoda Host Material & Justifikasi 5 Properti Utama</span></div>
+        <div class="web-card-title"><span>🛡️ 3. Rationale for Cathode Host Materials & Justification of 5 Core Target Properties</span></div>
         <p style="margin:0;">
-            Untuk memitigasi Efek Shuttle dan mengatasi konduktivitas sulfur murni yang sangat rendah (&approx; 5 &times; 10<sup>-30</sup> S/cm), 
-            diperlukan struktur matriks penampung (<b>Cathode Host Material</b>) berbasis struktur karbon berpori tingkat tinggi seperti <b>Graphene TPMS (Triply Periodic Minimal Surfaces)</b>.
+            To suppress the Shuttle Effect and compensate for elemental sulfur's poor electrical conductivity (&approx; 5 &times; 10<sup>-30</sup> S/cm), 
+            a conductive <b>Cathode Host Material</b> matrix such as <b>Graphene TPMS (Triply Periodic Minimal Surfaces)</b> scaffolds is required.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -911,8 +632,8 @@ with tab_intro:
             <div class="kpi-label">1. Band Gap (E<sub>g</sub>)</div>
             <div class="kpi-value">Metallic / Semimetal</div>
             <div class="kpi-sub">eV</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
-                <b>Alasan Penggunaan:</b> Menilai kemampuan konduktivitas listrik. Nilai Band Gap mendekati 0 eV (logam/semilogam) sangat krusial untuk mentransfer elektron secara cepat ke sulfur dan mengkompensasi sifat isolator S<sub>8</sub> dan Li<sub>2</sub>S.
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(203,213,225,0.6);">
+                <b>Scientific Rationale:</b> Assesses electronic conductivity. Near-zero band gap values (metallic/semimetallic) are crucial for rapid electron transport to compensate for S<sub>8</sub> and Li<sub>2</sub>S insulating nature.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -920,10 +641,10 @@ with tab_intro:
         st.markdown("""
         <div class="web-card" style="height: 100%; margin-top:1rem;">
             <div class="kpi-label">2. Formation Energy (E<sub>f</sub>)</div>
-            <div class="kpi-value">Rendah / Negatif</div>
+            <div class="kpi-value">Low / Negative</div>
             <div class="kpi-sub">eV / atom</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
-                <b>Alasan Penggunaan:</b> Menentukan stabilitas termodinamika kristal host. Semakin rendah/negatif energi pembentukan, semakin stabil struktur matriks host saat mengalami siklus pengisian/pengosongan berulang.
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(203,213,225,0.6);">
+                <b>Scientific Rationale:</b> Governs host crystal thermodynamic stability. More negative formation energy leads to higher matrix structural stability under repeated charge/discharge cycles.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -932,10 +653,10 @@ with tab_intro:
         st.markdown("""
         <div class="web-card" style="height: 100%;">
             <div class="kpi-label">3. Bulk Modulus (K)</div>
-            <div class="kpi-value">Semakin Tinggi</div>
+            <div class="kpi-value">Higher</div>
             <div class="kpi-sub">GPa</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
-                <b>Alasan Penggunaan:</b> Mengukur ketahanan matriks host terhadap tekanan hidrostatik dan ekspansi volume sel (&approx; 80% perubahan volume dari S<sub>8</sub> ke Li<sub>2</sub>S). Ketahanan mekanis yang tinggi mencegah pembentukan retakan mikro pada katoda.
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(203,213,225,0.6);">
+                <b>Scientific Rationale:</b> Measures host resistance against hydrostatic pressure and volume expansion (&approx; 80% volume expansion from S<sub>8</sub> to Li<sub>2</sub>S). High mechanical resistance prevents cathode micro-cracking.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -943,10 +664,10 @@ with tab_intro:
         st.markdown("""
         <div class="web-card" style="height: 100%; margin-top:1rem;">
             <div class="kpi-label">4. Shear Modulus (G)</div>
-            <div class="kpi-value">Semakin Tinggi</div>
+            <div class="kpi-value">Higher</div>
             <div class="kpi-sub">GPa</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
-                <b>Alasan Penggunaan:</b> Mengukur kekuatan matriks host terhadap deformasi geser (shear deformation) untuk menjaga stabilitas dan ketahanan mekanis katoda.
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(203,213,225,0.6);">
+                <b>Scientific Rationale:</b> Measures shear resistance against deformation to preserve structural rigidity and mechanical integrity of the cathode matrix.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -955,10 +676,10 @@ with tab_intro:
         st.markdown("""
         <div class="web-card" style="height: 100%;">
             <div class="kpi-label">5. Adsorption Energy (E<sub>ads</sub>)</div>
-            <div class="kpi-value">Semakin Tinggi (&ge; 2.0 eV)</div>
+            <div class="kpi-value">Higher (&ge; 2.0 eV)</div>
             <div class="kpi-sub">eV</div>
-            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.12);">
-                <b>Alasan Penggunaan:</b> Mengukur kekuatan penjangkaran kimiawi (<i>chemical anchoring</i>) terhadap molekul polisulfida (Li<sub>2</sub>S<sub>x</sub>). Energi adsorpsi yang kuat secara fisik terbukti mampu mengikat molekul polisulfida agar tidak larut dan tidak menembus separator.
+            <div style="margin-top:1.2rem; font-size:1.05rem !important; line-height:1.6; padding-top:0.8rem; border-top:1px solid rgba(203,213,225,0.6);">
+                <b>Scientific Rationale:</b> Quantifies chemical anchoring strength toward polysulfide molecules (Li<sub>2</sub>S<sub>x</sub>). Strong binding physically traps polysulfides within the cathode.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -968,9 +689,9 @@ with tab_intro:
     # SECTION 4: CENTERED HD YOUTUBE VIDEO EMBED
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🎥 4. Visualisasi Video Prinsip Kerja Baterai Li-S (Working Principle)</span></div>
+        <div class="web-card-title"><span>🎥 4. Working Principle Animation Video</span></div>
         <p style="margin:0;">
-            Berikut adalah animasi video interaktif prinsip kerja elektrokimia baterai Lithium-Sulfur (Working Principle) yang telah diperbesar dan ditempatkan simetris di tengah halaman:
+            Below is an interactive video animation of the Lithium-Sulfur battery electrochemical working principle:
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -990,21 +711,21 @@ with tab_intro:
 
 
 # ===========================================================================
-# TAB 2: TPMS TEST RESULTS & MULTI-CIF RANKING LEADERBOARD (DISPLAY ALL 5 MATERIALS & ALL PROPERTIES)
+# TAB 2: TPMS TEST RESULTS & MULTI-CIF RANKING LEADERBOARD
 # ===========================================================================
 with tab_tpms_rank:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🏆 Hasil Pengujian TPMS & Inferensi CGCNN Multi-CIF</span></div>
+        <div class="web-card-title"><span>🏆 TPMS Evaluation Results & Multi-CIF CGCNN Inference</span></div>
         <p style="margin:0;">
-            Modul ini menyajikan <b>Hasil Pengujian Topologi Graphene TPMS (Triply Periodic Minimal Surfaces)</b>. 
-            Seluruh 5 material TPMS dievaluasi berdasarkan <b>5 Pilar Properti Fisika</b> dan dibobotkan secara berimbang (20% per properti) untuk menghasilkan skor komposit akhir.
+            This module presents the <b>Evaluation Results of Graphene TPMS (Triply Periodic Minimal Surfaces) Topologies</b>. 
+            All 5 TPMS materials are evaluated based on <b>5 Core Physical Target Properties</b> weighted equally (20% per property) to compute an overall composite host score.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
     # 1. EVALUATION OF ALL 5 GRAPHENE TPMS SHEETS
-    st.markdown("### 📊 1. Evaluasi & Ranking 5 Topologi Graphene TPMS")
+    st.markdown("### 📊 1. Evaluation & Ranking of 5 Graphene TPMS Topologies")
 
     tpms_results = []
     if os.path.exists(TPMS_DIR) and bundle is not None:
@@ -1064,7 +785,7 @@ with tab_tpms_rank:
         df_tpms["Overall_Rank"] = df_tpms.index + 1
 
         # DISPLAY CARDS FOR ALL 5 MATERIALS SHOWING ALL PHYSICAL PROPERTIES
-        st.markdown("#### 🏆 Detail Lengkap & Seluruh Properti Fisika Ke-5 Material Graphene TPMS")
+        st.markdown("#### 🏆 Full Property Breakdown of All 5 Graphene TPMS Scaffolds")
 
         badges_info = [
             {"icon": "🥇", "label": "Rank 1 - Champion Host", "border": "#eab308", "bg_accent": "rgba(234, 179, 8, 0.12)"},
@@ -1096,7 +817,7 @@ with tab_tpms_rank:
                         <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
                     </div>
                     <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
-                        <b>Breakdown 5 Pilar Skor:</b><br>
+                        <b>Breakdown of 5-Pillar Sub-Scores:</b><br>
                         BG: <b>{row_item['Score_Band_Gap']:.2f}</b> | E<sub>f</sub>: <b>{row_item['Score_Formation_Energy']:.2f}</b> | K: <b>{row_item['Score_Bulk_Modulus']:.2f}</b> | G: <b>{row_item['Score_Shear_Modulus']:.2f}</b> | E<sub>ads</sub>: <b>{row_item['Score_Adsorption_Energy']:.2f}</b>
                     </div>
                 </div>
@@ -1126,7 +847,7 @@ with tab_tpms_rank:
                             <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
                         </div>
                         <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
-                            <b>Breakdown 5 Pilar Skor:</b><br>
+                            <b>Breakdown of 5-Pillar Sub-Scores:</b><br>
                             BG: <b>{row_item['Score_Band_Gap']:.2f}</b> | E<sub>f</sub>: <b>{row_item['Score_Formation_Energy']:.2f}</b> | K: <b>{row_item['Score_Bulk_Modulus']:.2f}</b> | G: <b>{row_item['Score_Shear_Modulus']:.2f}</b> | E<sub>ads</sub>: <b>{row_item['Score_Adsorption_Energy']:.2f}</b>
                         </div>
                     </div>
@@ -1134,7 +855,7 @@ with tab_tpms_rank:
 
         st.divider()
 
-        st.markdown("#### 📋 Tabel Rangking Komprehensif Seluruh Properti Graphene TPMS")
+        st.markdown("#### 📋 Comprehensive Ranking Table Across All Graphene TPMS Topologies")
         st.dataframe(
             df_tpms[[
                 "Overall_Rank", "TPMS", "Num_Atoms", "Material_Type",
@@ -1152,8 +873,8 @@ with tab_tpms_rank:
         )
 
         # Plotly Radar Chart / Spider Web plot comparing all 5 TPMS hosts
-        st.markdown("#### 🕸️ Radar Chart Komparasi 5 Pilar Properti Graphene TPMS")
-        categories = ["Band Gap (Normalized)", "Formation Energy (Normalized)", "Bulk Modulus (Normalized)", "Shear Modulus (Normalized)", "Adsorption Energy (Normalized)"]
+        st.markdown("#### 🕸️ 5-Axis Performance Radar Chart for Graphene TPMS Topologies")
+        categories = ["Band Gap (Norm.)", "Formation Energy (Norm.)", "Bulk Modulus (Norm.)", "Shear Modulus (Norm.)", "Adsorption Energy (Norm.)"]
 
         fig_radar = go.Figure()
         colors = ["#38bdf8", "#818cf8", "#c084fc", "#f472b6", "#fb923c"]
@@ -1188,16 +909,16 @@ with tab_tpms_rank:
         st.plotly_chart(fig_radar, use_container_width=True)
 
     else:
-        st.warning("Data TPMS tidak dapat dimuat dari folder `Graphene_TPMS_Sheet`.")
+        st.warning("TPMS data could not be loaded from `Graphene_TPMS_Sheet` directory.")
 
     st.divider()
 
     # 2. BATCH UPLOAD & RANKING CUSTOM CIF FILES (UP TO 5 FILES)
-    st.markdown("### 📤 2. Upload & Ranking Batch Multi-CIF Mandiri (Hingga 5 File CIF)")
-    st.markdown("Anda dapat mengunggah **1 hingga 5 file .CIF kristal mandiri** untuk diprediksi propertinya dan dirangkingkan secara otomatis berdasarkan model AI CGCNN:", unsafe_allow_html=True)
+    st.markdown("### 📤 2. Upload & Rank Custom Multi-CIF Batch (Up to 5 CIF Files)")
+    st.markdown("Upload **1 to 5 custom .CIF crystal files** for automated multi-property prediction and ranking via the CGCNN deep-learning model:", unsafe_allow_html=True)
 
     uploaded_batch_files = st.file_uploader(
-        "Unggah file CIF mandiri (maksimal 5 file):",
+        "Upload custom CIF files (up to 5 files):",
         type=["cif"],
         accept_multiple_files=True,
         key="multi_cif_batch_uploader"
@@ -1205,7 +926,7 @@ with tab_tpms_rank:
 
     if uploaded_batch_files:
         if len(uploaded_batch_files) > 5:
-            st.warning("⚠️ Anda mengunggah lebih dari 5 file. Hanya 5 file pertama yang akan diproses.")
+            st.warning("⚠️ More than 5 files uploaded. Processing the first 5 files only.")
             batch_list = uploaded_batch_files[:5]
         else:
             batch_list = uploaded_batch_files
@@ -1241,7 +962,7 @@ with tab_tpms_rank:
                         "Adsorption_Energy_eV": ads
                     })
                 except Exception as ex:
-                    st.error(f"Gagal memproses {up_file.name}: {ex}")
+                    st.error(f"Failed to process {up_file.name}: {ex}")
 
             if batch_results:
                 df_batch = pd.DataFrame(batch_results)
@@ -1263,7 +984,7 @@ with tab_tpms_rank:
                 df_batch = df_batch.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
                 df_batch["Rank"] = df_batch.index + 1
 
-                st.markdown("#### 🏆 Card Hasil Prediksi & Properti Seluruh Material Upload")
+                st.markdown("#### 🏆 Prediction Cards & Physical Properties for Uploaded Batch")
                 b_cols = st.columns(min(3, len(df_batch)))
                 for b_idx, b_row in df_batch.iterrows():
                     with b_cols[b_idx % len(b_cols)]:
@@ -1282,7 +1003,7 @@ with tab_tpms_rank:
                         </div>
                         """, unsafe_allow_html=True)
 
-                st.markdown("#### 📋 Leaderboard Tabel Hasil Prediksi & Ranking Multi-CIF Upload Mandiri")
+                st.markdown("#### 📋 Leaderboard Table for Custom Multi-CIF Uploads")
                 st.dataframe(
                     df_batch[[
                         "Rank", "File_Name", "Formula", "Num_Atoms", "Material_Type",
@@ -1304,7 +1025,7 @@ with tab_tpms_rank:
 # TAB 3: 3D CRYSTAL & GRAPH VISUALIZATION
 # ===========================================================================
 with tab_viz3d:
-    st.markdown("### 🧊 Visualisasi Struktur Kristal 3D & Graph Atomik")
+    st.markdown("### 🧊 3D Crystal Structure & Atomic Graph Visualization")
     
     if "cif_structure" in st.session_state and "cif_text" in st.session_state:
         struct = st.session_state["cif_structure"]
@@ -1314,13 +1035,13 @@ with tab_viz3d:
         col_v1, col_v2 = st.columns([1, 1])
 
         with col_v1:
-            st.markdown(f"#### ⚛️ Render 3Dmol.js: `{cif_name_curr}`")
-            viz_style = st.selectbox("Style Rendering 3D:", ["stick_sphere", "spacefill", "line"], index=0)
-            supercell_val = st.slider("Ukuran Supercell:", min_value=1, max_value=3, value=1)
+            st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
+            viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0)
+            supercell_val = st.slider("Supercell Dimension:", min_value=1, max_value=3, value=1)
             render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
         with col_v2:
-            st.markdown("#### 🕸️ Graph Crystal Network (Node & Edge 3D Plotly)")
+            st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
             try:
                 atom_fea, nbr_fea, nbr_fea_idx = build_graph(struct, max_num_nbr=12, radius=4.0)
                 coords = struct.cart_coords
@@ -1370,9 +1091,9 @@ with tab_viz3d:
                 st.plotly_chart(fig_graph, use_container_width=True)
 
             except Exception as ex:
-                st.error(f"Gagal membuat visualisasi 3D Graph: {ex}")
+                st.error(f"Failed to generate 3D Graph visualization: {ex}")
     else:
-        st.info("Pilih atau unggah file CIF di sidebar untuk menampilkan visualisasi kristal 3D.")
+        st.info("Select or upload a CIF file in the sidebar to display 3D crystal structure renderings.")
 
 
 # ===========================================================================
@@ -1381,12 +1102,11 @@ with tab_viz3d:
 with tab_eda:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>📊 Dashboard Analisis Exploratory Data Analytics (EDA) Material Katoda</span></div>
+        <div class="web-card-title"><span>📊 Cathode Host Material Exploratory Data Analytics (EDA) Dashboard</span></div>
         <p style="margin:0;">
-            Dashboard analitik ilmiah ini menyajikan statistik eksplorasi dataset material host katoda Li-S, 
-            mencakup distribusi frekuensi 5 properti fisika utama beserta kurva densitas KDE, 
-            matriks korelasi linear Pearson, proporsi konduktivitas elektronik, kekuatan energi adsorpsi per spesies polisulfida, 
-            hingga evaluasi akurasi presisi model deep-learning CGCNN.
+            This research dashboard provides statistical exploration of the Li-S cathode host dataset, 
+            covering frequency distributions of the 5 core target physical properties with overlaid KDE density curves, 
+            Pearson linear correlation heatmaps, electronic conductivity classifications, and precision accuracy evaluations of the CGCNN model.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1443,7 +1163,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 1: 5-PROPERTY DISTRIBUTION HISTOGRAMS WITH OVERLAID SMOOTH KDE CURVES
-        st.markdown("### 📈 Distribusi Frekuensi & Densitas (KDE) 5 Properti Fisika Utama Material Host")
+        st.markdown("### 📈 Statistical Distributions & Density Profiles (KDE) across 5 Core Target Properties")
         
         fig1_sub = make_subplots(
             rows=2, cols=3,
@@ -1518,7 +1238,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 2: INTER-PROPERTY PEARSON CORRELATION MATRIX HEATMAP FOR 5 CORE PROPERTIES
-        st.markdown("### 🧮 Matriks Korelasi Linier Pearson Antar 5 Properti Fisika Utama")
+        st.markdown("### 🧮 Inter-Property Pearson Linear Correlation Heatmap")
         
         target_cols = ["band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]
         valid_targets = [c for c in target_cols if c in eda_df.columns]
@@ -1538,7 +1258,7 @@ with tab_eda:
                 corr_mat,
                 text_auto=".3f",
                 color_continuous_scale="YlGnBu",
-                title="Heatmap Korelasi Pearson 5 Properti Utama Kristal Host",
+                title="Pearson Correlation Heatmap across 5 Target Properties",
                 aspect="auto"
             )
             fig2_corr.update_layout(
@@ -1553,10 +1273,9 @@ with tab_eda:
         st.divider()
 
         # SECTION 3: MATERIAL TYPE DISTRIBUTION ACCROSS ALL 5 PROPERTIES
-        st.markdown("### 📊 3. Jumlah & Distribusi Jenis Material Berdasarkan 5 Pilar Properti Fisika")
+        st.markdown("### 📊 3. Material Count & Distribution across 5 Target Physical Properties")
         st.markdown("""
-        Analisis komprehensif jumlah dan proporsi jenis material host katoda yang dikategorikan secara objektif 
-        berdasarkan **kelima pilar properti fisika utama** (Band Gap, Formation Energy, Bulk Modulus, Shear Modulus, dan Adsorption Energy):
+        Comprehensive distribution breakdown of host materials categorized across all <b>5 core physical target properties</b>:
         """)
 
         def cat_band_gap(bg):
@@ -1566,24 +1285,24 @@ with tab_eda:
             else: return "Insulator (Eg > 2.0 eV)"
 
         def cat_formation_energy(ef):
-            if ef <= 0: return "Sangat Stabil (Ef <= 0 eV/atom)"
-            elif ef <= 0.5: return "Meta-stabil (0 < Ef <= 0.5 eV/atom)"
-            else: return "Kurang Stabil (Ef > 0.5 eV/atom)"
+            if ef <= 0: return "Highly Stable (Ef <= 0 eV/atom)"
+            elif ef <= 0.5: return "Metastable (0 < Ef <= 0.5 eV/atom)"
+            else: return "Unstable (Ef > 0.5 eV/atom)"
 
         def cat_bulk_modulus(k):
-            if k >= 150: return "Tinggi (K >= 150 GPa)"
-            elif k >= 75: return "Sedang (75 <= K < 150 GPa)"
-            else: return "Rendah (K < 75 GPa)"
+            if k >= 150: return "High (K >= 150 GPa)"
+            elif k >= 75: return "Moderate (75 <= K < 150 GPa)"
+            else: return "Low (K < 75 GPa)"
 
         def cat_shear_modulus(g):
-            if g >= 80: return "Tinggi (G >= 80 GPa)"
-            elif g >= 40: return "Sedang (40 <= G < 80 GPa)"
-            else: return "Rendah (G < 40 GPa)"
+            if g >= 80: return "High (G >= 80 GPa)"
+            elif g >= 40: return "Moderate (40 <= G < 80 GPa)"
+            else: return "Low (G < 40 GPa)"
 
         def cat_adsorption_energy(ads):
-            if ads >= 2.5: return "Sangat Kuat (Eads >= 2.5 eV)"
-            elif ads >= 1.5: return "Sedang (1.5 <= Eads < 2.5 eV)"
-            else: return "Lemah (Eads < 1.5 eV)"
+            if ads >= 2.5: return "Very Strong (Eads >= 2.5 eV)"
+            elif ads >= 1.5: return "Moderate (1.5 <= Eads < 2.5 eV)"
+            else: return "Weak (Eads < 1.5 eV)"
 
         eda_df_cat = eda_df.copy()
         eda_df_cat["Cat_Band_Gap"] = eda_df_cat["band_gap"].apply(cat_band_gap)
@@ -1595,17 +1314,17 @@ with tab_eda:
         col_f3a, col_f3b = st.columns(2)
 
         with col_f3a:
-            st.markdown("#### (a) Jumlah Material: Konduktivitas (Band Gap) & Stabilitas Termodinamika")
+            st.markdown("#### (a) Electronic Conductivity (Band Gap) & Stability Breakdown")
             bg_counts = eda_df_cat["Cat_Band_Gap"].value_counts().reset_index()
-            bg_counts.columns = ["Kategori Band Gap", "Jumlah Material"]
+            bg_counts.columns = ["Band Gap Category", "Material Count"]
             fig3_bg = px.bar(
                 bg_counts,
-                x="Jumlah Material",
-                y="Kategori Band Gap",
+                x="Material Count",
+                y="Band Gap Category",
                 orientation="h",
-                text="Jumlah Material",
-                title="Jumlah Jenis Material Berdasarkan Band Gap (Eg)",
-                color="Kategori Band Gap",
+                text="Material Count",
+                title="Material Breakdown by Electronic Band Gap (Eg)",
+                color="Band Gap Category",
                 color_discrete_sequence=["#0284c7", "#38bdf8", "#818cf8", "#c084fc"]
             )
             fig3_bg.update_layout(
@@ -1619,32 +1338,32 @@ with tab_eda:
             st.plotly_chart(fig3_bg, use_container_width=True)
 
         with col_f3b:
-            st.markdown("#### (b) Jumlah Material: Sifat Mekanis (Bulk & Shear Modulus) & Adsorpsi")
+            st.markdown("#### (b) Mechanical Moduli & Adsorption Energy Breakdown")
             
             bm_c = eda_df_cat["Cat_Bulk_Modulus"].value_counts().to_dict()
             sm_c = eda_df_cat["Cat_Shear_Modulus"].value_counts().to_dict()
             ads_c = eda_df_cat["Cat_Adsorption_Energy"].value_counts().to_dict()
 
             mech_df = pd.DataFrame([
-                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": bm_c.get("Tinggi (K >= 150 GPa)", 0)},
-                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Sedang", "Jumlah Material": bm_c.get("Sedang (75 <= K < 150 GPa)", 0)},
-                {"Properti": "Bulk Modulus (K)", "Tingkat/Kategori": "Rendah", "Jumlah Material": bm_c.get("Rendah (K < 75 GPa)", 0)},
-                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": sm_c.get("Tinggi (G >= 80 GPa)", 0)},
-                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Sedang", "Jumlah Material": sm_c.get("Sedang (40 <= G < 80 GPa)", 0)},
-                {"Properti": "Shear Modulus (G)", "Tingkat/Kategori": "Rendah", "Jumlah Material": sm_c.get("Rendah (G < 40 GPa)", 0)},
-                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Tinggi", "Jumlah Material": ads_c.get("Sangat Kuat (Eads >= 2.5 eV)", 0)},
-                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Sedang", "Jumlah Material": ads_c.get("Sedang (1.5 <= Eads < 2.5 eV)", 0)},
-                {"Properti": "Adsorption Energy (Eads)", "Tingkat/Kategori": "Rendah", "Jumlah Material": ads_c.get("Lemah (Eads < 1.5 eV)", 0)},
+                {"Property": "Bulk Modulus (K)", "Category": "High", "Material Count": bm_c.get("High (K >= 150 GPa)", 0)},
+                {"Property": "Bulk Modulus (K)", "Category": "Moderate", "Material Count": bm_c.get("Moderate (75 <= K < 150 GPa)", 0)},
+                {"Property": "Bulk Modulus (K)", "Category": "Low", "Material Count": bm_c.get("Low (K < 75 GPa)", 0)},
+                {"Property": "Shear Modulus (G)", "Category": "High", "Material Count": sm_c.get("High (G >= 80 GPa)", 0)},
+                {"Property": "Shear Modulus (G)", "Category": "Moderate", "Material Count": sm_c.get("Moderate (40 <= G < 80 GPa)", 0)},
+                {"Property": "Shear Modulus (G)", "Category": "Low", "Material Count": sm_c.get("Low (G < 40 GPa)", 0)},
+                {"Property": "Adsorption Energy (Eads)", "Category": "High", "Material Count": ads_c.get("Very Strong (Eads >= 2.5 eV)", 0)},
+                {"Property": "Adsorption Energy (Eads)", "Category": "Moderate", "Material Count": ads_c.get("Moderate (1.5 <= Eads < 2.5 eV)", 0)},
+                {"Property": "Adsorption Energy (Eads)", "Category": "Low", "Material Count": ads_c.get("Weak (Eads < 1.5 eV)", 0)},
             ])
 
             fig3_mech = px.bar(
                 mech_df,
-                x="Properti",
-                y="Jumlah Material",
-                color="Tingkat/Kategori",
+                x="Property",
+                y="Material Count",
+                color="Category",
                 barmode="group",
-                text="Jumlah Material",
-                title="Perbandingan Jumlah Material: Bulk & Shear Modulus vs Adsorpsi",
+                text="Material Count",
+                title="Material Distribution: Moduli vs Adsorption Energy",
                 color_discrete_sequence=["#0284c7", "#38bdf8", "#fb923c"]
             )
             fig3_mech.update_layout(
@@ -1656,45 +1375,45 @@ with tab_eda:
             )
             st.plotly_chart(fig3_mech, use_container_width=True)
 
-        st.markdown("#### 📋 Tabel Rangkuman Distribusi & Jumlah Jenis Material (5 Properti Fisika)")
+        st.markdown("#### 📋 Summary Table of Material Categorization (5 Physical Target Properties)")
         
         total_rec = len(eda_df_cat)
         prop_summary_list = []
 
         for k, v in eda_df_cat["Cat_Band_Gap"].value_counts().items():
             prop_summary_list.append({
-                "Properti Fisika": "1. Band Gap (Eg)",
-                "Kategori / Tingkatan": k,
-                "Jumlah Material": v,
-                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+                "Physical Property": "1. Band Gap (Eg)",
+                "Category / Level": k,
+                "Material Count": v,
+                "Percentage (%)": f"{(v / total_rec) * 100:.2f}%"
             })
         for k, v in eda_df_cat["Cat_Formation_Energy"].value_counts().items():
             prop_summary_list.append({
-                "Properti Fisika": "2. Formation Energy (Ef)",
-                "Kategori / Tingkatan": k,
-                "Jumlah Material": v,
-                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+                "Physical Property": "2. Formation Energy (Ef)",
+                "Category / Level": k,
+                "Material Count": v,
+                "Percentage (%)": f"{(v / total_rec) * 100:.2f}%"
             })
         for k, v in eda_df_cat["Cat_Bulk_Modulus"].value_counts().items():
             prop_summary_list.append({
-                "Properti Fisika": "3. Bulk Modulus (K)",
-                "Kategori / Tingkatan": k,
-                "Jumlah Material": v,
-                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+                "Physical Property": "3. Bulk Modulus (K)",
+                "Category / Level": k,
+                "Material Count": v,
+                "Percentage (%)": f"{(v / total_rec) * 100:.2f}%"
             })
         for k, v in eda_df_cat["Cat_Shear_Modulus"].value_counts().items():
             prop_summary_list.append({
-                "Properti Fisika": "4. Shear Modulus (G)",
-                "Kategori / Tingkatan": k,
-                "Jumlah Material": v,
-                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+                "Physical Property": "4. Shear Modulus (G)",
+                "Category / Level": k,
+                "Material Count": v,
+                "Percentage (%)": f"{(v / total_rec) * 100:.2f}%"
             })
         for k, v in eda_df_cat["Cat_Adsorption_Energy"].value_counts().items():
             prop_summary_list.append({
-                "Properti Fisika": "5. Adsorption Energy (Eads)",
-                "Kategori / Tingkatan": k,
-                "Jumlah Material": v,
-                "Persentase (%)": f"{(v / total_rec) * 100:.2f}%"
+                "Physical Property": "5. Adsorption Energy (Eads)",
+                "Category / Level": k,
+                "Material Count": v,
+                "Percentage (%)": f"{(v / total_rec) * 100:.2f}%"
             })
 
         df_prop_summary = pd.DataFrame(prop_summary_list)
@@ -1703,8 +1422,8 @@ with tab_eda:
         st.divider()
 
         # SECTION 4: FULL DENSITY PARITY PLOTS WITH IN-SUBPLOT EVALUATION METRIC BOXES
-        st.markdown("### 🎯 Evaluasi Akurasi Prediksi Model Deep Learning CGCNN")
-        st.markdown(r"Evaluasi presisi prediksi model CGCNN pada **Test Set (3,000 Sampel)** memperlihatkan seluruh persebaran titik data aktual vs prediksi, garis referensi Ideal (1:1), pita toleransi kesalahan $\pm 10\%$, dan kotak metrik evaluasi ($R^2$, MAE, RMSE):")
+        st.markdown("### 🎯 Predictive Accuracy Evaluation of Multi-Target CGCNN Model")
+        st.markdown(r"Predictive performance of the CGCNN model evaluated on the hold-out **Test Set** showing actual vs predicted scatter points, 1:1 ideal reference line, $\pm 10\%$ error tolerance bands, and annotated metric boxes ($R^2$, MAE, RMSE):")
 
         # Benchmarked Test Set Accuracy Metrics for 3000 Samples
         parity_metrics_3000 = {
@@ -1803,8 +1522,8 @@ with tab_eda:
             x_pos = min_v + 0.05 * (max_v - min_v)
             y_pos = max_v - 0.08 * (max_v - min_v)
 
-            box_bg = "rgba(241, 245, 249, 0.92)" if is_light else "rgba(15, 23, 42, 0.88)"
-            box_fc = "#0f172a" if is_light else "#ffffff"
+            box_bg = "rgba(241, 245, 249, 0.92)"
+            box_fc = "#0f172a"
 
             fig_parity.add_annotation(
                 x=x_pos, y=y_pos,
@@ -1835,7 +1554,7 @@ with tab_eda:
         st.plotly_chart(fig_parity, use_container_width=True)
 
         # COMPREHENSIVE EVALUATION METRICS TABLE SUMMARY
-        st.markdown("#### 📊 Tabel Rangkuman Evaluation Metrics Prediksi Model CGCNN (3,000 Samples Test Set)")
+        st.markdown("#### 📊 Model Evaluation Summary Table across 5 Core Target Properties")
         df_p_summary = pd.DataFrame([
             {
                 "Target Property": m["name"],
@@ -1850,4 +1569,4 @@ with tab_eda:
         st.dataframe(df_p_summary, use_container_width=True)
 
     else:
-        st.warning("Dataset EDA tidak ditemukan di path `dataset_jarvis_dft3d_matched.pkl`.")
+        st.warning("EDA dataset not found at `dataset_jarvis_dft3d_matched.pkl`.")
