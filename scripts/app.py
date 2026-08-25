@@ -208,6 +208,70 @@ def get_flat_graphene_all_polysulfides_cif(supercell_x=1, supercell_y=1, superce
         return ""
 
 
+@st.cache_data
+def generate_matplotlib_graphene_fig():
+    """Generate a pure Python Matplotlib 2D vector schematic plot of 2D Pristine Monolayer Flat Graphene with adsorbed polysulfides."""
+    import matplotlib.pyplot as plt
+    
+    fig, ax = plt.subplots(figsize=(11, 5.5), dpi=200)
+    fig.patch.set_facecolor("#ffffff")
+    ax.set_facecolor("#ffffff")
+
+    nx, ny, bond_len = 16, 8, 0.8
+    pts, lns = [], []
+    for i in range(nx):
+        for j in range(ny):
+            x0 = i * 1.5 * bond_len
+            y0 = j * np.sqrt(3) * bond_len + (0.5 * np.sqrt(3) * bond_len if i % 2 != 0 else 0)
+            p1 = (x0, y0)
+            p2 = (x0 + bond_len, y0)
+            pts.extend([p1, p2])
+            lns.append((p1, p2))
+            if j < ny - 1:
+                p3 = (x0 + 1.5 * bond_len, y0 + 0.5 * np.sqrt(3) * bond_len)
+                lns.append((p2, p3))
+                p4 = (x0 - 0.5 * bond_len, y0 + 0.5 * np.sqrt(3) * bond_len)
+                lns.append((p1, p4))
+
+    for p1, p2 in lns:
+        ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=1.5, zorder=1)
+
+    cx, cy = zip(*pts)
+    ax.scatter(cx, cy, s=35, color="#475569", edgecolors="#1e293b", linewidth=0.6, label="Carbon (C)", zorder=2)
+
+    species_data = [
+        ("Li2S8", 2.5, 7.5, "#dc2626", 8, 2),
+        ("Li2S6", 6.5, 7.5, "#9333ea", 6, 2),
+        ("Li2S4", 10.5, 7.5, "#2563eb", 4, 2),
+        ("Li2S2", 14.5, 7.5, "#16a34a", 2, 2),
+        ("Li2S",  18.5, 7.5, "#ea580c", 1, 2),
+    ]
+
+    for name, x, y, col, n_s, n_li in species_data:
+        ax.text(x, y + 1.8, name, fontsize=12, fontweight="bold", color=col, ha="center", va="bottom",
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="#f8fafc", edgecolor=col, linewidth=1.5))
+        
+        s_x = [x + (i - (n_s-1)/2)*0.45 for i in range(n_s)]
+        s_y = [y + np.sin(i*0.8)*0.3 for i in range(n_s)]
+        for i in range(len(s_x)-1):
+            ax.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=3, zorder=3)
+        ax.scatter(s_x, s_y, s=110, color="#eab308", edgecolors="#713f12", linewidth=1.0, zorder=4, label="Sulfur (S)" if name=="Li2S8" else "")
+        
+        li_x = [s_x[0] - 0.4, s_x[-1] + 0.4]
+        li_y = [y - 0.7, y - 0.7]
+        for lx, ly in zip(li_x, li_y):
+            ax.plot([lx, s_x[0] if lx==li_x[0] else s_x[-1]], [ly, s_y[0] if lx==li_x[0] else s_y[-1]], color="#a855f7", linestyle="--", linewidth=1.5, zorder=3)
+            ax.plot([lx, lx], [ly, ly - 0.6], color="#0284c7", linestyle=":", linewidth=1.5, zorder=3)
+        ax.scatter(li_x, li_y, s=90, color="#a855f7", edgecolors="#581c87", linewidth=1.0, zorder=4, label="Lithium (Li)" if name=="Li2S8" else "")
+
+    ax.set_title("2D Monolayer Flat Graphene + Polysulfides (Pure Python Matplotlib Schematic)", fontsize=13, fontweight="bold", pad=15)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=10)
+    plt.tight_layout()
+    return fig
+
+
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF/XYZ Structure Viewer Component (Pure Light Mode + PNG Export)
 # ---------------------------------------------------------------------------
@@ -925,7 +989,11 @@ with tab_intro:
             st.markdown("#### ⚙️ Display Mode & Rendering Controls")
             t1_display_mode = st.radio(
                 "Visual Mode / Tampilan Interface:",
-                ["🖼️ 2D Academic Schematic Diagram (Gambar Skematik)", "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3D)"],
+                [
+                    "🐍 2D Python Vector Plot (Kodingan Python Murni 100%)",
+                    "🖼️ 2D High-Res Academic Illustration (Gambar Skematik AI)",
+                    "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3D)"
+                ],
                 index=0,
                 key="t1_display_mode"
             )
@@ -987,7 +1055,12 @@ with tab_intro:
             st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            if "2D" in t1_display_mode:
+            if "Python" in t1_display_mode:
+                st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Graphene Sheet + Polysulfides")
+                fig_mpl = generate_matplotlib_graphene_fig()
+                st.pyplot(fig_mpl)
+                st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Matplotlib code.")
+            elif "Illustration" in t1_display_mode or "AI" in t1_display_mode:
                 st.markdown("#### 🖼️ 2D Academic Schematic Diagram: Graphene Monolayer + Polysulfides")
                 schematic_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_polysulfide_schematic.png")
                 if os.path.exists(schematic_path):
