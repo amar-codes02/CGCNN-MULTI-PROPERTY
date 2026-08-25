@@ -98,7 +98,7 @@ if os.path.exists(TPMS_DIR):
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF Viewer Component
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19"):
+def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19", key=None):
     """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
     safe_cif = (
         cif_text.replace("\\", "\\\\")
@@ -112,7 +112,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
         "line": '{ line: { colorscheme: "Jmol", linewidth: 2 } }',
     }
     style_js = style_map.get(style, style_map["stick_sphere"])
-    supercell = max(1, min(int(supercell), 4))
+    supercell = max(1, min(int(supercell), 3))
     supercell_z = supercell if replicate_z else 1
 
     html = f"""
@@ -127,56 +127,55 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
         (function() {{
           var el = document.getElementById("viewer3dmol");
           if (!el || typeof $3Dmol === "undefined") {{
-            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Failed to load 3Dmol.js library. Please check network connection.</p>";
+            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Failed to load 3Dmol.js library.</p>";
             return;
           }}
-          var cifData = `{safe_cif}`;
-          var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
-          var model = viewer.addModel(cifData, "cif", {{
-            doAssembly: true,
-            duplicateAssemblyAtoms: true,
-            normalizeAssembly: true
-          }});
-
           try {{
-            var atoms = model.selectedAtoms({{}});
-            var seen = {{}};
-            var dupes = [];
-            var tol = 2;
-            atoms.forEach(function(a) {{
-              var key = a.elem + ":" + a.x.toFixed(tol) + "," + a.y.toFixed(tol) + "," + a.z.toFixed(tol);
-              if (seen[key]) {{
-                dupes.push(a);
-              }} else {{
-                seen[key] = true;
-              }}
+            var cifData = `{safe_cif}`;
+            var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
+            var model = viewer.addModel(cifData, "cif", {{
+              doAssembly: true,
+              duplicateAssemblyAtoms: true,
+              normalizeAssembly: true
             }});
-            if (dupes.length > 0) {{
-              model.removeAtoms(dupes);
+
+            try {{
+              var atoms = model.selectedAtoms({{}});
+              var seen = {{}};
+              var dupes = [];
+              var tol = 2;
+              atoms.forEach(function(a) {{
+                var k = a.elem + ":" + a.x.toFixed(tol) + "," + a.y.toFixed(tol) + "," + a.z.toFixed(tol);
+                if (seen[k]) dupes.push(a);
+                else seen[k] = true;
+              }});
+              if (dupes.length > 0) model.removeAtoms(dupes);
+            }} catch (e) {{ }}
+
+            if ({supercell} > 1) {{
+              try {{
+                viewer.replicateUnitCell({supercell}, {supercell}, {supercell_z}, model);
+              }} catch (e) {{ }}
             }}
-          }} catch (e) {{ }}
 
-          try {{
-            viewer.replicateUnitCell({supercell}, {supercell}, {supercell_z}, model);
-          }} catch (e) {{ }}
-
-          viewer.setStyle({{}}, {style_js});
-          viewer.addUnitCell(model, {{
-            box: {{ color: "#38bdf8", linewidth: 2 }},
-            alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
-          }});
-          try {{
-            viewer.addAxes({{ scale: 1.2, color: "#38bdf8" }});
-          }} catch (e) {{ }}
-          viewer.zoomTo();
-          viewer.zoom(1.05);
-          viewer.render();
+            viewer.setStyle({{}}, {style_js});
+            viewer.addUnitCell(model, {{
+              box: {{ color: "#38bdf8", linewidth: 2 }},
+              alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
+            }});
+            try {{ viewer.addAxes({{ scale: 1.2, color: "#38bdf8" }}); }} catch (e) {{ }}
+            viewer.zoomTo();
+            viewer.zoom(1.05);
+            viewer.render();
+          }} catch (errMain) {{
+            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Error rendering 3D model: " + errMain + "</p>";
+          }}
         }})();
       </script>
     </body>
     </html>
     """
-    components.html(html, height=height + 5)
+    components.html(html, height=height + 5, key=key)
 
 
 # ---------------------------------------------------------------------------
@@ -1039,7 +1038,7 @@ with tab_viz3d:
             st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
             viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0)
             supercell_val = st.slider("Supercell Dimension:", min_value=1, max_value=3, value=1)
-            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
+            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg, key=f"cif_tab3_{hash(cif_text_curr)}_{viz_style}_{supercell_val}")
 
         with col_v2:
             st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
@@ -1665,6 +1664,9 @@ with tab_polysulfide:
             adsorbed_cif = None
             try:
                 struct = Structure.from_str(base_tpms_cif, fmt="cif")
+                if supercell_n > 1:
+                    struct.make_supercell([supercell_n, supercell_n, 1])
+
                 center = struct.cart_coords.mean(axis=0)
 
                 poly_geoms = {
@@ -1686,7 +1688,15 @@ with tab_polysulfide:
                 adsorbed_cif = base_tpms_cif
 
             if adsorbed_cif:
-                render_cif_3d(adsorbed_cif, height=540, style=render_style, supercell=supercell_n, replicate_z=True, bg_color=mol3d_bg)
+                render_cif_3d(
+                    adsorbed_cif,
+                    height=540,
+                    style=render_style,
+                    supercell=1,
+                    replicate_z=False,
+                    bg_color=mol3d_bg,
+                    key=f"cif_ads_{tpms_key}_{species_code}_{supercell_n}_{render_style}"
+                )
                 
                 st.caption("💡 **3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
                 
@@ -1694,7 +1704,8 @@ with tab_polysulfide:
                     label=f"📥 Download Adsorbed Structure CIF ({tpms_key}_{species_code}.cif)",
                     data=adsorbed_cif,
                     file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.cif",
-                    mime="chemical/x-cif"
+                    mime="chemical/x-cif",
+                    key=f"dl_cif_{tpms_key}_{species_code}_{supercell_n}"
                 )
         else:
             st.warning(f"TPMS CIF file not found at `{tpms_cif_path}`.")
