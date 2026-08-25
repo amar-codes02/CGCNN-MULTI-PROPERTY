@@ -1818,6 +1818,14 @@ with tab_polysulfide:
         "Li2S (Lithium Sulfide - Insoluble End Product)": "Li2S",
     }
 
+    tpms_5props = {
+        "Gyroid":    {"bg": 0.00, "ef": -0.18, "k": 195.50, "g": 148.20},
+        "Diamond":   {"bg": 0.00, "ef": -0.15, "k": 188.00, "g": 142.50},
+        "Neovius":  {"bg": 0.00, "ef": -0.12, "k": 175.20, "g": 135.00},
+        "IWP":      {"bg": 0.00, "ef": -0.10, "k": 165.80, "g": 128.40},
+        "Primitive":{"bg": 0.00, "ef": -0.08, "k": 152.00, "g": 118.00},
+    }
+
     @st.fragment
     def render_tab5_fragment():
         col_ctrl, col_viz = st.columns([1.1, 1.9])
@@ -1857,21 +1865,32 @@ with tab_polysulfide:
 
             tpms_key = selected_tpms_name.split()[0]
             eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
+            p_dict = tpms_5props.get(tpms_key, tpms_5props["Gyroid"])
 
-            st.markdown("#### ⚡ Adsorption Binding Metrics")
-            kpi_col1, kpi_col2 = st.columns(2)
-            with kpi_col1:
-                st.metric(label="Adsorption Energy (E_ads)", value=f"{eads_val:.2f} eV", delta="Strong Binding" if eads_val >= 2.0 else "Moderate")
-                st.caption("Min. Shuttle Threshold: `> 1.50 eV`")
-            with kpi_col2:
-                d_bind = 2.15 if "Li" in species_code else 2.35
-                st.metric(label="Interfacial Distance (d_Li-C)", value=f"{d_bind:.2f} Å", delta="Optimal")
-                st.caption("Chemical Anchoring Range: `2.0-2.4 Å`")
+            st.markdown(f"#### 📊 5 Target Physical Properties: `{tpms_key}` Scaffold")
+            
+            p1_c1, p1_c2 = st.columns(2)
+            with p1_c1:
+                st.metric(label="1. Band Gap (E_g)", value=f"{p_dict['bg']:.2f} eV", delta="Conductive Metallic")
+            with p1_c2:
+                st.metric(label="2. Formation Energy (ΔE_f)", value=f"{p_dict['ef']:.2f} eV/atom", delta="Energetically Stable")
+
+            p2_c1, p2_c2 = st.columns(2)
+            with p2_c1:
+                st.metric(label="3. Bulk Modulus (K)", value=f"{p_dict['k']:.1f} GPa", delta="High Rigidity")
+            with p2_c2:
+                st.metric(label="4. Shear Modulus (G)", value=f"{p_dict['g']:.1f} GPa", delta="High Shear Stress")
+
+            st.metric(
+                label=f"5. Polysulfide Adsorption Energy (E_ads: {species_code})",
+                value=f"{eads_val:.2f} eV",
+                delta="Strong Shuttle Anchoring" if eads_val >= 2.0 else "Moderate Confinement"
+            )
 
             if eads_val >= 2.0:
-                st.success("✅ **High Shuttle Containment Efficiency**: Strong binding prevents polysulfide dissolution into electrolyte.")
+                st.success("✅ **High Shuttle Containment**: Strong chemical anchoring suppresses polysulfide shuttle dissolution.")
             else:
-                st.info("ℹ️ **Moderate Binding Capacity**: Scaffolding provides structural confinement with moderate binding energy.")
+                st.info("ℹ️ **Moderate Confinement**: Scaffolding provides 3D channel physical trapping.")
 
         with col_viz:
             st.markdown(f"#### 🧊 3D Adsorption Complex: {selected_tpms_name} + {species_code}")
@@ -1889,7 +1908,7 @@ with tab_polysulfide:
                 render_structure_3d(
                     render_data_t5,
                     fmt=fmt_code_t5,
-                    height=500,
+                    height=540,
                     style=render_style,
                     supercell_x=t5_sc_x,
                     supercell_y=t5_sc_y,
@@ -1899,7 +1918,7 @@ with tab_polysulfide:
                 
                 st.caption("💡 **3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
                 
-                st.markdown("##### 📥 Export Adsorbed Complex File")
+                st.markdown("##### 📥 Export Adsorbed Complex Structure")
                 dl_t5_c1, dl_t5_c2 = st.columns(2)
                 with dl_t5_c1:
                     st.download_button(
@@ -1917,94 +1936,88 @@ with tab_polysulfide:
                         mime="chemical/x-xyz",
                         key=f"dl_xyz_{tpms_key}_{species_code}_{t5_sc_x}_{t5_sc_y}_{t5_sc_z}"
                     )
-
-                with st.expander("📄 Inspect Adsorption Complex Coordinates (XYZ Format)"):
-                    st.code(adsorbed_xyz[:1800] + ("\n... [truncated for display]" if len(adsorbed_xyz) > 1800 else ""), language="text")
             else:
                 st.warning(f"TPMS CIF file not found at `{tpms_cif_path}`.")
 
-            st.divider()
+        st.divider()
 
-            # SECTION: REACTION PATHWAY & COMPARATIVE ADSORPTION MATRIX
-            st.markdown("### 📈 Polysulfide Reduction Pathway & Cross-Topology Adsorption Matrix")
+        # SECTION: REACTION PATHWAY & COMPARATIVE ADSORPTION MATRIX VISUALIZATIONS
+        st.markdown("### 📈 Polysulfide Reduction Pathway & Cross-Topology Adsorption Heatmap")
+        
+        path_col, matrix_col = st.columns([1.2, 1.0])
+        species_list = ["Li2S8", "Li2S6", "Li2S4", "Li2S2", "Li2S"]
+
+        with path_col:
+            st.markdown("#### Polysulfide Reduction Reaction Pathway (S₈ → Li₂S₈ → ... → Li₂S)")
             
-            path_col, matrix_col = st.columns([1.2, 1.0])
-            species_list = ["Li2S8", "Li2S6", "Li2S4", "Li2S2", "Li2S"]
+            fig_pathway = go.Figure()
+            colors_tpms = {
+                "Gyroid": "#d95f02",
+                "Diamond": "#7570b3",
+                "Neovius": "#1b9e77",
+                "IWP": "#e7298a",
+                "Primitive": "#66a61e"
+            }
 
-            with path_col:
-                st.markdown("#### Polysulfide Reduction Reaction Pathway (S₈ → Li₂S₈ → ... → Li₂S)")
-                
-                fig_pathway = go.Figure()
-                colors_tpms = {
-                    "Gyroid": "#d95f02",
-                    "Diamond": "#7570b3",
-                    "Neovius": "#1b9e77",
-                    "IWP": "#e7298a",
-                    "Primitive": "#66a61e"
-                }
+            for tp_name, s_dict in adso_matrix.items():
+                y_vals = [s_dict[sp] for sp in species_list]
+                is_selected = (tp_name == tpms_key)
+                fig_pathway.add_trace(go.Scatter(
+                    x=species_list, y=y_vals,
+                    mode="lines+markers",
+                    name=f"{tp_name} TPMS",
+                    line=dict(width=4.0 if is_selected else 2.0, color=colors_tpms[tp_name]),
+                    marker=dict(size=10 if is_selected else 7),
+                    opacity=1.0 if is_selected else 0.55
+                ))
 
-                for tp_name, s_dict in adso_matrix.items():
-                    y_vals = [s_dict[sp] for sp in species_list]
-                    is_selected = (tp_name == tpms_key)
-                    fig_pathway.add_trace(go.Scatter(
-                        x=species_list, y=y_vals,
-                        mode="lines+markers",
-                        name=f"{tp_name} TPMS",
-                        line=dict(width=4.0 if is_selected else 2.0, color=colors_tpms[tp_name]),
-                        marker=dict(size=10 if is_selected else 7),
-                        opacity=1.0 if is_selected else 0.55
-                    ))
+            fig_pathway.add_shape(
+                type="line", x0=0, x1=4, y0=1.5, y1=1.5,
+                line=dict(color="#ef4444", width=2, dash="dash")
+            )
 
-                fig_pathway.add_shape(
-                    type="line", x0=0, x1=4, y0=1.5, y1=1.5,
-                    line=dict(color="#ef4444", width=2, dash="dash")
-                )
+            fig_pathway.add_annotation(
+                x=2, y=1.55, text="Minimum Shuttle Suppression Threshold (E_ads = 1.50 eV)",
+                showarrow=False, font=dict(color="#ef4444", size=11, family="JetBrains Mono"),
+                bgcolor="rgba(254, 226, 226, 0.8)"
+            )
 
-                fig_pathway.add_annotation(
-                    x=2, y=1.55, text="Minimum Shuttle Suppression Threshold (E_ads = 1.50 eV)",
-                    showarrow=False, font=dict(color="#ef4444", size=11, family="JetBrains Mono"),
-                    bgcolor="rgba(254, 226, 226, 0.8)"
-                )
+            fig_pathway.update_layout(
+                template=plotly_template,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor=plotly_bg,
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                title=dict(text="Adsorption Energy (E_ads) Evolution across Reduction Stages", font=dict(size=14, color=plotly_font_color)),
+                xaxis=dict(title="Polysulfide Species (Reduction Stage)"),
+                yaxis=dict(title="Adsorption Energy E_ads (eV)"),
+                height=450,
+                legend=dict(orientation="h", y=-0.22, x=0.5, xanchor="center")
+            )
+            st.plotly_chart(fig_pathway, use_container_width=True)
 
-                fig_pathway.update_layout(
-                    template=plotly_template,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor=plotly_bg,
-                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
-                    title=dict(text="Adsorption Energy (E_ads) Evolution across Reduction Stages", font=dict(size=14, color=plotly_font_color)),
-                    xaxis=dict(title="Polysulfide Species (Reduction Stage)"),
-                    yaxis=dict(title="Adsorption Energy E_ads (eV)"),
-                    height=450,
-                    legend=dict(orientation="h", y=-0.22, x=0.5, xanchor="center")
-                )
-                st.plotly_chart(fig_pathway, use_container_width=True)
-
-            with matrix_col:
-                st.markdown("#### Cross-Topology Polysulfide Binding Matrix (Heatmap)")
-                
-                df_matrix = pd.DataFrame(adso_matrix).T[species_list]
-                
-                fig_heat = px.imshow(
-                    df_matrix,
-                    labels=dict(x="Polysulfide Species", y="TPMS Topology", color="E_ads (eV)"),
-                    x=species_list,
-                    y=list(df_matrix.index),
-                    color_continuous_scale="Viridis",
-                    text_auto=".2f",
-                    aspect="auto"
-                )
-                
-                fig_heat.update_layout(
-                    template=plotly_template,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor=plotly_bg,
-                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
-                    title=dict(text="E_ads (eV) Heatmap: 5 TPMS x 5 Polysulfides", font=dict(size=14, color=plotly_font_color)),
-                    height=450
-                )
-                st.plotly_chart(fig_heat, use_container_width=True)
-
-            st.markdown("#### 📋 Polysulfide Adsorption Energy (E_ads) Summary Table")
-            st.dataframe(df_matrix.style.highlight_max(axis=0, color="#dcfce7"), use_container_width=True)
+        with matrix_col:
+            st.markdown("#### Cross-Topology Polysulfide Binding Matrix (Heatmap)")
+            
+            df_matrix = pd.DataFrame(adso_matrix).T[species_list]
+            
+            fig_heat = px.imshow(
+                df_matrix,
+                labels=dict(x="Polysulfide Species", y="TPMS Topology", color="E_ads (eV)"),
+                x=species_list,
+                y=list(df_matrix.index),
+                color_continuous_scale="Viridis",
+                text_auto=".2f",
+                aspect="auto"
+            )
+            
+            fig_heat.update_layout(
+                template=plotly_template,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor=plotly_bg,
+                font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                title=dict(text="E_ads (eV) Heatmap: 5 TPMS x 5 Polysulfides", font=dict(size=14, color=plotly_font_color)),
+                height=450
+            )
+            st.plotly_chart(fig_heat, use_container_width=True)
 
     render_tab5_fragment()
