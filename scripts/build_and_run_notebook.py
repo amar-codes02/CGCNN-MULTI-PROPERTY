@@ -666,7 +666,7 @@ print(f"Total epochs trained : {len(epochs)} | Best validation epoch: {_best_epo
 """)
 
     c14_md = nbf.v4.new_markdown_cell(r"""### 3.4 Model Predictive Performance (Test Split — 15%)
-> Quantitative evaluation (MAE, RMSE, R2, Pearson r) on the hold-out test set (15% split), comparing ground-truth DFT values against CGCNN predictions.
+> Quantitative evaluation (MAE, RMSE, $R^2$) on the hold-out test set (15% split), comparing ground-truth DFT values against CGCNN predictions.
 """)
 
     c10_eval = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -757,15 +757,12 @@ for target in FIVE_TARGETS:
     mae  = mean_absolute_error(yt, yp)
     rmse = np.sqrt(mean_squared_error(yt, yp))
     r2   = r2_score(yt, yp)
-    pr, _ = pearsonr(yt, yp)
-
     metrics_summary.append({
-        "Property":  TARGET_LABELS[target],
-        "Unit":      TARGET_UNITS[target],
-        "MAE":       round(mae,  3),
-        "RMSE":      round(rmse, 3),
-        "R2 Score":  round(r2,   3),
-        "Pearson r": round(pr,   3),
+        "Property":   TARGET_LABELS[target],
+        "Unit":       TARGET_UNITS[target],
+        "MAE":        round(mae,  3),
+        "RMSE":       round(rmse, 3),
+        "$R^2$ Score": round(r2,   3),
     })
 
 df_metrics = pd.DataFrame(metrics_summary)
@@ -872,11 +869,11 @@ for idx, (target, color, label) in enumerate(zip(FIVE_TARGETS, colors_parity, pa
     ax.fill_between([mn, mx], [mn * 0.9, mx * 0.9], [mn * 1.1, mx * 1.1],
                     color="gray", alpha=0.18, label="Tol. Error ±10%")
 
-    r2_val   = df_metrics.loc[df_metrics["Property"] == TARGET_LABELS[target], "R2 Score"].values[0]
+    r2_val   = df_metrics.loc[df_metrics["Property"] == TARGET_LABELS[target], "$R^2$ Score"].values[0]
     mae_val  = df_metrics.loc[df_metrics["Property"] == TARGET_LABELS[target], "MAE"].values[0]
     rmse_val = df_metrics.loc[df_metrics["Property"] == TARGET_LABELS[target], "RMSE"].values[0]
 
-    ax.text(0.05, 0.94, f"R2 = {r2_val:.3f}\nMAE = {mae_val:.3f}\nRMSE = {rmse_val:.3f}",
+    ax.text(0.05, 0.94, f"$R^2$ = {r2_val:.3f}\nMAE = {mae_val:.3f}\nRMSE = {rmse_val:.3f}",
             transform=ax.transAxes, fontsize=9.5,
             verticalalignment="top", horizontalalignment="left",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.88, edgecolor="gray"))
