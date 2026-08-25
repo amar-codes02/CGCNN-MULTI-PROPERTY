@@ -755,7 +755,7 @@ for target in FIVE_TARGETS:
 df_metrics = pd.DataFrame(metrics_summary)
 render_df_to_fig(df_metrics, title="", filename="table_model_metrics")
 
-# Render Actual vs Predicted Test Data Comparison Table Image
+# 1. Render Summary Actual vs Predicted Test Data Comparison Table Image
 df_test_comp = pd.DataFrame({
     "Formula": df_test_eval["formula"].head(8).values,
     "Eg Act": np.round(y_true_dict["band_gap"][:8], 2),
@@ -764,10 +764,37 @@ df_test_comp = pd.DataFrame({
     "Ef Pred": np.round(y_pred_dict["formation_energy"][:8], 2),
     "K Act": np.round(y_true_dict["bulk_modulus"][:8], 1),
     "K Pred": np.round(y_pred_dict["bulk_modulus"][:8], 1),
+    "G Act": np.round(y_true_dict["shear_modulus"][:8], 1),
+    "G Pred": np.round(y_pred_dict["shear_modulus"][:8], 1),
     "Eads Act": np.round(y_true_dict["adsorption_energy_eV"][:8], 2),
     "Eads Pred": np.round(y_pred_dict["adsorption_energy_eV"][:8], 2),
 })
 render_df_to_fig(df_test_comp, title="", filename="table_actual_vs_predicted_test")
+
+# 2. Render Property-Wise Actual vs Predicted Test Data Comparison Table Images
+prop_file_map = {
+    "band_gap": "table_actual_vs_predicted_band_gap",
+    "formation_energy": "table_actual_vs_predicted_formation_energy",
+    "bulk_modulus": "table_actual_vs_predicted_bulk_modulus",
+    "shear_modulus": "table_actual_vs_predicted_shear_modulus",
+    "adsorption_energy_eV": "table_actual_vs_predicted_adsorption_energy",
+}
+
+for target in FIVE_TARGETS:
+    prop_short = TARGET_LABELS[target].split(" (")[0]
+    unit = TARGET_UNITS[target]
+    yt_s = y_true_dict[target][:10]
+    yp_s = y_pred_dict[target][:10]
+
+    df_prop_table = pd.DataFrame({
+        "Formula": df_test_eval["formula"].head(10).values,
+        f"Actual {prop_short} ({unit})": np.round(yt_s, 3),
+        f"Predicted {prop_short} ({unit})": np.round(yp_s, 3),
+        "Difference": np.round(yp_s - yt_s, 3),
+        "Abs Error": np.round(np.abs(yp_s - yt_s), 3),
+    })
+
+    render_df_to_fig(df_prop_table, title="", filename=prop_file_map[target])
 
 # Generate predictions across full dataset domain (1000 points) for visualization density
 np.random.seed(202)
@@ -1095,30 +1122,9 @@ for idx, col in enumerate(FIVE_TARGETS):
             ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#1f77b4")
             ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#d95f02")
 
-# Panel (f): MAE Summary Table
+# Panel 6 (f): Off / Empty panel
 ax_summary = axes_comp[5]
 ax_summary.axis("off")
-
-mae_top5_list = []
-for prop in FIVE_TARGETS:
-    mae_val = np.mean(np.abs(actual_top5[prop] - pred_top5[prop]))
-    prop_short_name = TARGET_LABELS[prop].split(" (")[0]
-    mae_top5_list.append([prop_short_name, f"{mae_val:.3f} {TARGET_UNITS[prop]}"])
-
-table_data = [["Target Property", "Top 5 MAE"]] + mae_top5_list
-table = ax_summary.table(cellText=table_data, colWidths=[0.55, 0.45], loc="center", cellLoc="center")
-table.auto_set_font_size(False)
-table.set_fontsize(11.0)
-table.scale(1.0, 1.8)
-
-for (row, col_idx), cell in table.get_celld().items():
-    if row == 0:
-        cell.set_facecolor("#2b5c8f")
-        cell.set_text_props(color="white", fontweight="bold")
-    else:
-        cell.set_facecolor("#f9f9f9" if row % 2 == 0 else "white")
-
-ax_summary.set_title("(f) Prediction Accuracy (MAE Summary)", fontweight="bold", fontsize=14.5, pad=9)
 
 fig_comp.suptitle("Actual vs Predicted — Top 5 Host Materials Across 5 Target Properties", fontsize=18.0, fontweight="bold", y=0.99)
 plt.tight_layout(pad=1.5)
@@ -1419,7 +1425,7 @@ print("   - summary_table_tpms_topologies.csv")
         c0, c1, c2, c1_setup, c2_load, c5_md, c3_stats,
         c6, c7_md, c4_dist, c8_md, c5_corr, c9_md, c6_class,
         c10, c11_md, c7_feat, c12_md, c8_model, c13_md, c9_curves, c14_md, c10_eval, c15_md, c11_parity,
-        c16_user, c17_user_md, c12_user_score, c18_user_md, c13_user_vis, c13_6_radar_vis, c18_act_pred_md, c13_act_pred_vis,
+        c16_user, c17_user_md, c12_user_score, c13_6_radar_vis, c18_act_pred_md, c13_act_pred_vis,
         c19_tpms, c20_tpms_md, c14_tpms, c21_tpms_md, c15_vis_tpms,
         c22_latex, c16_latex_out
     ]
