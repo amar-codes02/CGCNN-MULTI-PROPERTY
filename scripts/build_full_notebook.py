@@ -78,28 +78,32 @@ from torch.utils.data import Dataset, DataLoader
 from pymatgen.core import Structure, Lattice
 
 # ── Wiley / Chemistry-Europe Publication Style ─────────────────────────────
-# Double-column width = 7.0 in (17.8 cm), single = 3.35 in (8.5 cm)
-# Base font sizes strictly within the 6.5–8.5 pt range for multi-panel figs.
+# Enlarged figure typography & high-contrast elements for maximum GitHub & Wiley clarity.
 plt.rcParams.update({
     'font.family':         'sans-serif',
-    'font.sans-serif':     ['DejaVu Sans', 'Arial', 'Helvetica'],
-    'font.size':           7.5,          # default text (tick labels, annotations)
-    'axes.titlesize':      8.0,          # subplot panel title
-    'axes.titlepad':       4.0,          # gap between panel title and axes
-    'axes.labelsize':      7.5,          # x / y axis labels
-    'axes.labelpad':       3.0,
-    'xtick.labelsize':     7.0,
-    'ytick.labelsize':     7.0,
-    'xtick.major.pad':     2.5,
-    'ytick.major.pad':     2.5,
-    'legend.fontsize':     6.5,
-    'legend.title_fontsize': 6.5,
-    'figure.titlesize':    9.0,          # fig.suptitle
+    'font.sans-serif':     ['Arial', 'Helvetica', 'DejaVu Sans'],
+    'font.size':           13.0,         # default text (tick labels, annotations)
+    'axes.titlesize':      15.5,         # subplot panel title
+    'axes.titleweight':    'bold',
+    'axes.titlepad':       12.0,         # gap between panel title and axes
+    'axes.labelsize':      14.0,         # x / y axis labels
+    'axes.labelweight':    'bold',
+    'axes.labelpad':       9.0,
+    'xtick.labelsize':     12.5,
+    'ytick.labelsize':     12.5,
+    'xtick.major.pad':     6.0,
+    'ytick.major.pad':     6.0,
+    'legend.fontsize':     12.0,
+    'legend.title_fontsize': 12.0,
+    'figure.titlesize':    18.0,         # fig.suptitle
+    'figure.titleweight':  'bold',
     'axes.edgecolor':      '#222222',
-    'axes.linewidth':      0.9,
-    'figure.dpi':          300,
-    'savefig.dpi':         300,
-    'figure.constrained_layout.use': False,
+    'axes.linewidth':      1.4,
+    'lines.linewidth':     2.5,
+    'figure.dpi':          95,           # 95 DPI yields 1:1 pixel match on GitHub notebooks
+    'savefig.dpi':         300,          # 300 DPI for paper publication
+    'savefig.bbox':        'tight',
+    'savefig.pad_inches':  0.15
 })
 
 def get_paper_fig_dir():

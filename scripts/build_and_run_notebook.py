@@ -78,31 +78,32 @@ from torch.utils.data import Dataset, DataLoader
 from pymatgen.core import Structure, Lattice
 
 # ── Wiley / Chemistry-Europe Publication Style ─────────────────────────────
-# Enlarged figure canvas & high-contrast typography, 300 DPI export / 120 DPI inline viewer.
+# Enlarged figure typography & high-contrast elements for maximum GitHub & Wiley clarity.
 plt.rcParams.update({
     'font.family':         'sans-serif',
     'font.sans-serif':     ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'font.size':           11.0,         # default text (tick labels, annotations)
-    'axes.titlesize':      13.5,         # subplot panel title
+    'font.size':           13.0,         # default text (tick labels, annotations)
+    'axes.titlesize':      15.5,         # subplot panel title
     'axes.titleweight':    'bold',
-    'axes.titlepad':       10.0,         # gap between panel title and axes
-    'axes.labelsize':      12.0,         # x / y axis labels
+    'axes.titlepad':       12.0,         # gap between panel title and axes
+    'axes.labelsize':      14.0,         # x / y axis labels
     'axes.labelweight':    'bold',
-    'axes.labelpad':       8.0,
-    'xtick.labelsize':     11.0,
-    'ytick.labelsize':     11.0,
-    'xtick.major.pad':     5.0,
-    'ytick.major.pad':     5.0,
-    'legend.fontsize':     10.5,
-    'legend.title_fontsize': 10.5,
-    'figure.titlesize':    16.0,         # fig.suptitle
+    'axes.labelpad':       9.0,
+    'xtick.labelsize':     12.5,
+    'ytick.labelsize':     12.5,
+    'xtick.major.pad':     6.0,
+    'ytick.major.pad':     6.0,
+    'legend.fontsize':     12.0,
+    'legend.title_fontsize': 12.0,
+    'figure.titlesize':    18.0,         # fig.suptitle
     'figure.titleweight':  'bold',
     'axes.edgecolor':      '#222222',
-    'axes.linewidth':      1.2,
-    'figure.dpi':          120,          # enlarged inline notebook viewer DPI
-    'savefig.dpi':         300,          # 300 DPI for Wiley paper publication
+    'axes.linewidth':      1.4,
+    'lines.linewidth':     2.5,
+    'figure.dpi':          95,           # 95 DPI yields 1:1 pixel match on GitHub notebooks
+    'savefig.dpi':         300,          # 300 DPI for paper publication
     'savefig.bbox':        'tight',
-    'savefig.pad_inches':  0.12
+    'savefig.pad_inches':  0.15
 })
 
 # Directory output for publication-ready figures
@@ -1017,11 +1018,11 @@ for prop in FIVE_TARGETS:
         pred_vals = np.clip(pred_vals, 0, None)
     pred_top5[prop] = pred_vals
 
-fig_comp, axes_comp = plt.subplots(2, 3, figsize=(20.0, 13.0))
+fig_comp, axes_comp = plt.subplots(2, 3, figsize=(19.0, 12.5))
 axes_comp = axes_comp.flatten()
 
 x_indices = np.arange(len(top5_formulas))
-bar_width = 0.35
+bar_width = 0.36
 
 top5_clean_titles = [
     "Band Gap (eV)",
@@ -1037,55 +1038,55 @@ for idx, col in enumerate(FIVE_TARGETS):
     prd_vals = pred_top5[col]
     
     rects1 = ax.bar(x_indices - bar_width/2, act_vals, bar_width, label="Actual (DFT / Exp)",
-                    color="#1f77b4", edgecolor="black", linewidth=1.0, alpha=0.9)
+                    color="#1f77b4", edgecolor="black", linewidth=1.2, alpha=0.92)
     rects2 = ax.bar(x_indices + bar_width/2, prd_vals, bar_width, label="Predicted (CGCNN)",
-                    color="#ff7f0e", edgecolor="black", linewidth=1.0, alpha=0.9)
+                    color="#ff7f0e", edgecolor="black", linewidth=1.2, alpha=0.92)
     
-    ax.set_title(f"{SUBPLOT_LABELS[idx]} {top5_clean_titles[idx]}", fontweight="bold", fontsize=14.5, pad=9)
-    ax.set_xlabel("Material Formula", fontweight="bold", fontsize=12.0)
-    ax.set_ylabel(TARGET_UNITS[col], fontweight="bold", fontsize=12.0)
+    ax.set_title(f"{SUBPLOT_LABELS[idx]} {top5_clean_titles[idx]}", fontweight="bold", fontsize=16.0, pad=10)
+    ax.set_xlabel("Material Formula", fontweight="bold", fontsize=13.5)
+    ax.set_ylabel(TARGET_UNITS[col], fontweight="bold", fontsize=13.5)
     ax.set_xticks(x_indices)
-    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=15, ha="right", fontsize=11.0)
+    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=15, ha="right", fontsize=12.5)
     ax.grid(True, linestyle="--", alpha=0.45, axis="y")
 
     if idx == 0:
-        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=11.5, loc="upper left")
+        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5, loc="upper left")
 
     if col == "band_gap":
         max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(-0.05, max(0.60, max_y * 1.35))
+        ax.set_ylim(-0.05, max(0.60, max_y * 1.38))
         for r1, r2 in zip(rects1, rects2):
-            ax.text(r1.get_x() + r1.get_width()/2, r1.get_height() + 0.015 if r1.get_height() > 0 else 0.01, f"{r1.get_height():.2f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, r2.get_height() + 0.04, f"{r2.get_height():.2f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, r1.get_height() + 0.015 if r1.get_height() > 0 else 0.01, f"{r1.get_height():.2f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, r2.get_height() + 0.04, f"{r2.get_height():.2f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
     elif col == "formation_energy":
         min_y = min(min(act_vals), min(prd_vals))
-        ax.set_ylim(bottom=min_y * 1.25 - 0.2, top=0.6)
+        ax.set_ylim(bottom=min_y * 1.25 - 0.25, top=0.65)
         ax.axhline(0, color="gray", linestyle="-", linewidth=1.0, alpha=0.7)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 - 0.18, f"{h1:.2f}", ha="center", va="top", fontsize=9.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 - 0.42, f"{h2:.2f}", ha="center", va="top", fontsize=9.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 - 0.18, f"{h1:.2f}", ha="center", va="top", fontsize=11.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 - 0.42, f"{h2:.2f}", ha="center", va="top", fontsize=11.5, fontweight="bold", color="#d95f02")
     elif col == "bulk_modulus":
-        max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(bottom=0, top=max_y * 1.22)
-        for r1, r2 in zip(rects1, rects2):
-            h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 12, f"{h1:.0f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 3, f"{h2:.0f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#d95f02")
-    elif col == "shear_modulus":
-        max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(bottom=0, top=max_y * 1.22)
-        for r1, r2 in zip(rects1, rects2):
-            h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 10, f"{h1:.0f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 2, f"{h2:.0f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#d95f02")
-    elif col == "adsorption_energy_eV":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(bottom=0, top=max_y * 1.24)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 12, f"{h1:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 3, f"{h2:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+    elif col == "shear_modulus":
+        max_y = max(max(act_vals), max(prd_vals))
+        ax.set_ylim(bottom=0, top=max_y * 1.24)
+        for r1, r2 in zip(rects1, rects2):
+            h1, h2 = r1.get_height(), r2.get_height()
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 10, f"{h1:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 2, f"{h2:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+    elif col == "adsorption_energy_eV":
+        max_y = max(max(act_vals), max(prd_vals))
+        ax.set_ylim(bottom=0, top=max_y * 1.25)
+        for r1, r2 in zip(rects1, rects2):
+            h1, h2 = r1.get_height(), r2.get_height()
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
 
 # Panel (f): MAE Summary Table
 ax_summary = axes_comp[5]
@@ -1100,8 +1101,8 @@ for prop in FIVE_TARGETS:
 table_data = [["Target Property", "Top 5 MAE"]] + mae_top5_list
 table = ax_summary.table(cellText=table_data, colWidths=[0.55, 0.45], loc="center", cellLoc="center")
 table.auto_set_font_size(False)
-table.set_fontsize(11.0)
-table.scale(1.0, 1.8)
+table.set_fontsize(13.0)
+table.scale(1.0, 2.1)
 
 for (row, col_idx), cell in table.get_celld().items():
     if row == 0:
@@ -1110,11 +1111,11 @@ for (row, col_idx), cell in table.get_celld().items():
     else:
         cell.set_facecolor("#f9f9f9" if row % 2 == 0 else "white")
 
-ax_summary.set_title("(f) Prediction Accuracy (MAE Summary)", fontweight="bold", fontsize=14.5, pad=9)
+ax_summary.set_title("(f) Prediction Accuracy (MAE Summary)", fontweight="bold", fontsize=16.0, pad=10)
 
-fig_comp.suptitle("Actual vs Predicted — Top 5 Host Materials Across 5 Target Properties", fontsize=18.0, fontweight="bold", y=0.99)
+fig_comp.suptitle("Actual vs Predicted — Top 5 Host Materials Across 5 Target Properties", fontsize=20.0, fontweight="bold", y=0.99)
 plt.tight_layout(pad=1.5)
-fig_comp.subplots_adjust(top=0.92, hspace=0.42, wspace=0.28)
+fig_comp.subplots_adjust(top=0.91, hspace=0.45, wspace=0.28)
 save_paper_fig(fig_comp, "fig7_user_dataset_top5_actual_vs_predicted")
 plt.show()
 """)
@@ -1125,7 +1126,7 @@ N_u = len(categories_user)
 angles_u = [n / float(N_u) * 2 * np.pi for n in range(N_u)]
 angles_u += angles_u[:1]
 
-fig_radar_u, ax_radar_u = plt.subplots(figsize=(10.5, 8.2), subplot_kw=dict(polar=True))
+fig_radar_u, ax_radar_u = plt.subplots(figsize=(11.0, 8.5), subplot_kw=dict(polar=True))
 colors_user = ["#d95f02", "#7570b3", "#1b9e77", "#e7298a", "#66a61e"]
 
 top5_hosts_user = df_user_host.head(5)
@@ -1139,18 +1140,18 @@ for idx, row in top5_hosts_user.iterrows():
     ]
     values += values[:1]
     
-    ax_radar_u.plot(angles_u, values, linewidth=2.0, linestyle="solid", label=f"Rank {row['Rank']}: {row['formula']}", color=colors_user[idx])
+    ax_radar_u.plot(angles_u, values, linewidth=2.8, linestyle="solid", label=f"Rank {row['Rank']}: {row['formula']}", color=colors_user[idx])
     ax_radar_u.fill(angles_u, values, color=colors_user[idx], alpha=0.15)
 
 ax_radar_u.set_xticks(angles_u[:-1])
-ax_radar_u.set_xticklabels(categories_user, fontweight="bold", fontsize=10.0)
-ax_radar_u.tick_params(axis="x", pad=18)
+ax_radar_u.set_xticklabels(categories_user, fontweight="bold", fontsize=12.5)
+ax_radar_u.tick_params(axis="x", pad=20)
 ax_radar_u.set_rlabel_position(210)
-plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=9.0)
+plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.0, fontweight="bold")
 plt.ylim(0, 1.05)
 
-plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=12.5, fontweight="bold", pad=20)
-plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
+plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=15.0, fontweight="bold", pad=22)
+plt.legend(loc="center left", bbox_to_anchor=(1.32, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.0)
 plt.tight_layout(pad=2.0)
 save_paper_fig(fig_radar_u, "fig8_user_dataset_radar_comparison")
 plt.show()
