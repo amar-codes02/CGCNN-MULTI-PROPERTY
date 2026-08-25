@@ -128,14 +128,14 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
         for col in df.columns:
             cell_strs = [str(col)] + [str(v) for v in df[col].values]
             max_len = max([len(s) for s in cell_strs]) if cell_strs else len(str(col))
-            col_lens.append(max_len + 5)
+            col_lens.append(max_len + 6)
         tot_len = sum(col_lens)
         col_widths = [l / tot_len for l in col_lens]
 
     if figsize is None:
         tot_chars = sum([max([len(str(v)) for v in [col] + df[col].tolist()]) for col in df.columns])
-        fig_w = max(16.0, min(24.0, tot_chars * 0.24 + n_cols * 0.9))
-        fig_h = max(4.5, (n_rows + 2.0) * 0.75)
+        fig_w = max(18.0, min(28.0, tot_chars * 0.28 + n_cols * 1.1))
+        fig_h = max(5.5, (n_rows + 2.2) * 0.95)
         figsize = (fig_w, fig_h)
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -146,20 +146,20 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     table = ax.table(cellText=table_data, colWidths=col_widths, loc="center", cellLoc="center")
 
     table.auto_set_font_size(False)
-    table.set_fontsize(14.5)
-    table.scale(1.0, 2.5)
+    table.set_fontsize(17.0)
+    table.scale(1.2, 3.2)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
             cell.set_facecolor("#2b5c8f")
-            cell.set_text_props(color="white", fontweight="bold", fontsize=15.5)
+            cell.set_text_props(color="white", fontweight="bold", fontsize=19.0)
         else:
             cell.set_facecolor("#f9f9f9" if r % 2 == 0 else "white")
-            cell.set_text_props(color="#111111", fontsize=14.0)
+            cell.set_text_props(color="#111111", fontsize=16.5)
 
     if title:
         clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
-        ax.set_title(clean_title, fontsize=17.0, fontweight="bold", pad=22)
+        ax.set_title(clean_title, fontsize=20.0, fontweight="bold", pad=25)
 
     plt.tight_layout()
     if filename:
@@ -1061,51 +1061,51 @@ for idx, col in enumerate(FIVE_TARGETS):
     rects2 = ax.bar(x_indices + bar_width/2, prd_vals, bar_width, label="Predicted (CGCNN)",
                     color="#ff7f0e", edgecolor="black", linewidth=1.2, alpha=0.92)
     
-    ax.set_title(f"{SUBPLOT_LABELS[idx]} {top5_clean_titles[idx]}", fontweight="bold", fontsize=16.0, pad=10)
-    ax.set_xlabel("Material Formula", fontweight="bold", fontsize=13.5)
-    ax.set_ylabel(TARGET_UNITS[col], fontweight="bold", fontsize=13.5)
+    ax.set_title(f"{SUBPLOT_LABELS[idx]} {top5_clean_titles[idx]}", fontweight="bold", fontsize=18.0, pad=12)
+    ax.set_xlabel("Material Formula", fontweight="bold", fontsize=15.0)
+    ax.set_ylabel(TARGET_UNITS[col], fontweight="bold", fontsize=15.0)
     ax.set_xticks(x_indices)
-    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=15, ha="right", fontsize=12.5)
+    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=15, ha="right", fontsize=14.0)
     ax.grid(True, linestyle="--", alpha=0.45, axis="y")
 
     if idx == 0:
-        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5, loc="upper left")
+        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=14.0, loc="upper left")
 
     if col == "band_gap":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(-0.05, max(0.60, max_y * 1.38))
         for r1, r2 in zip(rects1, rects2):
-            ax.text(r1.get_x() + r1.get_width()/2, r1.get_height() + 0.015 if r1.get_height() > 0 else 0.01, f"{r1.get_height():.2f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, r2.get_height() + 0.04, f"{r2.get_height():.2f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, r1.get_height() + 0.015 if r1.get_height() > 0 else 0.01, f"{r1.get_height():.2f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, r2.get_height() + 0.04, f"{r2.get_height():.2f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
     elif col == "formation_energy":
         min_y = min(min(act_vals), min(prd_vals))
         ax.set_ylim(bottom=min_y * 1.25 - 0.25, top=0.65)
         ax.axhline(0, color="gray", linestyle="-", linewidth=1.0, alpha=0.7)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 - 0.18, f"{h1:.2f}", ha="center", va="top", fontsize=11.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 - 0.42, f"{h2:.2f}", ha="center", va="top", fontsize=11.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 - 0.18, f"{h1:.2f}", ha="center", va="top", fontsize=13.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 - 0.42, f"{h2:.2f}", ha="center", va="top", fontsize=13.5, fontweight="bold", color="#d95f02")
     elif col == "bulk_modulus":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(bottom=0, top=max_y * 1.24)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 12, f"{h1:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 3, f"{h2:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 12, f"{h1:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 3, f"{h2:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
     elif col == "shear_modulus":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(bottom=0, top=max_y * 1.24)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 10, f"{h1:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 2, f"{h2:.0f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 10, f"{h1:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 2, f"{h2:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
     elif col == "adsorption_energy_eV":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(bottom=0, top=max_y * 1.25)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=11.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
 
 # Panel 6 (f): Off / Empty panel
 ax_summary = axes_comp[5]
