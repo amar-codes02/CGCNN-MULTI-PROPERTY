@@ -272,6 +272,98 @@ def generate_matplotlib_graphene_fig():
     return fig
 
 
+@st.cache_data
+def generate_matplotlib_top_side_grid_fig():
+    """Generate a publication-grade Top View vs Side View 5-species multi-panel plot using pure Python Matplotlib."""
+    import matplotlib.pyplot as plt
+    
+    fig, axes = plt.subplots(5, 2, figsize=(10, 11), dpi=200)
+    fig.patch.set_facecolor("#ffffff")
+    
+    species = [
+        ("Li₂S<sub>8</sub>", 8, 2, "#dc2626", "d_Li-C = 1.98 Å"),
+        ("Li₂S<sub>6</sub>", 6, 2, "#9333ea", "d_Li-C = 1.95 Å"),
+        ("Li₂S<sub>4</sub>", 4, 2, "#2563eb", "d_Li-C = 1.91 Å"),
+        ("Li₂S<sub>2</sub>", 2, 2, "#16a34a", "d_Li-C = 1.86 Å"),
+        ("Li₂S",  1, 2, "#ea580c", "d_Li-C = 1.80 Å"),
+    ]
+    
+    for row_idx, (sp_name, n_s, n_li, color, d_text) in enumerate(species):
+        clean_name = sp_name.replace("<sub>", "").replace("</sub>", "")
+        # Left column: Top view
+        ax_top = axes[row_idx, 0]
+        ax_top.set_facecolor("#ffffff")
+        
+        nx, ny, bond_len = 8, 5, 0.8
+        pts, lns = [], []
+        for i in range(nx):
+            for j in range(ny):
+                x0 = i * 1.5 * bond_len
+                y0 = j * np.sqrt(3) * bond_len + (0.5 * np.sqrt(3) * bond_len if i % 2 != 0 else 0)
+                p1 = (x0, y0)
+                p2 = (x0 + bond_len, y0)
+                pts.extend([p1, p2])
+                lns.append((p1, p2))
+                if j < ny - 1:
+                    p3 = (x0 + 1.5 * bond_len, y0 + 0.5 * np.sqrt(3) * bond_len)
+                    lns.append((p2, p3))
+                    p4 = (x0 - 0.5 * bond_len, y0 + 0.5 * np.sqrt(3) * bond_len)
+                    lns.append((p1, p4))
+
+        for p1, p2 in lns:
+            ax_top.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=1.2, zorder=1)
+        cx, cy = zip(*pts)
+        ax_top.scatter(cx, cy, s=25, color="#475569", edgecolors="#1e293b", linewidth=0.5, zorder=2)
+        
+        center_x, center_y = 4.2, 3.2
+        s_x = [center_x + (i - (n_s-1)/2)*0.45 for i in range(n_s)]
+        s_y = [center_y + np.sin(i*0.8)*0.3 for i in range(n_s)]
+        for i in range(len(s_x)-1):
+            ax_top.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=2.5, zorder=3)
+        ax_top.scatter(s_x, s_y, s=80, color="#eab308", edgecolors="#713f12", linewidth=0.8, zorder=4)
+        li_x = [s_x[0] - 0.4, s_x[-1] + 0.4]
+        li_y = [center_y - 0.5, center_y - 0.5]
+        ax_top.scatter(li_x, li_y, s=70, color="#a855f7", edgecolors="#581c87", linewidth=0.8, zorder=4)
+        
+        ax_top.set_ylabel(clean_name, fontsize=13, fontweight="bold", color=color, rotation=0, labelpad=30, va="center")
+        ax_top.set_aspect("equal")
+        ax_top.axis("off")
+        
+        # Right column: Side view
+        ax_side = axes[row_idx, 1]
+        ax_side.set_facecolor("#ffffff")
+        
+        gx = np.linspace(0, 9, 18)
+        gy = np.zeros_like(gx)
+        ax_side.plot([0, 9], [0, 0], color="#64748b", linewidth=2, zorder=1)
+        ax_side.scatter(gx, gy, s=40, color="#475569", edgecolors="#1e293b", linewidth=0.6, zorder=2)
+        
+        s_x_side = [4.5 + (i - (n_s-1)/2)*0.4 for i in range(n_s)]
+        s_y_side = [1.2 + np.sin(i*0.9)*0.4 for i in range(n_s)]
+        for i in range(len(s_x_side)-1):
+            ax_side.plot([s_x_side[i], s_x_side[i+1]], [s_y_side[i], s_y_side[i+1]], color="#eab308", linewidth=2.5, zorder=3)
+        ax_side.scatter(s_x_side, s_y_side, s=80, color="#eab308", edgecolors="#713f12", linewidth=0.8, zorder=4)
+        
+        li_x_side = [s_x_side[0] - 0.35, s_x_side[-1] + 0.35]
+        li_y_side = [0.7, 0.7]
+        for lx, ly in zip(li_x_side, li_y_side):
+            ax_side.plot([lx, lx], [ly, 0.0], color="#0284c7", linestyle=":", linewidth=1.2, zorder=3)
+        ax_side.scatter(li_x_side, li_y_side, s=70, color="#a855f7", edgecolors="#581c87", linewidth=0.8, zorder=4)
+        
+        ax_side.text(9.3, 0.7, d_text, fontsize=9, va="center", color="#334155")
+        ax_side.text(9.3, 0.0, "d_graphene = 0.0 Å", fontsize=9, va="center", color="#64748b")
+        
+        ax_side.set_ylim(-0.5, 2.5)
+        ax_side.set_xlim(-0.5, 12.0)
+        ax_side.axis("off")
+
+    axes[0, 0].set_title("Top view", fontsize=14, fontweight="bold", pad=10)
+    axes[0, 1].set_title("Side view", fontsize=14, fontweight="bold", pad=10)
+    
+    plt.tight_layout()
+    return fig
+
+
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF/XYZ Structure Viewer Component (Pure Light Mode + PNG Export)
 # ---------------------------------------------------------------------------
@@ -990,6 +1082,7 @@ with tab_intro:
             t1_display_mode = st.radio(
                 "Visual Mode / Tampilan Interface:",
                 [
+                    "📊 Journal Figure: Top View vs Side View Matrix (Format Gambar Jurnal)",
                     "🐍 2D Python Vector Plot (Kodingan Python Murni 100%)",
                     "🖼️ 2D High-Res Academic Illustration (Gambar Skematik AI)",
                     "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3D)"
@@ -1055,7 +1148,32 @@ with tab_intro:
             st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            if "Python" in t1_display_mode:
+            if "Journal Figure" in t1_display_mode or "Matrix" in t1_display_mode:
+                st.markdown("#### 📊 Academic Journal Figure: Top View vs Side View Adsorption Matrix")
+                top_side_fig_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_top_side_views_figure.png")
+                
+                sub_tab1, sub_tab2 = st.tabs(["📸 High-Res Journal Figure (Format Publikasi Jurnal)", "🐍 Python Matplotlib Render (Dynamic Code Plot)"])
+                with sub_tab1:
+                    if os.path.exists(top_side_fig_path):
+                        st.image(
+                            top_side_fig_path,
+                            caption="📊 Publication-Ready Scientific Figure: Top View vs Side View Comparison of Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S Adsorption on Monolayer Flat Graphene Sheet",
+                            use_container_width=True
+                        )
+                        with open(top_side_fig_path, "rb") as img_file:
+                            st.download_button(
+                                label="📥 Download Journal Figure (PNG Image)",
+                                data=img_file,
+                                file_name="flat_graphene_top_side_adsorption_figure.png",
+                                mime="image/png",
+                                key="dl_t1_top_side_figure_png"
+                            )
+                with sub_tab2:
+                    fig_grid = generate_matplotlib_top_side_grid_fig()
+                    st.pyplot(fig_grid)
+                    st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Matplotlib.")
+
+            elif "Python" in t1_display_mode:
                 st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Graphene Sheet + Polysulfides")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
