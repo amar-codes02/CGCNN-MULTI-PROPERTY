@@ -98,7 +98,7 @@ if os.path.exists(TPMS_DIR):
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF Viewer Component
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19"):
+def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#0b0f19"):
     """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
     safe_cif = (
         cif_text.replace("\\", "\\\\")
@@ -107,12 +107,12 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
     )
 
     style_map = {
-        "stick_sphere": '{ sphere: { scale: 0.28, colorscheme: "Jmol" }, stick: { radius: 0.14, colorscheme: "Jmol" } }',
-        "spacefill": '{ sphere: { scale: 0.85, colorscheme: "Jmol" } }',
+        "stick_sphere": '{ sphere: { scale: 0.24, colorscheme: "Jmol" }, stick: { radius: 0.12, colorscheme: "Jmol" } }',
+        "spacefill": '{ sphere: { scale: 0.70, colorscheme: "Jmol" } }',
         "line": '{ line: { colorscheme: "Jmol", linewidth: 2 } }',
     }
     style_js = style_map.get(style, style_map["stick_sphere"])
-    supercell = max(1, min(int(supercell), 3))
+    supercell = max(1, min(int(supercell), 2))
     supercell_z = supercell if replicate_z else 1
 
     html = f"""
@@ -134,9 +134,9 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
             var cifData = `{safe_cif}`;
             var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
             var model = viewer.addModel(cifData, "cif", {{
-              doAssembly: true,
-              duplicateAssemblyAtoms: true,
-              normalizeAssembly: true
+              doAssembly: false,
+              duplicateAssemblyAtoms: false,
+              normalizeAssembly: false
             }});
 
             try {{
@@ -154,21 +154,31 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
 
             if ({supercell} > 1) {{
               try {{
-                viewer.replicateUnitCell({supercell}, {supercell}, {supercell_z}, model);
+                var countBefore = model.selectedAtoms({{}}).length;
+                if (countBefore <= 350) {{
+                  viewer.replicateUnitCell({supercell}, {supercell}, {supercell_z}, model);
+                }}
               }} catch (e) {{ }}
             }}
 
-            viewer.setStyle({{}}, {style_js});
+            var totalAtoms = model.selectedAtoms({{}}).length;
+            var chosenStyle = {style_js};
+
+            if (totalAtoms > 700) {{
+              chosenStyle = {{ sphere: {{ scale: 0.18, colorscheme: "Jmol" }}, stick: {{ radius: 0.08, colorscheme: "Jmol" }} }};
+            }}
+
+            viewer.setStyle({{}}, chosenStyle);
             viewer.addUnitCell(model, {{
-              box: {{ color: "#38bdf8", linewidth: 2 }},
+              box: {{ color: "#38bdf8", linewidth: 1.5 }},
               alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
             }});
-            try {{ viewer.addAxes({{ scale: 1.2, color: "#38bdf8" }}); }} catch (e) {{ }}
+            try {{ viewer.addAxes({{ scale: 1.0, color: "#38bdf8" }}); }} catch (e) {{ }}
             viewer.zoomTo();
             viewer.zoom(1.05);
             viewer.render();
           }} catch (errMain) {{
-            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Error rendering 3D model: " + errMain + "</p>";
+            el.innerHTML = "<p style='color:#f87171; padding:20px;'>3D Viewer Error: " + errMain + "</p>";
           }}
         }})();
       </script>
@@ -1037,7 +1047,7 @@ with tab_viz3d:
         with col_v1:
             st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
             viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0)
-            supercell_val = st.slider("Supercell Dimension:", min_value=1, max_value=3, value=1)
+            supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)")
             render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
         with col_v2:
@@ -1631,7 +1641,7 @@ with tab_polysulfide:
                 "line": "Wireframe Line"
             }[x]
         )
-        supercell_n = st.slider("Supercell Grid Expansion (X x Y x Z):", 1, 3, 1)
+        supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)")
 
         tpms_key = selected_tpms_name.split()[0]
         eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
