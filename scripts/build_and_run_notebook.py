@@ -1419,7 +1419,19 @@ print("   - summary_table_tpms_topologies.csv")
     out_nb_path = "notebooks/JARVIS_DFT3D_Data_Extraction.ipynb" if os.path.exists("notebooks") else "JARVIS_DFT3D_Data_Extraction.ipynb"
     with open(out_nb_path, "w", encoding="utf-8") as f:
         nbf.write(nb, f)
-    print(f" Successfully updated and polished notebook code & EDA visualizations into {out_nb_path}!")
+    print(f" Successfully updated and polished notebook structure into {out_nb_path}!")
+
+    print(" Executing notebook to populate cell outputs and inline figures...")
+    try:
+        from nbconvert.preprocessors import ExecutePreprocessor
+        ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+        ep.preprocess(nb, {"metadata": {"path": os.path.dirname(os.path.abspath(out_nb_path)) or "."}})
+        with open(out_nb_path, "w", encoding="utf-8") as f:
+            nbf.write(nb, f)
+        print(" Cell outputs and inline visualizations successfully saved inside notebook!")
+    except Exception as e:
+        print(f" Warning: Could not auto-execute notebook outputs: {e}")
 
 if __name__ == "__main__":
     create_notebook()
+
