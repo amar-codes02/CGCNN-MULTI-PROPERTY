@@ -158,21 +158,30 @@ def get_adsorbed_cif(tpms_cif_path, species_code, supercell_x=1, supercell_y=1, 
 
 
 @st.cache_data
-def get_flat_graphene_adsorbed_cif(species_code="Li2S6", supercell_x=1, supercell_y=1, supercell_z=1):
-    """Build pristine 2D monolayer flat graphene sheet (4x4 unit cell base) with adsorbed polysulfide species."""
+def get_flat_graphene_all_polysulfides_cif(supercell_x=1, supercell_y=1, supercell_z=1):
+    """Build pristine 2D monolayer flat graphene sheet (6x6 unit cell base) with ALL 5 lithium polysulfide species (Li2S8, Li2S6, Li2S4, Li2S2, Li2S) attached simultaneously across the surface."""
     sx = max(1, min(int(supercell_x), 3))
     sy = max(1, min(int(supercell_y), 3))
     sz = max(1, min(int(supercell_z), 3))
 
     try:
-        lattice = Lattice.from_parameters(a=2.46, b=2.46, c=20.0, alpha=90, beta=90, gamma=120)
+        lattice = Lattice.from_parameters(a=2.46, b=2.46, c=22.0, alpha=90, beta=90, gamma=120)
         unit_graphene = Structure(lattice, ["C", "C"], [[1/3, 2/3, 0.5], [2/3, 1/3, 0.5]])
         
-        # 4x4 flat monolayer sheet base
-        struct = unit_graphene * (4, 4, 1)
+        # 6x6 flat monolayer sheet base (72 Carbon atoms)
+        struct = unit_graphene * (6, 6, 1)
 
         coords_cart = struct.cart_coords
-        center = coords_cart.mean(axis=0) + np.array([0.0, 0.0, 2.35])
+        center_sheet = coords_cart.mean(axis=0)
+        center_z = center_sheet[2] + 2.35
+
+        offsets_species = {
+            "Li2S8": np.array([-4.5,  4.5, 0.0]),
+            "Li2S6": np.array([ 4.5,  4.5, 0.0]),
+            "Li2S4": np.array([ 0.0,  0.0, 0.0]),
+            "Li2S2": np.array([-4.5, -4.5, 0.0]),
+            "Li2S":  np.array([ 4.5, -4.5, 0.0]),
+        }
 
         poly_geoms = {
             "Li2S8": [("Li", [0.0, 0.0, 0.0]), ("Li", [3.2, 0.0, 0.2]), ("S", [0.8, 1.4, 0.5]), ("S", [2.2, 1.4, 0.5]), ("S", [3.0, 0.2, 1.2]), ("S", [2.0, -0.8, 1.5]), ("S", [0.5, -1.0, 1.2]), ("S", [-0.5, -0.2, 0.8]), ("S", [-1.0, 1.0, 0.5]), ("S", [0.0, 1.8, 1.0])],
@@ -181,10 +190,13 @@ def get_flat_graphene_adsorbed_cif(species_code="Li2S6", supercell_x=1, supercel
             "Li2S2": [("Li", [0.0, 0.0, 0.0]), ("Li", [2.1, 0.0, 0.2]), ("S", [0.4, 0.8, 0.5]), ("S", [1.4, 0.8, 0.5])],
             "Li2S":  [("Li", [0.0, 0.0, 0.0]), ("Li", [2.0, 0.0, 0.2]), ("S", [1.0, 0.5, 0.5])],
         }
-        geom = poly_geoms.get(species_code, poly_geoms["Li2S6"])
-        for elem, offset in geom:
-            pos = center + np.array(offset)
-            struct.append(elem, pos, coords_are_cartesian=True)
+
+        for sp_name, sp_offset in offsets_species.items():
+            sp_center = center_sheet + sp_offset
+            sp_center[2] = center_z
+            for elem, rel_pos in poly_geoms[sp_name]:
+                pos = sp_center + np.array(rel_pos)
+                struct.append(elem, pos, coords_are_cartesian=True)
 
         if sx > 1 or sy > 1 or sz > 1:
             struct.make_supercell([sx, sy, sz])
@@ -893,13 +905,12 @@ with tab_intro:
 
     st.divider()
 
-    # SECTION 5: 2D MONOLAYER FLAT GRAPHENE SHEET + POLYSULFIDE ADSORPTION VISUALIZER
+    # SECTION 5: 2D MONOLAYER FLAT GRAPHENE SHEET WITH ALL 5 POLYSULFIDE ADSORBATES
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>💠 2D Monolayer Flat Graphene Sheet & Polysulfide (Li<sub>2</sub>S<sub>x</sub>) Adsorption Interface Visualizer</span></div>
+        <div class="web-card-title"><span>💠 2D Monolayer Flat Graphene Sheet & Multi-Polysulfide (Li<sub>2</sub>S<sub>8</sub> → Li<sub>2</sub>S) Adsorption Complex</span></div>
         <p style="margin:0;">
-            Interactive 3D visualization of a <b>Pristine 2D Monolayer Flat Graphene Sheet</b> serving as an active host surface for intermediate lithium polysulfide adsorbates (<b>Li<sub>2</sub>S<sub>8</sub></b>, <b>Li<sub>2</sub>S<sub>6</sub></b>, <b>Li<sub>2</sub>S<sub>4</sub></b>, <b>Li<sub>2</sub>S<sub>2</sub></b>, <b>Li<sub>2</sub>S</b>). 
-            Adjust supercell expansion, 3D style, and use the <b>📷 Save 3D PNG</b> export button for visual documentation.
+            Unified 3D structural visualization of a <b>Pristine 2D Monolayer Flat Graphene Sheet</b> containing <b>ALL 5 Polysulfide Reduction Products (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S)</b> attached simultaneously across the host surface in a single integrated interface.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -909,22 +920,9 @@ with tab_intro:
         col_ctrl_t1, col_viz_t1 = st.columns([1.1, 1.9])
 
         with col_ctrl_t1:
-            st.markdown("#### ⚙️ 2D Flat Graphene Sheet & Polysulfide Setup")
-            flat_species_label = st.selectbox(
-                "Select Adsorbed Polysulfide Species (Li₂Sₓ):",
-                [
-                    "Li2S8 (Lithium Octasulfide - Soluble Long Chain)",
-                    "Li2S6 (Lithium Hexasulfide - Soluble Intermediate)",
-                    "Li2S4 (Lithium Tetrasulfide - Soluble Medium Chain)",
-                    "Li2S2 (Lithium Disulfide - Insoluble Short Chain)",
-                    "Li2S (Lithium Sulfide - Insoluble End Product)"
-                ],
-                index=1,
-                key="t1_flat_species"
-            )
-            flat_species_code = flat_species_label.split()[0]
+            st.markdown("#### ⚙️ 3D Rendering & Format Controls")
 
-            st.markdown("#### 🎨 3D Representation & Format")
+            st.markdown("#### 🎨 3D Representation Style & Format")
             col_s1, col_f1 = st.columns([1.1, 0.9])
             with col_s1:
                 t1_render_style = st.selectbox(
@@ -950,8 +948,21 @@ with tab_intro:
             with t1_sc3:
                 t1_sc_z = st.slider("Expansion Z:", min_value=1, max_value=3, value=1, key="t1_sc_z")
 
+            # Polysulfide Layout Badge Legend
+            st.markdown("#### 🏷️ Polysulfide Adsorbate Spatial Layout")
+            st.markdown("""
+            <div style="background: rgba(248,250,252,0.8); border: 1px solid rgba(203,213,225,0.6); padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.92rem;">
+                <b>📍 Surface Positions of 5 Adsorbed Species:</b><br>
+                🔴 <b>Li<sub>2</sub>S<sub>8</sub></b>: Top-Left Region (Long-chain)<br>
+                🟣 <b>Li<sub>2</sub>S<sub>6</sub></b>: Top-Right Region (Intermediate)<br>
+                🔵 <b>Li<sub>2</sub>S<sub>4</sub></b>: Center Region (Medium-chain)<br>
+                🟢 <b>Li<sub>2</sub>S<sub>2</sub></b>: Bottom-Left Region (Short-chain)<br>
+                🟠 <b>Li<sub>2</sub>S</b>: Bottom-Right Region (Insoluble End-product)
+            </div>
+            """, unsafe_allow_html=True)
+
             # Flat Graphene Metrics
-            st.markdown("#### ⚡ 2D Monolayer Flat Graphene Properties")
+            st.markdown("#### ⚡ 2D Monolayer Flat Graphene Physical Metrics")
             m_c1, m_c2 = st.columns(2)
             with m_c1:
                 st.metric(label="Band Gap (E_g)", value="0.00 eV", delta="Metallic Semi-Metal")
@@ -960,14 +971,12 @@ with tab_intro:
                 st.metric(label="Bulk Modulus (K)", value="120.0 GPa", delta="High 2D Rigidity")
                 st.metric(label="Shear Modulus (G)", value="95.0 GPa", delta="Flexible Monolayer")
 
-            eads_flat = {"Li2S8": 1.65, "Li2S6": 1.82, "Li2S4": 1.95, "Li2S2": 2.15, "Li2S": 2.40}.get(flat_species_code, 1.82)
-            st.metric(label=f"Flat Graphene Adsorption E_ads ({flat_species_code})", value=f"{eads_flat:.2f} eV", delta="Moderate Anchoring")
+            st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            st.markdown(f"#### 🧊 3D Interface: 2D Monolayer Flat Graphene Sheet + {flat_species_code}")
+            st.markdown("#### 🧊 3D Interface: 2D Monolayer Flat Graphene + All 5 Polysulfides (Li₂S₈ → Li₂S)")
             
-            flat_cif = get_flat_graphene_adsorbed_cif(
-                flat_species_code,
+            flat_cif = get_flat_graphene_all_polysulfides_cif(
                 supercell_x=t1_sc_x,
                 supercell_y=t1_sc_y,
                 supercell_z=t1_sc_z
@@ -981,7 +990,7 @@ with tab_intro:
                 render_structure_3d(
                     render_data_t1,
                     fmt=fmt_code_t1,
-                    height=540,
+                    height=560,
                     style=t1_render_style,
                     supercell_x=t1_sc_x,
                     supercell_y=t1_sc_y,
@@ -989,25 +998,25 @@ with tab_intro:
                     bg_color="#ffffff"
                 )
                 
-                st.caption("💡 **3D Interaction**: Click and drag to rotate the 2D flat graphene sheet + adsorbate. Use **📷 Save 3D PNG** to download snapshot.")
+                st.caption("💡 **3D Interaction**: Click and drag to rotate the 2D flat graphene sheet + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
 
-                st.markdown("##### 📥 Export 2D Flat Graphene Complex Structure")
+                st.markdown("##### 📥 Export Multi-Adsorbate 2D Flat Graphene Complex Structure")
                 dl1, dl2 = st.columns(2)
                 with dl1:
                     st.download_button(
-                        label=f"📥 Download CIF (graphene_flat_{flat_species_code}.cif)",
+                        label="📥 Download CIF (graphene_flat_all_polysulfides.cif)",
                         data=flat_cif,
-                        file_name=f"flat_graphene_adsorbed_{flat_species_code.lower()}.cif",
+                        file_name="flat_graphene_adsorbed_all_polysulfides.cif",
                         mime="chemical/x-cif",
-                        key=f"dl_t1_cif_{flat_species_code}_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                        key=f"dl_t1_cif_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
                     )
                 with dl2:
                     st.download_button(
-                        label=f"📥 Download XYZ (graphene_flat_{flat_species_code}.xyz)",
+                        label="📥 Download XYZ (graphene_flat_all_polysulfides.xyz)",
                         data=flat_xyz,
-                        file_name=f"flat_graphene_adsorbed_{flat_species_code.lower()}.xyz",
+                        file_name="flat_graphene_adsorbed_all_polysulfides.xyz",
                         mime="chemical/x-xyz",
-                        key=f"dl_t1_xyz_{flat_species_code}_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
+                        key=f"dl_t1_xyz_all_{t1_sc_x}_{t1_sc_y}_{t1_sc_z}"
                     )
 
     render_tab1_graphene_fragment()
