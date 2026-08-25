@@ -399,7 +399,7 @@ def generate_matplotlib_top_side_grid_fig():
 
     axes[0, 0].set_title("Top view", fontsize=14, fontweight="bold", pad=10)
     axes[0, 1].set_title("Side view", fontsize=14, fontweight="bold", pad=10)
-    fig.suptitle("Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material", fontsize=14, fontweight="bold", y=1.01)
+    fig.suptitle("Schematic illustration of LiPS adsorption on the host material", fontsize=14, fontweight="bold", y=1.01)
     
     plt.tight_layout()
     return fig
@@ -1104,12 +1104,12 @@ with tab_intro:
 
     st.divider()
 
-    # SECTION 5: ILUSTRASI LIPS DI HOST MATERIAL CATHODE
+    # SECTION 5: SCHEMATIC ILLUSTRATION OF LIPS ADSORPTION ON HOST MATERIAL
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>💠 Ilustrasi Lithium Polysulfide (LiPS) di Host Material Cathode & Adsorption Complex</span></div>
-        <p style="margin:0;">
-            Visualisasi skematik & 3D interaktif <b>Ilustrasi LiPS di Host Material Cathode</b> yang memuat <b>seluruh 5 produk reduksi polisulfida (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, dan Li<sub>2</sub>S)</b> yang teradsorpsi secara simultan pada permukaan host material katoda.
+        <div class="web-card-title"><span>💠 Schematic illustration of LiPS adsorption on the host material</span></div>
+        <p style="margin:0; font-size:1.02rem; line-height:1.6;">
+            <b>Schematic illustration of LiPS adsorption on the host material</b>, showing the interaction of different lithium polysulfide species (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S) with the host surface.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1190,14 +1190,14 @@ with tab_intro:
 
         with col_viz_t1:
             if "2D Journal Figure Matrix" in t1_display_mode:
-                st.markdown("#### 📊 Academic Journal Figure: Top View vs Side View Matrix (Pure Python Matplotlib)")
+                st.markdown("#### 📊 Schematic illustration of LiPS adsorption on the host material")
                 fig_grid = generate_matplotlib_top_side_grid_fig()
                 st.pyplot(fig_grid)
-                st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Python Matplotlib code.")
+                st.caption("💡 **Figure Caption**: Schematic illustration of LiPS adsorption on the host material, showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
             
             elif "3D Journal Matrix" in t1_display_mode:
-                st.markdown("#### 🧊 3D Interactive Journal Matrix: Individual 5-Species Adsorption (3Dmol.js WebGL)")
-                st.caption("💡 **100% Interactive WebGL Code**: Rotate and inspect each of the 5 lithium polysulfide species individually in full 3D.")
+                st.markdown("#### 🧊 3D Schematic Matrix of LiPS Adsorption on Host Material (3Dmol.js WebGL)")
+                st.caption("💡 **Interactive 3D WebGL**: Showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
                 
                 species_list = [
                     ("Li2S8", "Li₂S₈ (Long-Chain Polysulfide)", "2.45 eV", "1.98 Å"),
