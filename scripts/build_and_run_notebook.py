@@ -1146,7 +1146,7 @@ N_u = len(categories_user)
 angles_u = [n / float(N_u) * 2 * np.pi for n in range(N_u)]
 angles_u += angles_u[:1]
 
-fig_radar_u, ax_radar_u = plt.subplots(figsize=(11.0, 8.5), subplot_kw=dict(polar=True))
+fig_radar_u, ax_radar_u = plt.subplots(figsize=(11.5, 9.0), subplot_kw=dict(polar=True))
 colors_user = ["#d95f02", "#7570b3", "#1b9e77", "#e7298a", "#66a61e"]
 
 top5_hosts_user = df_user_host.head(5)
@@ -1164,14 +1164,25 @@ for idx, row in top5_hosts_user.iterrows():
     ax_radar_u.fill(angles_u, values, color=colors_user[idx], alpha=0.15)
 
 ax_radar_u.set_xticks(angles_u[:-1])
-ax_radar_u.set_xticklabels(categories_user, fontweight="bold", fontsize=12.5)
-ax_radar_u.tick_params(axis="x", pad=20)
+ax_radar_u.set_xticklabels([])
 ax_radar_u.set_rlabel_position(210)
-plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.0, fontweight="bold")
-plt.ylim(0, 1.05)
+plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.5, fontweight="bold")
+plt.ylim(0, 1.25)
 
-plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=15.0, fontweight="bold", pad=22)
-plt.legend(loc="center left", bbox_to_anchor=(1.32, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.0)
+alignments_user = [
+    ("left", "center"),     # 0 deg: Band Gap (Eg)
+    ("center", "bottom"),   # 72 deg: Formation Energy (Ef)
+    ("right", "center"),    # 144 deg: Bulk Modulus (K)
+    ("right", "top"),       # 216 deg: Shear Modulus (G)
+    ("center", "top")       # 288 deg: Adsorption Energy (E_ads)
+]
+
+for angle, label, (ha, va) in zip(angles_u[:-1], categories_user, alignments_user):
+    ax_radar_u.text(angle, 1.18, label, fontweight="bold", fontsize=13.0, ha=ha, va=va,
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
+
+plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=15.5, fontweight="bold", pad=25)
+plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5)
 plt.tight_layout(pad=2.0)
 save_paper_fig(fig_radar_u, "fig8_user_dataset_radar_comparison")
 plt.show()
@@ -1354,7 +1365,7 @@ N = len(categories)
 angles = [n / float(N) * 2 * np.pi for n in range(N)]
 angles += angles[:1]
 
-fig, ax = plt.subplots(figsize=(10.5, 8.2), subplot_kw=dict(polar=True))
+fig, ax = plt.subplots(figsize=(11.5, 9.0), subplot_kw=dict(polar=True))
 colors_tpms = ["#d95f02", "#7570b3", "#1b9e77", "#e7298a", "#66a61e"]
 
 for idx, row in df_tpms.iterrows():
@@ -1367,18 +1378,29 @@ for idx, row in df_tpms.iterrows():
     ]
     values += values[:1]
     
-    ax.plot(angles, values, linewidth=2.0, linestyle="solid", label=f"Rank {row['Overall_Rank']}: {row['TPMS']}", color=colors_tpms[idx])
+    ax.plot(angles, values, linewidth=2.8, linestyle="solid", label=f"Rank {row['Overall_Rank']}: {row['TPMS']}", color=colors_tpms[idx])
     ax.fill(angles, values, color=colors_tpms[idx], alpha=0.15)
 
 ax.set_xticks(angles[:-1])
-ax.set_xticklabels(categories, fontweight="bold", fontsize=10.0)
-ax.tick_params(axis="x", pad=18)
+ax.set_xticklabels([])
 ax.set_rlabel_position(210)
-plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=9.0)
-plt.ylim(0, 1.05)
+plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.5, fontweight="bold")
+plt.ylim(0, 1.25)
 
-plt.title("Holistic 5-Axis Performance Radar Map\nacross 5 Core Physical Properties", fontsize=12.5, fontweight="bold", pad=20)
-plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
+alignments = [
+    ("left", "center"),
+    ("center", "bottom"),
+    ("right", "center"),
+    ("right", "top"),
+    ("center", "top")
+]
+
+for angle, label, (ha, va) in zip(angles[:-1], categories, alignments):
+    ax.text(angle, 1.18, label, fontweight="bold", fontsize=13.0, ha=ha, va=va,
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
+
+plt.title("Holistic 5-Axis Performance Radar Map\nacross 5 Core Physical Properties", fontsize=15.5, fontweight="bold", pad=25)
+plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5)
 plt.tight_layout(pad=2.0)
 save_paper_fig(fig, "fig10_tpms_radar_comparison")
 plt.show()
