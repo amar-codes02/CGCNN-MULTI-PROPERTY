@@ -11,44 +11,44 @@ def create_notebook():
     # CELL 0: Title & Research Rationale
     c0 = nbf.v4.new_markdown_cell(r"""# Dual-Scale Material Property Screening & Polysulfide Adsorption Analysis Pipeline
 
-> **Fokus Penelitian**: Kerangka kerja skrining komputasional dua skala (Dual-Scale Computational Screening) untuk material host katoda Baterai Lithium-Sulfur (Li-S) melalui ekstraksi data JARVIS-DFT3D, Exploratory Data Analysis (EDA), Crystal Graph Convolutional Network (CGCNN) multi-target, Skrining Dataset Material Host Katoda, dan Evaluasi Arsitektur Perancah Sheet Triply Periodic Minimal Surface (TPMS) Graphene.
+> **Fokus Penelitian**: Dual-scale computational screening framework for Lithium-Sulfur (Li-S) battery cathode host materials via JARVIS-DFT3D data extraction, Exploratory Data Analysis (EDA), multi-target Crystal Graph Convolutional Network (CGCNN), Cathode Host Material Dataset Screening, and Graphene Triply Periodic Minimal Surface (TPMS) Sheet Scaffold Evaluation.
 
 ---
 
-### 5 Properti Fisik Utama (5 Core Target Properties)
-1. **Band Gap (Eg, eV)** — Indikator konduktivitas elektronik (Nilai lebih rendah/logam lebih disukai).
-2. **Formation Energy (Ef, eV/atom)** — Stabilitas termodinamika kristal (Nilai lebih negatif/rendah lebih disukai).
-3. **Bulk Modulus (K, GPa)** — Ketahanan terhadap ekspansi volume hidrostatik (Nilai lebih tinggi lebih disukai).
-4. **Shear Modulus (G, GPa)** — Ketahanan terhadap stres geser dan kekakuan struktur (Nilai lebih tinggi lebih disukai).
-5. **Polysulfide Adsorption Energy (E_ads, eV)** — Kemampuan penjangkaran kimiawi terhadap efek shuttle polisulfida (Nilai positif lebih tinggi menyatakan penjangkaran/ikatan yang lebih kuat — $E_{ads} > 0$).
+### 5 Core Target Physical Properties
+1. **Band Gap (Eg, eV)** — Electronic conductivity indicator (Lower values / metallic character preferred).
+2. **Formation Energy (Ef, eV/atom)** — Crystal thermodynamic stability (Lower/more negative formation energy preferred).
+3. **Bulk Modulus (K, GPa)** — Resistance to hydrostatic volume expansion (Higher values preferred).
+4. **Shear Modulus (G, GPa)** — Resistance to shear stress and structural rigidity (Higher values preferred).
+5. **Polysulfide Adsorption Energy (E_ads, eV)** — Chemical anchoring capability suppressing polysulfide shuttle effect (Higher positive magnitude indicates stronger binding energy — $E_{ads} > 0$).
 
 ---
 
-### Arsitektur Skrining Dua Skala (Dual-Scale Architecture)
-* [G] **Skrining Skala Material Katoda (Section 4)**: Evaluasi dan pemeringkatan 35 material kandidat host unik dari Dataset Matched Adsorpsi Polisulfida (`df_matched`).
-* **Skrining Arsitektur Mesoscale TPMS (Section 5)**: Prediksi CGCNN terhadap 5 topologi sheet Graphene TPMS (*Gyroid, Neovius, Diamond, IWP, Primitive*).
+### Dual-Scale Screening Architecture
+* [G] **Cathode Material Scale Screening (Section 4)**: Evaluation and ranking of 35 unique candidate host materials from the Polysulfide Adsorption Matched Dataset (`df_matched`).
+* **Mesoscale TPMS Architecture Screening (Section 5)**: CGCNN predictions across 5 Graphene TPMS sheet topologies (*Gyroid, Neovius, Diamond, IWP, Primitive*).
 """)
 
     # CELL 1: Methodological Rigor & Peer-Review Compliance
-    c1 = nbf.v4.new_markdown_cell(r"""## Catatan Metodologi & Kepatuhan Peer-Review
+    c1 = nbf.v4.new_markdown_cell(r"""## Methodological Rationale & Peer-Review Compliance
 
-> **Inovasi Ilmiah & Metodologi Utama yang Diterapkan:**
+> **Key Scientific Innovations & Methodological Rigor:**
 >
-> 1. **Partitioning Data Out-of-Group (Mencegah Data Leakage)**:
->    Pemisahan data pengujian berbasis grup material unik (N_test = 3,000) untuk memastikan tidak ada kebocoran target akibat polimorf atau stoikiometri yang sama antara data latih dan data uji. Akurasi pengujian tinggi ($R^2 = 0.89 - 0.95$, MAE = 0.048 - 0.185 eV) menunjukkan pemodelan generik yang valid tanpa overfitting.
+> 1. **Out-of-Group Data Partitioning (Preventing Data Leakage)**:
+>    Group-based test set split using unique chemical formulas (N_test = 3,000) ensuring zero target leakage between train and test splits caused by polymorphs or shared stoichiometry. High test set accuracy ($R^2 = 0.89 - 0.95$, MAE = 0.048 - 0.185 eV) demonstrates robust model generalization without overfitting.
 >
-> 2. **Surrogate Proxy Adsorpsi Permukaan (E_ads)**:
->    Embedding graf CGCNN untuk adsorption energy (E_ads) berfungsi sebagai **High-Throughput Bulk Descriptor Proxy**, menggabungkan proxy d-band center, energi pembentukan bulk, dan rasio elektronegativitas.
+> 2. **Surface Adsorption Surrogate Proxy (E_ads)**:
+>    CGCNN graph embeddings for adsorption energy (E_ads) serve as a **High-Throughput Bulk Descriptor Proxy**, integrating d-band center proxies, bulk formation energy, and electronegativity ratios.
 >
-> 3. **Kopling Multiskala TPMS (Material Katoda <-> Perancah Mesoscale)**:
->    Prediksi CGCNN skala atomik dihubungkan dengan parameter geometris TPMS Gyroid mesoscale melalui persamaan transpor multiskala:
+> 3. **Multiscale TPMS Coupling (Cathode Material <-> Mesoscale Scaffold)**:
+>    Atomic-scale CGCNN predictions are coupled to mesoscale TPMS Gyroid geometric parameters via multiscale transport equations:
 >    `j_effective = j0 * Sv * exp(-E_ads / kT)`
 >    `sigma_eff = (sigma0 * phi) / tau_Gyroid`
 """)
 
     # CELL 2: Section 1 Header
     c2 = nbf.v4.new_markdown_cell(r"""---
-## 1. Setup Lingkungan Kerja, Akselerasi Hardware & Integrasi Dataset
+## 1. Environment Setup, Hardware Acceleration & Dataset Integration
 
 > **Tujuan Ilmiah**: Menginisialisasi lingkungan Python, mengkonfigurasi gaya visualisasi Matplotlib standar publikasi Chemistry Europe / Wiley (300 DPI, lebar 17.8 cm / 8.4 cm), mendeteksi akselerasi GPU (CUDA/CPU), memuat database JARVIS-DFT 3D, serta mengintegrasikan dataset adsorpsi polisulfida (`dataset_jarvis_dft3d_matched.pkl`).
 """)
@@ -175,7 +175,7 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
             cell.set_text_props(color="#111111", fontsize=body_font)
 
     if title:
-        clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
+        clean_title = title.replace("Table ( ) :", "").replace("Table", "").strip()
         ax.set_title(clean_title, fontsize=header_font + 2, fontweight="bold", pad=12)
 
     plt.tight_layout()
@@ -184,7 +184,7 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     plt.show()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f" Setup Berhasil! PyTorch Version: {torch.__version__} | Hardware Device: {device}")
+print(f" Environment Setup Successful! PyTorch Version: {torch.__version__} | Hardware Device: {device}")
 """)
 
     c2_load = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -250,8 +250,8 @@ else:
 df_matched["adsorption_energy_eV"] = df_matched["adsorption_energy_eV"].abs()
 
 
-print(f" Total Material Terdaftar di JARVIS DFT3D: {len(df_eda):,} sampel")
-print(f" Total Entri Matched Dataset Adsorpsi Polisulfida: {len(df_matched)} entri ({df_matched['formula'].nunique()} material unik)")
+print(f" Total Registered Materials in JARVIS-DFT 3D: {len(df_eda):,} sampel")
+print(f" Total Matched Polysulfide Adsorption Entries: {len(df_matched)} entri ({df_matched['formula'].nunique()} unique materials)")
 
 # Display dataframe as rendered figure image
 df_preview = df_matched[["formula", "adsorbate", "band_gap", "formation_energy", "e_hull", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]].head(10).round(3)
@@ -259,8 +259,8 @@ df_preview.columns = ["Formula", "Adsorbate", "Eg (eV)", "Ef (eV/at)", "Ehull (e
 render_df_to_fig(df_preview, title="", filename="table_preview_df")
 """)
 
-    c5_md = nbf.v4.new_markdown_cell(r"""### 1.1 Statistik Deskriptif 5 Properti Fisik Utama
-> Ringkasan statistik yang mencakup jumlah sampel, rata-rata, standar deviasi, nilai min/maks, persentil, dan skewness untuk properti Eg, Ef, K, G, dan E_ads.
+    c5_md = nbf.v4.new_markdown_cell(r"""### 1.1 Descriptive Statistics for 5 Core Target Properties
+> Statistical summary including sample count, mean, standard deviation, min/max values, percentiles, and skewness for Eg, Ef, K, G, and E_ads properties.
 """)
 
     c3_stats = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -306,13 +306,13 @@ render_df_to_fig(df_stats_matched, title="", filename="table_descriptive_stats")
 """)
 
     c6 = nbf.v4.new_markdown_cell(r"""---
-## 2. Exploratory Data Analysis (EDA) — 5 Properti Fisik Utama
+## 2. Exploratory Data Analysis (EDA) — 5 Core Target Properties
 
-> **Tujuan Ilmiah**: Melakukan analisis eksplorasi data untuk mengevaluasi distribusi statistik, struktur korelasi antar properti, dan batas stabilitas termodinamika di seluruh kelas konduktivitas elektronik.
+> **Tujuan Ilmiah**: Perform exploratory data analysis to evaluate statistical distributions, inter-property correlation structures, and thermodynamic stability boundaries across electronic conductivity classes.
 """)
 
-    c7_md = nbf.v4.new_markdown_cell(r"""### 2.1 Distribusi Statistik & Densitas Probabilitas (Gambar 1)
-> Grafik histogram dan kurva Kernel Density Estimation (KDE) yang menggambarkan distribusi dan variansi di seluruh 5 properti target.
+    c7_md = nbf.v4.new_markdown_cell(r"""### 2.1 Statistical Distributions & Probability Densities (Figure 1)
+> Histograms and Kernel Density Estimation (KDE) curves illustrating distributions and variances across the 5 core target properties.
 """)
 
     c4_dist = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -356,8 +356,8 @@ save_paper_fig(fig, "fig1_eda_property_distributions")
 plt.show()
 """)
 
-    c8_md = nbf.v4.new_markdown_cell(r"""### 2.2 Matriks Korelasi Linier Antar-Properti (Gambar 2)
-> Heatmap korelasi Pearson (r) yang menunjukkan hubungan fisik antara modulus elastis (K, G), band gap elektronik (Eg), dan energi ikatan polisulfida (E_ads).
+    c8_md = nbf.v4.new_markdown_cell(r"""### 2.2 Inter-Property Linear Correlation Matrix (Figure 2)
+> Pearson correlation (r) heatmap illustrating physical relationships among elastic moduli (K, G), electronic band gap (Eg), and polysulfide binding energy (E_ads).
 """)
 
     c5_corr = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -380,8 +380,8 @@ save_paper_fig(fig, "fig2_eda_correlation_matrix")
 plt.show()
 """)
 
-    c9_md = nbf.v4.new_markdown_cell(r"""### 2.3 Klasifikasi Konduktivitas Elektronik & Stabilitas Termodinamika (Gambar 3)
-> Pengelompokan material kandidat menjadi Logam (Eg = 0 eV), Semilogam (0 < Eg < 0.5 eV), dan Semikonduktor (Eg >= 0.5 eV), dikombinasikan dengan rata-rata properti fisik dan stabilitas energy convex hull (E_hull).
+    c9_md = nbf.v4.new_markdown_cell(r"""### 2.3 Electronic Conductivity Classification & Thermodynamic Stability (Figure 3)
+> Categorization of candidate materials into Metals (Eg = 0 eV), Semimetals (0 < Eg < 0.5 eV), and Semiconductors (Eg >= 0.5 eV), combined with average physical properties and energy convex hull (E_hull) thermodynamic stability.
 """)
 
     c6_class = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -510,13 +510,13 @@ plt.show()
 """)
 
     c10 = nbf.v4.new_markdown_cell(r"""---
-## 3. Arsitektur Model CGCNN Multi-Target & Evaluasi Akurasi
+## 3. Multi-Target CGCNN Model Architecture & Accuracy Evaluation
 
-> **Tujuan Ilmiah**: Membangun representasi Crystal Graph Convolutional Network (CGCNN), melakukan pelatihan model hingga 3.000 epoch, dan mengevaluasi akurasi prediksi (Parity Evaluation dengan batas toleransi error +/- 10%).
+> **Tujuan Ilmiah**: Construct Crystal Graph Convolutional Network (CGCNN) representations, train the multi-target model for 3,000 epochs, and evaluate predictive accuracy (Parity evaluation with ±10% error tolerance boundaries).
 """)
 
-    c11_md = nbf.v4.new_markdown_cell(r"""### 3.1 Representasi Graf Kristal & Ekspansi Jarak Gauss
-> Konversi geometri sel kristal 3D menjadi graf atom periodik dengan fitur tepi ter-ekspansi Gauss (r_cutoff = 8.0 Angstrom, N_neighbors = 12).
+    c11_md = nbf.v4.new_markdown_cell(r"""### 3.1 Crystal Graph Representation & Gaussian Distance Expansion
+> Conversion of 3D crystal unit cell geometries into periodic atomic graphs with Gaussian-expanded edge features (r_cutoff = 8.0 Å, N_neighbors = 12).
 """)
 
     c7_feat = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -578,11 +578,11 @@ class CrystalDataset(Dataset):
         t_vals = [row[t] for t in self.targets]
         return torch.tensor(t_vals, dtype=torch.float32)
 
-print(" Helper konstruksi Graf Kristal & CrystalDataset Ready!")
+print(" Crystal Graph construction helpers & CrystalDataset Ready!")
 """)
 
-    c12_md = nbf.v4.new_markdown_cell(r"""### 3.2 Arsitektur Jaringan CGCNN & Aktivasi Softplus Non-Negatif
-> Implementasi lapis konvolusi graf dengan fungsi aktivasi gated non-linear dan output head Softplus untuk menjamin batasan non-negativitas fisik pada modulus elastisitas dan band gap.
+    c12_md = nbf.v4.new_markdown_cell(r"""### 3.2 CGCNN Network Architecture & Non-Negative Softplus Activation
+> Implementation of graph convolution layers with gated non-linear activation and Softplus output head ensuring physical non-negativity constraints for elastic moduli and band gap.
 """)
 
     c8_model = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -649,11 +649,11 @@ class CrystalGraphConvNet(nn.Module):
             out[:, self.non_negative_idx] = self.out_softplus(out[:, self.non_negative_idx])
         return out
 
-print(" Kelas Arsitektur CGCNN (Final JARVIS Standard) Terdefinisi dengan Sukses!")
+print(" CGCNN Architecture Class (Final JARVIS Standard) Defined Successfully!")
 """)
 
-    c13_md = nbf.v4.new_markdown_cell(r"""### 3.3 Kurva Konvergensi Pelatihan (3.000 Epoch — Gambar 4)
-> Trajektori loss Mean Absolute Error (MAE) untuk data latih, validasi, dan pengujian selama 3.000 epoch yang menunjukkan konvergensi stabil.
+    c13_md = nbf.v4.new_markdown_cell(r"""### 3.3 Training Convergence Curves (3,000 Epochs — Figure 4)
+> Mean Absolute Error (MAE) loss trajectories for training, validation, and test sets over 3,000 epochs demonstrating stable convergence.
 """)
 
     c9_curves = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -707,8 +707,8 @@ plt.show()
 print(f"Total epochs trained : {len(epochs)} | Best validation epoch: {_best_epoch} (Val MAE = {_best_val:.4f})")
 """)
 
-    c14_md = nbf.v4.new_markdown_cell(r"""### 3.4 Performa Prediksi Model (Test Split — 15%)
-> Evaluasi kuantitatif (MAE, RMSE, $R^2$) pada data test (15% split dari 148 entri matched dataset), membandingkan nilai DFT aktual vs prediksi CGCNN.
+    c14_md = nbf.v4.new_markdown_cell(r"""### 3.4 Model Predictive Performance (Test Split — 15%)
+> Quantitative evaluation (MAE, RMSE, $R^2$) on the test split (15% holdout split from 148 matched dataset entries), comparing actual DFT vs CGCNN predicted values.
 """)
 
     c10_eval = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -869,8 +869,8 @@ for target in FIVE_TARGETS:
     y_pred_all_dict[target] = yp_a
 """)
 
-    c15_md = nbf.v4.new_markdown_cell(r"""### 3.5 Plot Paritas Prediksi Model (+/- 10% Toleransi Error — Gambar 5)
-> Grafik paritas aktual vs prediksi pada seluruh sampel dataset yang dilengkapi dengan pita toleransi error ±10%. Anotasi metrik evaluasi ($R^2$, MAE, RMSE) pada kotak teks disajikan dari hasil evaluasi **data test** (15% split hold-out set).
+    c15_md = nbf.v4.new_markdown_cell(r"""### 3.5 Model Prediction Parity Plots (±10% Error Tolerance — Figure 5)
+> Actual vs predicted parity plots across dataset samples equipped with ±10% error tolerance bands. Evaluation metric annotations ($R^2$, MAE, RMSE) in text boxes are reported from the test holdout set.
 """)
 
     c11_parity = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -937,15 +937,15 @@ plt.show()
 
     # SECTION 4: USER MATCHED DATASET SCREENING & TOP 5 LEADERBOARD
     c16_user = nbf.v4.new_markdown_cell(r"""---
-## 4. Skrining Material Host Kandidat dari Dataset Matched User (`df_matched`)
+## 4. Candidate Host Material Screening from User Matched Dataset (`df_matched`)
 
-> [G] **SKRINING SKALA MATERIAL KATODA**
+> [G] **CATHODE MATERIAL SCALE SCREENING**
 >
-> **Tujuan Ilmiah**: Evaluasi dan pemeringkatan 35 material host kandidat unik dari dataset eksperimen/DFT matched (`dataset_jarvis_dft3d_matched.pkl`) pada 5 properti target (Eg, Ef, K, G, E_ads) untuk menentukan Top 5 kandidat material host terbaik.
+> **Scientific Objective**: Evaluate and rank 35 unique candidate host materials from the matched dataset (`dataset_jarvis_dft3d_matched.pkl`) across 5 target properties (Eg, Ef, K, G, E_ads) to identify the Top 5 cathode host candidates.
 """)
 
-    c17_user_md = nbf.v4.new_markdown_cell(r"""### 4.1 Skor Komposit Multi-Properti untuk Dataset Matched User
-> Penggabungan entri dataset berdasarkan formula kimia, perhitungan sub-skor normalisasi min-maks, dan evaluasi Composite Host Score:
+    c17_user_md = nbf.v4.new_markdown_cell(r"""### 4.1 Multi-Property Composite Score for User Matched Dataset
+> Aggregation of dataset entries by chemical formula, min-max normalized sub-score calculation, and Composite Host Score evaluation:
 > `Composite Score = 0.20 * Score_Eg + 0.20 * Score_Ef + 0.20 * Score_K + 0.20 * Score_G + 0.20 * Score_Eads`
 """)
 
@@ -987,8 +987,8 @@ df_user_host["Rank"] = df_user_host.index + 1
 print(f" Candidate Host Materials Composite Ranking Complete (Top 5: {', '.join(df_user_host['formula'].head(5).tolist())})")
 """)
 
-    c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Visualisasi Top 5 Leaderboard Per Properti & Radar Map 5 Aksis (Gambar 6 & 8)
-> Grafik batang vertikal yang menampilkan Top 5 material kandidat per properti target beserta perbandingan radar map 5 aksis untuk Top 5 material host teratas.
+    c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Top 5 Leaderboard Visualizations Per Property & 5-Axis Radar Map (Figures 6 & 8)
+> Vertical bar charts displaying the Top 5 candidate materials per target property alongside a 5-axis performance radar comparison for the leading Top 5 host materials.
 """)
 
     c13_user_vis = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -1063,8 +1063,8 @@ plt.show()
 """)
 
     # CELL 4.3: Actual DFT vs Predicted CGCNN for Top 5 Materials
-    c18_act_pred_md = nbf.v4.new_markdown_cell(r"""### 4.3 Grafik Komparasi Nilai Aktual (DFT/Eksperimen) vs Prediksi (CGCNN) Top 5 Material Host (Gambar 7)
-> Grafik komparasi berpasangan (Grouped Bar Chart) yang menyandingkan nilai properti fisik aktual hasil kalkulasi DFT/Eksperimen dengan hasil prediksi model CGCNN untuk Top 5 material host teratas (`WB2`, `MoC`, `Co3O4`, `Ti3O5`, `Mo2C`) pada 5 properti target utama skrining katoda Baterai Li-S, dilengkapi dengan ringkasan akurasi prediksi (MAE).
+    c18_act_pred_md = nbf.v4.new_markdown_cell(r"""### 4.3 Actual (DFT/Experimental) vs Predicted (CGCNN) Comparison for Top 5 Host Materials (Figure 7)
+> Grouped bar chart comparing actual physical property values from DFT/experimental data against CGCNN model predictions for the Top 5 leading host materials (`WB2`, `MoC`, `Co3O4`, `Ti3O5`, `Mo2C`) across all 5 core target screening properties for Li-S battery cathodes.
 """)
 
     c13_act_pred_vis = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -1236,15 +1236,15 @@ plt.show()
 
     # SECTION 5: GRAPHENE TPMS ARCHITECTURE SCREENING
     c19_tpms = nbf.v4.new_markdown_cell(r"""---
-## 5. Skrining Arsitektur Perancah Sheet Graphene TPMS
+## 5. Graphene TPMS Sheet Scaffold Architecture Screening
 
-> **SKRINING STRUKTUR TPMS MESOSCALE**
+> **MESOSCALE TPMS STRUCTURE SCREENING**
 >
-> **Tujuan Ilmiah**: Menerapkan model CGCNN terlatih untuk memprediksi properti 5 topologi sheet Graphene Triply Periodic Minimal Surface (TPMS) (*Gyroid, Neovius, Diamond, Primitive, IWP*), dan menghitung skor komposit 5 aksis.
+> **Tujuan Ilmiah**: Apply the trained CGCNN model to predict properties for 5 Graphene Triply Periodic Minimal Surface (TPMS) sheet topologies (*Gyroid, Neovius, Diamond, Primitive, IWP*), and compute 5-axis composite scores.
 """)
 
-    c20_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.1 Ingesti Geometri CIF TPMS & Inferensi CGCNN Multi-Properti
-> Ekstraksi fitur graf langsung dari file CIF 3D Graphene TPMS, eksekusi prediksi CGCNN, dan perhitungan skor performa komposit ter-normalisasi.
+    c20_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.1 TPMS CIF Geometry Ingestion & Multi-Property CGCNN Inference
+> Direct graph feature extraction from 3D Graphene TPMS CIF files, CGCNN inference execution, and normalized composite performance scoring.
 """)
 
     c14_tpms = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -1317,12 +1317,12 @@ df_tpms_table.columns = ["Rank", "Topology", "Atoms", "Eg (eV)", "Ef (eV/at)", "
 render_df_to_fig(df_tpms_table, title="", filename="table_tpms_topologies")
 """)
 
-    c21_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.2 Visualisasi Grafik Batang Properti & Radar Map 5 Aksis TPMS (Gambar 9 & 10)
-> Grafik batang per properti fisik dan radar map 5 aksis yang menggambarkan performa relatif antar topologi sheet TPMS.
+    c21_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.2 Property Bar Charts & 5-Axis Radar Map for TPMS (Figures 9 & 10)
+> Property-wise bar charts and 5-axis radar map illustrating relative performance across TPMS sheet topologies.
 """)
 
     c15_vis_tpms = nbf.v4.new_code_cell(r"""# ==============================================================================
-# 15. VISUALIZATION: Bar Chart 5 Properti Utama + 5-Axis Radar Chart (Figure 9 & 10)
+# 15. VISUALIZATION: Bar Chart 5 Core Properties + 5-Axis Radar Chart (Figure 9 & 10)
 # ==============================================================================
 fig_tpms, axes_tpms = plt.subplots(2, 3, figsize=(12.0, 7.5))
 axes_tpms = axes_tpms.flatten()
@@ -1464,9 +1464,9 @@ plt.show()
 
     # SECTION 6: SUMMARY & DATASET EXPORTER (CSV/MARKDOWN & PUBLICATION TABLE FIGURES)
     c22_latex = nbf.v4.new_markdown_cell(r"""---
-## 6. Ringkasan Publikasi & Otomatisasi Ekspor Data
+## 6. Publication Summary & Data Export Automation
 
-> **Tujuan Ilmiah**: Merangkum hasil pemeringkatan material host untuk **Skrining Material Host Katoda** dan **Skrining Topologi Sheet TPMS Graphene** ke dalam gambar tabel publikasi dan mengekspor hasilnya ke format CSV.
+> **Tujuan Ilmiah**: Summarize candidate host material rankings for **Cathode Host Material Screening** and **Graphene TPMS Sheet Topology Screening** into publication table figures and export CSV summary files.
 """)
 
     c16_latex_out = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -1511,7 +1511,7 @@ for p in ["summary_table_tpms_topologies.csv", os.path.join("..", "summary_table
     except Exception:
         pass
 
-print("\n Exporter Berhasil! Tabel ringkasan telah disimpan ke CSV (root & notebooks/):")
+print("\n Exporter Successful! Summary tables saved to CSV (root & notebooks/):")
 print("   - summary_table_host_materials.csv")
 print("   - summary_table_tpms_topologies.csv")
 """)
