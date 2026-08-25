@@ -359,6 +359,7 @@ def generate_matplotlib_top_side_grid_fig():
 
     axes[0, 0].set_title("Top view", fontsize=14, fontweight="bold", pad=10)
     axes[0, 1].set_title("Side view", fontsize=14, fontweight="bold", pad=10)
+    fig.suptitle("Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material", fontsize=14, fontweight="bold", y=1.01)
     
     plt.tight_layout()
     return fig
