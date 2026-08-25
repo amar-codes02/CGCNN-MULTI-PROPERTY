@@ -266,10 +266,21 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
             }}
 
             var totalAtoms = model.selectedAtoms({{}}).length;
-            var chosenStyle = {style_js};
+            var modeName = "{style}";
+            var chosenStyle = {{}};
 
-            if (totalAtoms > 700) {{
-              chosenStyle = {{ sphere: {{ scale: 0.18, colorscheme: "Jmol" }}, stick: {{ radius: 0.08, colorscheme: "Jmol" }} }};
+            if (modeName === "spacefill") {{
+              chosenStyle = {{ sphere: {{ scale: (totalAtoms > 600 ? 0.68 : 0.82), colorscheme: "Jmol" }} }};
+            }} else if (modeName === "stick") {{
+              chosenStyle = {{ stick: {{ radius: (totalAtoms > 600 ? 0.10 : 0.18), colorscheme: "Jmol" }} }};
+            }} else if (modeName === "line") {{
+              chosenStyle = {{ line: {{ colorscheme: "Jmol", linewidth: 2 }} }};
+            }} else {{
+              if (totalAtoms > 700) {{
+                chosenStyle = {{ sphere: {{ scale: 0.16, colorscheme: "Jmol" }}, stick: {{ radius: 0.08, colorscheme: "Jmol" }} }};
+              }} else {{
+                chosenStyle = {{ sphere: {{ scale: 0.25, colorscheme: "Jmol" }}, stick: {{ radius: 0.14, colorscheme: "Jmol" }} }};
+              }}
             }}
 
             viewer.setStyle({{}}, chosenStyle);
@@ -1181,7 +1192,18 @@ with tab_viz3d:
                 with col_f1:
                     fmt_choice_t3 = st.radio("Display Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t3_fmt_choice", horizontal=True)
                 with col_f2:
-                    viz_style = st.selectbox("3D Representation:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
+                    viz_style = st.selectbox(
+                        "3D Representation:",
+                        ["stick_sphere", "spacefill", "stick", "line"],
+                        index=0,
+                        format_func=lambda x: {
+                            "stick_sphere": "Stick & Sphere (Ball & Stick)",
+                            "spacefill": "Spacefill (CPK Spheres)",
+                            "stick": "Stick Only (Cylinders)",
+                            "line": "Wireframe Line"
+                        }[x],
+                        key="t3_viz_style"
+                    )
 
                 st.markdown("##### 📐 Supercell Expansion (X x Y x Z, up to 3x3x3)")
                 sc_c1, sc_c2, sc_c3 = st.columns(3)
@@ -1812,10 +1834,11 @@ with tab_polysulfide:
             with col_t5_style:
                 render_style = st.selectbox(
                     "3D Representation Style:",
-                    ["stick_sphere", "spacefill", "line"],
+                    ["stick_sphere", "spacefill", "stick", "line"],
                     format_func=lambda x: {
                         "stick_sphere": "Stick & Sphere (Ball & Stick)",
-                        "spacefill": "Spacefill (CPK Van der Waals Radii)",
+                        "spacefill": "Spacefill (CPK Spheres)",
+                        "stick": "Stick Only (Cylinders)",
                         "line": "Wireframe Line"
                     }[x],
                     key="t5_render_style"
