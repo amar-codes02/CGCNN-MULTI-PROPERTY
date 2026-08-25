@@ -1083,10 +1083,9 @@ with tab_intro:
             t1_display_mode = st.radio(
                 "Visual Mode / Tampilan Interface:",
                 [
-                    "📊 Journal Figure: Top View vs Side View Matrix (Format Gambar Jurnal)",
-                    "🐍 2D Python Vector Plot (Kodingan Python Murni 100%)",
-                    "🖼️ 2D High-Res Academic Illustration (Gambar Skematik AI)",
-                    "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3D)"
+                    "📊 2D Journal Figure Matrix: Top View vs Side View (Kodingan Python Murni 100%)",
+                    "🐍 2D Host Surface Adsorption Overview (Kodingan Python Murni 100%)",
+                    "🧊 3D Interactive WebGL Viewer (Visual Interaktif 3Dmol.js)"
                 ],
                 index=0,
                 key="t1_display_mode"
@@ -1149,55 +1148,16 @@ with tab_intro:
             st.metric(label="Avg. Adsorption Energy (E_ads)", value="1.97 eV", delta="Multi-Species Anchoring")
 
         with col_viz_t1:
-            if "Journal Figure" in t1_display_mode or "Matrix" in t1_display_mode:
-                st.markdown("#### 📊 Academic Journal Figure: Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material")
-                top_side_fig_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_top_side_views_figure.png")
-                
-                sub_tab1, sub_tab2 = st.tabs(["📸 High-Res Journal Figure (Format Publikasi Jurnal)", "🐍 Python Matplotlib Render (Dynamic Code Plot)"])
-                with sub_tab1:
-                    if os.path.exists(top_side_fig_path):
-                        st.image(
-                            top_side_fig_path,
-                            caption="📊 Publication-Ready Scientific Figure: Top View vs Side View Comparison of Lithium Polysulfide (LiPS) Adsorption on Cathode Host Material",
-                            use_container_width=True
-                        )
-                        with open(top_side_fig_path, "rb") as img_file:
-                            st.download_button(
-                                label="📥 Download Journal Figure (PNG Image)",
-                                data=img_file,
-                                file_name="lips_cathode_host_material_adsorption_figure.png",
-                                mime="image/png",
-                                key="dl_t1_top_side_figure_png"
-                            )
-                with sub_tab2:
-                    fig_grid = generate_matplotlib_top_side_grid_fig()
-                    st.pyplot(fig_grid)
-                    st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Matplotlib.")
-
-            elif "Python" in t1_display_mode:
+            if "Journal Figure Matrix" in t1_display_mode:
+                st.markdown("#### 📊 Academic Journal Figure: Top View vs Side View Matrix (Pure Python Matplotlib)")
+                fig_grid = generate_matplotlib_top_side_grid_fig()
+                st.pyplot(fig_grid)
+                st.caption("💡 **100% Python Code Render**: Dynamic multi-panel vector plot generated via Python Matplotlib code.")
+            elif "Surface" in t1_display_mode or "Overview" in t1_display_mode:
                 st.markdown("#### 🐍 2D Python Matplotlib Vector Plot: Ilustrasi LiPS di Host Material Cathode")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
-                st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Matplotlib code.")
-            elif "Illustration" in t1_display_mode or "AI" in t1_display_mode:
-                st.markdown("#### 🖼️ 2D Academic Schematic Diagram: Ilustrasi LiPS di Host Material Cathode")
-                schematic_path = os.path.join(PROJECT_ROOT, "assets", "flat_graphene_polysulfide_schematic.png")
-                if os.path.exists(schematic_path):
-                    st.image(
-                        schematic_path,
-                        caption="🖼️ High-Resolution 2D Academic Diagram: Ilustrasi Lithium Polysulfide (LiPS) Adsorption di Host Material Cathode",
-                        use_container_width=True
-                    )
-                    with open(schematic_path, "rb") as img_file:
-                        st.download_button(
-                            label="📥 Download 2D Schematic Diagram (PNG Image)",
-                            data=img_file,
-                            file_name="lips_cathode_host_material_schematic.png",
-                            mime="image/png",
-                            key="dl_t1_schematic_png"
-                        )
-                else:
-                    st.info("2D Schematic image not found.")
+                st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Python Matplotlib code.")
             else:
                 st.markdown("#### 🧊 3D Interface: Ilustrasi LiPS di Host Material Cathode (Li₂S₈ → Li₂S)")
                 
