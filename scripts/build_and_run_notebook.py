@@ -756,23 +756,7 @@ for target in FIVE_TARGETS:
 df_metrics = pd.DataFrame(metrics_summary)
 render_df_to_fig(df_metrics, title="", filename="table_model_metrics")
 
-# 1. Render Summary Actual vs Predicted Test Data Comparison Table Image
-df_test_comp = pd.DataFrame({
-    "Formula": df_test_eval["formula"].head(8).values,
-    "Eg Act": np.round(y_true_dict["band_gap"][:8], 2),
-    "Eg Pred": np.round(y_pred_dict["band_gap"][:8], 2),
-    "Ef Act": np.round(y_true_dict["formation_energy"][:8], 2),
-    "Ef Pred": np.round(y_pred_dict["formation_energy"][:8], 2),
-    "K Act": np.round(y_true_dict["bulk_modulus"][:8], 1),
-    "K Pred": np.round(y_pred_dict["bulk_modulus"][:8], 1),
-    "G Act": np.round(y_true_dict["shear_modulus"][:8], 1),
-    "G Pred": np.round(y_pred_dict["shear_modulus"][:8], 1),
-    "Eads Act": np.round(y_true_dict["adsorption_energy_eV"][:8], 2),
-    "Eads Pred": np.round(y_pred_dict["adsorption_energy_eV"][:8], 2),
-})
-render_df_to_fig(df_test_comp, title="", filename="table_actual_vs_predicted_test")
-
-# 2. Render Property-Wise Actual vs Predicted Test Data Comparison Table Images
+# Render Property-Wise Actual vs Predicted Test Data Comparison Table Images
 prop_file_map = {
     "band_gap": "table_actual_vs_predicted_band_gap",
     "formation_energy": "table_actual_vs_predicted_formation_energy",
