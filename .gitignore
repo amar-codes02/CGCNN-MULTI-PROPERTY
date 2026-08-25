@@ -7,6 +7,9 @@ data/graph_cache.pkl
 .DS_Store
 .~lock.*
 
-# Exclude submission documents and wiley graphics per user request
+# Exclude submission documents, manuscript files, and wiley graphics per user request
 submission_documents/
 wiley_graphics/
+*.docx
+Response_to_Reviewers.md
+

@@ -45,7 +45,7 @@ from cgcnn_model import (
 # ---------------------------------------------------------------------------
 st.set_page_config(
     page_title="CGCNN-MULTI-PROPERTY: Material Property Screening & Graphene TPMS Research Platform",
-    page_icon="⚡",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -477,7 +477,7 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
       </style>
     </head>
     <body style="margin:0; padding:0; background-color:{bg_color}; overflow:hidden; position:relative;">
-      <button class="png-btn" onclick="download3DPNG()">📷 Save 3D PNG</button>
+      <button class="png-btn" onclick="download3DPNG()">Save 3D PNG</button>
       <div id="viewer3dmol" style="height: {height}px; width: 100%; position: relative; border-radius: 16px; border: 1px solid #cbd5e1;"></div>
       <script>
         var viewer = null;
@@ -582,9 +582,9 @@ render_cif_3d = render_structure_3d
 # Sidebar Settings & System Control
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### ⚙️ Platform Control Panel")
+    st.markdown("### Platform Control Panel")
     
-    st.markdown("#### 📁 Structure Viewer Selector")
+    st.markdown("#### Structure Viewer Selector")
     input_mode = st.radio("Select Single CIF Source:", ["Use Sample TPMS", "Upload Single .CIF File"], index=0, key="sb_input_mode")
     
     cif_text = None
@@ -613,15 +613,15 @@ with st.sidebar:
             st.error(f"Error reading CIF: {e}")
 
     st.divider()
-    st.markdown("#### 📊 Model Checkpoint Status")
+    st.markdown("#### Model Checkpoint Status")
     if bundle is not None:
-        st.success("CGCNN Model Loaded (`cgcnn_model.pt`) ✅")
+        st.success("CGCNN Model Loaded (`cgcnn_model.pt`) ")
         st.caption(f"Device: `{bundle['device']}` | Val MAE: `{bundle['meta'].get('val_loss', 0.0):.4f}`")
     else:
         st.error("Model `cgcnn_model.pt` not found!")
 
     if eda_df is not None:
-        st.success(f"Matched Polysulfide Dataset Loaded (`{len(eda_df):,}` records) ✅")
+        st.success(f"Matched Polysulfide Dataset Loaded (`{len(eda_df):,}` records) ")
     else:
         st.warning("EDA Dataset not found.")
 
@@ -854,7 +854,7 @@ st.markdown(theme_css, unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 st.markdown("""
 <div class="hero-banner">
-    <div class="hero-badge">⚡ Advanced Computational Material Screening</div>
+    <div class="hero-badge">Advanced Computational Material Screening</div>
     <div class="hero-title">Li-S Research Platform & Graphene TPMS Screening</div>
     <div class="hero-subtitle">
         Lithium-Sulfur (Li-S) Battery Research Platform: Electrochemical Rationale, Polysulfide Kinetics, 
@@ -866,11 +866,11 @@ st.markdown("""
 
 # Main Navigation Tabs
 tab_intro, tab_tpms_rank, tab_viz3d, tab_eda, tab_polysulfide = st.tabs([
-    "🧬 Scientific Foundations & Li-S Electrochemistry",
-    "🏆 TPMS Evaluation & Multi-CIF Leaderboard",
-    "🧊 3D Crystal & Atomic Graph Viewer",
-    "📊 Exploratory Data Analytics (EDA) Dashboard",
-    "🧪 Graphene TPMS & Polysulfide Adsorption Interface"
+    "Scientific Foundations & Li-S Electrochemistry",
+    "TPMS Evaluation & Multi-CIF Leaderboard",
+    "3D Crystal & Atomic Graph Viewer",
+    "Exploratory Data Analytics (EDA) Dashboard",
+    "Graphene TPMS & Polysulfide Adsorption Interface"
 ])
 
 
@@ -880,7 +880,7 @@ tab_intro, tab_tpms_rank, tab_viz3d, tab_eda, tab_polysulfide = st.tabs([
 with tab_intro:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🧬 Scientific Foundations of Lithium-Sulfur (Li-S) Batteries</span></div>
+        <div class="web-card-title"><span>Scientific Foundations of Lithium-Sulfur (Li-S) Batteries</span></div>
         <p>
             <b>Lithium-Sulfur (Li-S) batteries</b> represent a next-generation secondary energy storage technology offering remarkable theoretical energy density and specific capacity far surpassing conventional Lithium-ion (Li-ion) batteries. 
             Theoretically, elemental sulfur cathodes (<b>S<sub>8</sub></b>) deliver an extreme <b>specific capacity of 1,675 mAh/g</b> and a <b>specific energy density up to &approx; 2,600 Wh/kg</b> — nearly 5 times higher than standard Li-ion cathode materials (LiCoO<sub>2</sub> / NMC).
@@ -911,7 +911,7 @@ with tab_intro:
     # SECTION 1: DETAILED ELECTROCHEMICAL REACTION MECHANISM & FORMULAS
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🔄 1. Electrochemical Reactions & Polysulfide Reduction Mechanisms</span></div>
+        <div class="web-card-title"><span>1. Electrochemical Reactions & Polysulfide Reduction Mechanisms</span></div>
         <p>
             During discharge, cathode electrochemical conversion proceeds via the step-wise reduction of elemental sulfur (S<sub>8</sub>) into solid Lithium Sulfide (Li<sub>2</sub>S):
         </p>
@@ -971,7 +971,7 @@ with tab_intro:
     # SECTION 2: POLYSULFIDE SHUTTLE EFFECT & ANODE CORROSION
     st.markdown("""
     <div class="web-card" style="border-left: 6px solid #ef4444;">
-        <div class="web-card-title"><span style="background:linear-gradient(90deg, #ef4444, #f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚠️ 2. Core Challenges: Polysulfide Shuttle Effect & Anode Parasitic Corrosion</span></div>
+        <div class="web-card-title"><span style="background:linear-gradient(90deg, #ef4444, #f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">2. Core Challenges: Polysulfide Shuttle Effect & Anode Parasitic Corrosion</span></div>
         <p style="margin:0;">
             <b>1. Cathode Dissolution:</b> Intermediate <i>long-chain Lithium Polysulfides</i> (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>) readily dissolve into liquid organic electrolytes (DME/DOL).<br>
             <b>2. Cross-Separator Migration:</b> Driven by concentration gradients, dissolved polysulfides shuttle across the separator toward the Lithium metal anode.<br>
@@ -1015,7 +1015,7 @@ with tab_intro:
     # SECTION 3: RATIONALE FOR HOST MATERIALS & 5 TARGET PROPERTIES
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🛡️ 3. Rationale for Cathode Host Materials & Justification of 5 Core Target Properties</span></div>
+        <div class="web-card-title"><span>3. Rationale for Cathode Host Materials & Justification of 5 Core Target Properties</span></div>
         <p style="margin:0;">
             To suppress the Shuttle Effect and compensate for elemental sulfur's poor electrical conductivity (&approx; 5 &times; 10<sup>-30</sup> S/cm), 
             a conductive <b>Cathode Host Material</b> matrix such as <b>Graphene TPMS (Triply Periodic Minimal Surfaces)</b> scaffolds is required.
@@ -1124,21 +1124,21 @@ with tab_intro:
         col_ctrl_t1, col_viz_t1 = st.columns([1.1, 1.9])
 
         with col_ctrl_t1:
-            st.markdown("#### ⚙️ Display Mode & Rendering Controls")
+            st.markdown("#### Display Mode & Rendering Controls")
             t1_display_mode = st.radio(
                 "Visual Mode / Tampilan Interface:",
                 [
-                    "📊 2D Journal Figure Matrix: Top View vs Side View (Kodingan Python Murni 100%)",
-                    "🧊 3D Journal Matrix: Individual 5-Species 3D Viewers (Format Jurnal Interaktif 3Dmol.js)",
-                    "🐍 2D Host Surface Adsorption Overview (Kodingan Python Murni 100%)",
-                    "🧊 3D Combined Surface: All 5 Species Simultaneous (Visual Interaktif 3Dmol.js)"
+                    "2D Journal Figure Matrix: Top View vs Side View (Kodingan Python Murni 100%)",
+                    "3D Journal Matrix: Individual 5-Species 3D Viewers (Format Jurnal Interaktif 3Dmol.js)",
+                    "2D Host Surface Adsorption Overview (Kodingan Python Murni 100%)",
+                    "3D Combined Surface: All 5 Species Simultaneous (Visual Interaktif 3Dmol.js)"
                 ],
                 index=0,
                 key="t1_display_mode"
             )
 
             if "3D" in t1_display_mode:
-                st.markdown("#### 🎨 3D Representation Style & Format")
+                st.markdown("#### 3D Representation Style & Format")
                 col_s1, col_f1 = st.columns([1.1, 0.9])
                 with col_s1:
                     t1_render_style = st.selectbox(
@@ -1155,7 +1155,7 @@ with tab_intro:
                 with col_f1:
                     t1_fmt_choice = st.radio("3D Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t1_fmt_choice", horizontal=True)
 
-                st.markdown("##### 📐 Cathode Host Material Expansion (X x Y x Z, up to 3x3x3)")
+                st.markdown("##### Cathode Host Material Expansion (X x Y x Z, up to 3x3x3)")
                 t1_sc1, t1_sc2, t1_sc3 = st.columns(3)
                 with t1_sc1:
                     t1_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t1_sc_x")
@@ -1184,7 +1184,7 @@ with tab_intro:
             # Chemistry Europe / Wiley Guidelines Badge
             st.markdown("""
             <div style="background: #eff6ff; border: 1px solid #93c5fd; padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.88rem; margin-top: 0.8rem; color: #1e3a8a;">
-                <b>📐 Chemistry Europe / Wiley Publisher Compliance:</b><br>
+                <b>Chemistry Europe / Wiley Publisher Compliance:</b><br>
                 • <b>Resolution</b>: 600 DPI High-Res Vector Line Art<br>
                 • <b>Font Family</b>: Arial / Helvetica (Sans-Serif)<br>
                 • <b>Font Sizes</b>: Title 10 pt, Labels 8 pt, Details 7.5 pt<br>
@@ -1194,7 +1194,7 @@ with tab_intro:
             """, unsafe_allow_html=True)
 
             # Cathode Host Material Metrics
-            st.markdown("#### ⚡ Cathode Host Material Physical Metrics")
+            st.markdown("#### Cathode Host Material Physical Metrics")
             m_c1, m_c2 = st.columns(2)
             with m_c1:
                 st.metric(label="Band Gap (E_g)", value="0.00 eV", delta="Metallic Semi-Metal")
@@ -1207,14 +1207,14 @@ with tab_intro:
 
         with col_viz_t1:
             if "2D Journal Figure Matrix" in t1_display_mode:
-                st.markdown("#### 📊 Schematic illustration of LiPS adsorption on the host material")
+                st.markdown("#### Schematic illustration of LiPS adsorption on the host material")
                 fig_grid = generate_matplotlib_top_side_grid_fig()
                 st.pyplot(fig_grid)
-                st.caption("💡 **Figure Caption**: Schematic illustration of LiPS adsorption on the host material, showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
+                st.caption("**Figure Caption**: Schematic illustration of LiPS adsorption on the host material, showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
             
             elif "3D Journal Matrix" in t1_display_mode:
-                st.markdown("#### 🧊 3D Schematic Matrix of LiPS Adsorption on Host Material (3Dmol.js WebGL)")
-                st.caption("💡 **Interactive 3D WebGL**: Showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
+                st.markdown("#### 3D Schematic Matrix of LiPS Adsorption on Host Material (3Dmol.js WebGL)")
+                st.caption("**Interactive 3D WebGL**: Showing the interaction of different lithium polysulfide species (Li₂S₈, Li₂S₆, Li₂S₄, Li₂S₂, and Li₂S) with the host surface.")
                 
                 species_list = [
                     ("Li2S8", "Li₂S₈ (Long-Chain Polysulfide)", "2.45 eV", "1.98 Å"),
@@ -1225,7 +1225,7 @@ with tab_intro:
                 ]
 
                 for sp_id, sp_label, e_ads_val, d_val in species_list:
-                    st.markdown(f"##### ⚛️ {sp_label}")
+                    st.markdown(f"##### {sp_label}")
                     c_3d_vis, c_3d_meta = st.columns([1.5, 0.8])
                     
                     sp_cif = get_flat_graphene_single_polysulfide_cif(
@@ -1263,7 +1263,7 @@ with tab_intro:
                         """, unsafe_allow_html=True)
                         if sp_cif:
                             st.download_button(
-                                label=f"📥 Download {sp_id} CIF",
+                                label=f"Download {sp_id} CIF",
                                 data=sp_cif,
                                 file_name=f"{sp_id}_cathode_host_material.cif",
                                 mime="chemical/x-cif",
@@ -1272,12 +1272,12 @@ with tab_intro:
                     st.divider()
 
             elif "Surface" in t1_display_mode or "Overview" in t1_display_mode:
-                st.markdown("#### 🐍 2D Vector Plot: Schematic illustration of LiPS adsorption on the host material")
+                st.markdown("#### 2D Vector Plot: Schematic illustration of LiPS adsorption on the host material")
                 fig_mpl = generate_matplotlib_graphene_fig()
                 st.pyplot(fig_mpl)
-                st.caption("💡 **Pure Python Render**: 2D vector plot rendered dynamically using Python Matplotlib code.")
+                st.caption("**Pure Python Render**: 2D vector plot rendered dynamically using Python Matplotlib code.")
             else:
-                st.markdown("#### 🧊 3D Combined Surface: All 5 Species Simultaneous (Li₂S₈ → Li₂S)")
+                st.markdown("#### 3D Combined Surface: All 5 Species Simultaneous (Li₂S₈ → Li₂S)")
                 
                 flat_cif = get_flat_graphene_all_polysulfides_cif(
                     supercell_x=t1_sc_x,
@@ -1301,13 +1301,13 @@ with tab_intro:
                         bg_color="#ffffff"
                     )
                     
-                    st.caption("💡 **3D Interaction**: Click and drag to rotate the Cathode Host Material + 5 polysulfide adsorbates. Use **📷 Save 3D PNG** to download snapshot.")
+                    st.caption("**3D Interaction**: Click and drag to rotate the Cathode Host Material + 5 polysulfide adsorbates. Use **Save 3D PNG** to download snapshot.")
 
-                    st.markdown("##### 📥 Export Multi-Adsorbate Cathode Host Material Structure")
+                    st.markdown("##### Export Multi-Adsorbate Cathode Host Material Structure")
                     dl1, dl2 = st.columns(2)
                     with dl1:
                         st.download_button(
-                            label="📥 Download CIF (lips_cathode_host_material.cif)",
+                            label="Download CIF (lips_cathode_host_material.cif)",
                             data=flat_cif,
                             file_name="lips_cathode_host_material.cif",
                             mime="chemical/x-cif",
@@ -1315,7 +1315,7 @@ with tab_intro:
                         )
                     with dl2:
                         st.download_button(
-                            label="📥 Download XYZ (lips_cathode_host_material.xyz)",
+                            label="Download XYZ (lips_cathode_host_material.xyz)",
                             data=flat_xyz,
                             file_name="lips_cathode_host_material.xyz",
                             mime="chemical/x-xyz",
@@ -1331,7 +1331,7 @@ with tab_intro:
 with tab_tpms_rank:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🏆 TPMS Evaluation Results & Multi-CIF CGCNN Inference</span></div>
+        <div class="web-card-title"><span>TPMS Evaluation Results & Multi-CIF CGCNN Inference</span></div>
         <p style="margin:0;">
             This module presents the <b>Evaluation Results of Graphene TPMS (Triply Periodic Minimal Surfaces) Topologies</b>. 
             All 5 TPMS materials are evaluated based on <b>5 Core Physical Target Properties</b> weighted equally (20% per property) to compute an overall composite host score.
@@ -1340,7 +1340,7 @@ with tab_tpms_rank:
     """, unsafe_allow_html=True)
 
     # 1. EVALUATION OF ALL 5 GRAPHENE TPMS SHEETS
-    st.markdown("### 📊 1. Evaluation & Ranking of 5 Graphene TPMS Topologies")
+    st.markdown("### 1. Evaluation & Ranking of 5 Graphene TPMS Topologies")
 
     tpms_results = []
     if os.path.exists(TPMS_DIR) and bundle is not None:
@@ -1400,14 +1400,14 @@ with tab_tpms_rank:
         df_tpms["Overall_Rank"] = df_tpms.index + 1
 
         # DISPLAY CARDS FOR ALL 5 MATERIALS SHOWING ALL PHYSICAL PROPERTIES
-        st.markdown("#### 🏆 Full Property Breakdown of All 5 Graphene TPMS Scaffolds")
+        st.markdown("#### Full Property Breakdown of All 5 Graphene TPMS Scaffolds")
 
         badges_info = [
-            {"icon": "🥇", "label": "Rank 1 - Champion Host", "border": "#eab308", "bg_accent": "rgba(234, 179, 8, 0.12)"},
-            {"icon": "🥈", "label": "Rank 2 - Runner Up", "border": "#94a3b8", "bg_accent": "rgba(148, 163, 184, 0.12)"},
-            {"icon": "🥉", "label": "Rank 3 - High Performer", "border": "#b45309", "bg_accent": "rgba(180, 83, 9, 0.12)"},
-            {"icon": "🎖️", "label": "Rank 4 - Solid Candidate", "border": "#38bdf8", "bg_accent": "rgba(56, 189, 248, 0.12)"},
-            {"icon": "🎖️", "label": "Rank 5 - Benchmark Host", "border": "#818cf8", "bg_accent": "rgba(129, 140, 248, 0.12)"}
+            {"icon": "Rank 1:", "label": "Rank 1 - Champion Host", "border": "#eab308", "bg_accent": "rgba(234, 179, 8, 0.12)"},
+            {"icon": "Rank 2:", "label": "Rank 2 - Runner Up", "border": "#94a3b8", "bg_accent": "rgba(148, 163, 184, 0.12)"},
+            {"icon": "Rank 3:", "label": "Rank 3 - High Performer", "border": "#b45309", "bg_accent": "rgba(180, 83, 9, 0.12)"},
+            {"icon": "Rank Candidate:", "label": "Rank 4 - Solid Candidate", "border": "#38bdf8", "bg_accent": "rgba(56, 189, 248, 0.12)"},
+            {"icon": "Rank Candidate:", "label": "Rank 5 - Benchmark Host", "border": "#818cf8", "bg_accent": "rgba(129, 140, 248, 0.12)"}
         ]
 
         # Row 1: Ranks 1, 2, 3
@@ -1422,14 +1422,14 @@ with tab_tpms_rank:
                     <div style="font-size:1.6rem !important; font-weight:800; margin:0.3rem 0;">{row_item['TPMS']}</div>
                     <div style="font-size:1.25rem !important; color:#0284c7; font-weight:800; margin-bottom:0.4rem;">Overall Score: {row_item['Overall_Score']:.4f}</div>
                     <div style="font-size:0.92rem !important; margin-bottom:0.8rem;">
-                        📁 File: <code>{row_item['CIF_File']}</code> | ⚛️ <b>{row_item['Num_Atoms']} Atoms</b>
+                        File: <code>{row_item['CIF_File']}</code> | <b>{row_item['Num_Atoms']} Atoms</b>
                     </div>
                     <div style="border-top: 1px solid rgba(148,163,184,0.3); padding-top: 0.8rem; font-size: 1.02rem !important; line-height: 1.65;">
-                        <b>⚡ Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
-                        <b>🌱 Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
-                        <b>🛡️ Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
-                        <b>📐 Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
-                        <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
+                        <b>Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
+                        <b>Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
+                        <b>Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
+                        <b>Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
+                        <b>Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
                     </div>
                     <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
                         <b>Breakdown of 5-Pillar Sub-Scores:</b><br>
@@ -1452,14 +1452,14 @@ with tab_tpms_rank:
                         <div style="font-size:1.6rem !important; font-weight:800; margin:0.3rem 0;">{row_item['TPMS']}</div>
                         <div style="font-size:1.25rem !important; color:#0284c7; font-weight:800; margin-bottom:0.4rem;">Overall Score: {row_item['Overall_Score']:.4f}</div>
                         <div style="font-size:0.92rem !important; margin-bottom:0.8rem;">
-                            📁 File: <code>{row_item['CIF_File']}</code> | ⚛️ <b>{row_item['Num_Atoms']} Atoms</b>
+                            File: <code>{row_item['CIF_File']}</code> | <b>{row_item['Num_Atoms']} Atoms</b>
                         </div>
                         <div style="border-top: 1px solid rgba(148,163,184,0.3); padding-top: 0.8rem; font-size: 1.02rem !important; line-height: 1.65;">
-                            <b>⚡ Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
-                            <b>🌱 Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
-                            <b>🛡️ Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
-                            <b>📐 Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
-                            <b>🧲 Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
+                            <b>Band Gap (E<sub>g</sub>):</b> {row_item['Band_Gap_eV']:.4f} eV <span style="font-size:0.85rem; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.2); color:#0284c7; font-weight:700;">{row_item['Material_Type']}</span><br>
+                            <b>Formation E (E<sub>f</sub>):</b> {row_item['Formation_Energy_eV_atom']:.4f} eV/atom<br>
+                            <b>Bulk Modulus (K):</b> {row_item['Bulk_Modulus_GPa']:.2f} GPa<br>
+                            <b>Shear Modulus (G):</b> {row_item['Shear_Modulus_GPa']:.2f} GPa<br>
+                            <b>Adsorption E (E<sub>ads</sub>):</b> {row_item['Adsorption_Energy_eV']:.3f} eV
                         </div>
                         <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed rgba(148,163,184,0.3); font-size:0.88rem !important;">
                             <b>Breakdown of 5-Pillar Sub-Scores:</b><br>
@@ -1470,7 +1470,7 @@ with tab_tpms_rank:
 
         st.divider()
 
-        st.markdown("#### 📋 Comprehensive Ranking Table Across All Graphene TPMS Topologies")
+        st.markdown("#### Comprehensive Ranking Table Across All Graphene TPMS Topologies")
         st.dataframe(
             df_tpms[[
                 "Overall_Rank", "TPMS", "Num_Atoms", "Material_Type",
@@ -1488,7 +1488,7 @@ with tab_tpms_rank:
         )
 
         # Plotly Radar Chart / Spider Web plot comparing all 5 TPMS hosts
-        st.markdown("#### 🕸️ 5-Axis Performance Radar Chart for Graphene TPMS Topologies")
+        st.markdown("#### 5-Axis Performance Radar Chart for Graphene TPMS Topologies")
         categories = ["Band Gap (Norm.)", "Formation Energy (Norm.)", "Bulk Modulus (Norm.)", "Shear Modulus (Norm.)", "Adsorption Energy (Norm.)"]
 
         fig_radar = go.Figure()
@@ -1529,7 +1529,7 @@ with tab_tpms_rank:
     st.divider()
 
     # 2. BATCH UPLOAD & RANKING CUSTOM CIF FILES (UP TO 5 FILES)
-    st.markdown("### 📤 2. Upload & Rank Custom Multi-CIF Batch (Up to 5 CIF Files)")
+    st.markdown("### 2. Upload & Rank Custom Multi-CIF Batch (Up to 5 CIF Files)")
     st.markdown("Upload **1 to 5 custom .CIF crystal files** for automated multi-property prediction and ranking via the CGCNN deep-learning model:", unsafe_allow_html=True)
 
     uploaded_batch_files = st.file_uploader(
@@ -1541,7 +1541,7 @@ with tab_tpms_rank:
 
     if uploaded_batch_files:
         if len(uploaded_batch_files) > 5:
-            st.warning("⚠️ More than 5 files uploaded. Processing the first 5 files only.")
+            st.warning("More than 5 files uploaded. Processing the first 5 files only.")
             batch_list = uploaded_batch_files[:5]
         else:
             batch_list = uploaded_batch_files
@@ -1599,7 +1599,7 @@ with tab_tpms_rank:
                 df_batch = df_batch.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
                 df_batch["Rank"] = df_batch.index + 1
 
-                st.markdown("#### 🏆 Prediction Cards & Physical Properties for Uploaded Batch")
+                st.markdown("#### Prediction Cards & Physical Properties for Uploaded Batch")
                 b_cols = st.columns(min(3, len(df_batch)))
                 for b_idx, b_row in df_batch.iterrows():
                     with b_cols[b_idx % len(b_cols)]:
@@ -1609,16 +1609,16 @@ with tab_tpms_rank:
                             <div style="font-size:1.3rem !important; font-weight:800; margin:0.3rem 0;">{b_row['File_Name']}</div>
                             <div style="font-size:1.15rem !important; color:#0284c7; font-weight:800;">Score: {b_row['Overall_Score']:.4f}</div>
                             <div style="border-top:1px solid rgba(148,163,184,0.3); margin-top:0.6rem; padding-top:0.6rem; font-size:0.98rem !important; line-height:1.6;">
-                                ⚡ Band Gap: <b>{b_row['Band_Gap_eV']:.4f} eV</b> ({b_row['Material_Type']})<br>
-                                🌱 Formation E: <b>{b_row['Formation_Energy_eV_atom']:.4f} eV/atom</b><br>
-                                🛡️ Bulk Modulus: <b>{b_row['Bulk_Modulus_GPa']:.2f} GPa</b><br>
-                                📐 Shear Modulus: <b>{b_row['Shear_Modulus_GPa']:.2f} GPa</b><br>
-                                🧲 Adsorption E: <b>{b_row['Adsorption_Energy_eV']:.3f} eV</b>
+                                Band Gap: <b>{b_row['Band_Gap_eV']:.4f} eV</b> ({b_row['Material_Type']})<br>
+                                Formation E: <b>{b_row['Formation_Energy_eV_atom']:.4f} eV/atom</b><br>
+                                Bulk Modulus: <b>{b_row['Bulk_Modulus_GPa']:.2f} GPa</b><br>
+                                Shear Modulus: <b>{b_row['Shear_Modulus_GPa']:.2f} GPa</b><br>
+                                Adsorption E: <b>{b_row['Adsorption_Energy_eV']:.3f} eV</b>
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
 
-                st.markdown("#### 📋 Leaderboard Table for Custom Multi-CIF Uploads")
+                st.markdown("#### Leaderboard Table for Custom Multi-CIF Uploads")
                 st.dataframe(
                     df_batch[[
                         "Rank", "File_Name", "Formula", "Num_Atoms", "Material_Type",
@@ -1640,7 +1640,7 @@ with tab_tpms_rank:
 # TAB 3: 3D CRYSTAL & GRAPH VISUALIZATION
 # ===========================================================================
 with tab_viz3d:
-    st.markdown("### 🧊 3D Crystal Structure & Atomic Graph Visualization")
+    st.markdown("### 3D Crystal Structure & Atomic Graph Visualization")
     
     if "cif_text" in st.session_state:
         cif_text_curr = st.session_state["cif_text"]
@@ -1656,7 +1656,7 @@ with tab_viz3d:
             col_v1, col_v2 = st.columns([1, 1])
 
             with col_v1:
-                st.markdown(f"#### ⚛️ 3D Renderer: `{cif_name_curr}`")
+                st.markdown(f"#### 3D Renderer: `{cif_name_curr}`")
                 
                 col_f1, col_f2 = st.columns([1, 1])
                 with col_f1:
@@ -1675,7 +1675,7 @@ with tab_viz3d:
                         key="t3_viz_style"
                     )
 
-                st.markdown("##### 📐 Supercell Expansion (X x Y x Z, up to 3x3x3)")
+                st.markdown("##### Supercell Expansion (X x Y x Z, up to 3x3x3)")
                 sc_c1, sc_c2, sc_c3 = st.columns(3)
                 with sc_c1:
                     sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t3_sc_x")
@@ -1690,12 +1690,12 @@ with tab_viz3d:
                 
                 render_structure_3d(render_data_t3, fmt=fmt_code_t3, height=480, style=viz_style, supercell_x=sc_x, supercell_y=sc_y, supercell_z=sc_z, bg_color="#ffffff")
 
-                st.markdown("##### 📥 Structure Export Options")
+                st.markdown("##### Structure Export Options")
                 dl_col1, dl_col2 = st.columns(2)
                 base_name_clean = os.path.splitext(cif_name_curr)[0]
                 with dl_col1:
                     st.download_button(
-                        label=f"📥 Download CIF ({base_name_clean}.cif)",
+                        label=f"Download CIF ({base_name_clean}.cif)",
                         data=cif_text_curr,
                         file_name=f"{base_name_clean}.cif",
                         mime="chemical/x-cif",
@@ -1703,18 +1703,18 @@ with tab_viz3d:
                     )
                 with dl_col2:
                     st.download_button(
-                        label=f"📥 Download XYZ ({base_name_clean}.xyz)",
+                        label=f"Download XYZ ({base_name_clean}.xyz)",
                         data=xyz_text_t3,
                         file_name=f"{base_name_clean}.xyz",
                         mime="chemical/x-xyz",
                         key="t3_dl_xyz"
                     )
 
-                with st.expander("📄 Inspect Atomic Coordinates (XYZ Format)"):
+                with st.expander("Inspect Atomic Coordinates (XYZ Format)"):
                     st.code(xyz_text_t3[:1800] + ("\n... [truncated for display]" if len(xyz_text_t3) > 1800 else ""), language="text")
 
             with col_v2:
-                st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
+                st.markdown("#### Crystal Graph Network (3D Plotly Nodes & Edges)")
                 if struct is not None:
                     try:
                         atom_fea, nbr_fea, nbr_fea_idx = build_graph(struct, max_num_nbr=12, radius=4.0)
@@ -1780,7 +1780,7 @@ with tab_viz3d:
 with tab_eda:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>📊 Cathode Host Material Exploratory Data Analytics (EDA) Dashboard</span></div>
+        <div class="web-card-title"><span>Cathode Host Material Exploratory Data Analytics (EDA) Dashboard</span></div>
         <p style="margin:0;">
             This research dashboard provides statistical exploration of the Li-S cathode host dataset, 
             covering frequency distributions of the 5 core target physical properties with overlaid KDE density curves, 
@@ -1841,7 +1841,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 1: 5-PROPERTY DISTRIBUTION HISTOGRAMS WITH OVERLAID SMOOTH KDE CURVES
-        st.markdown("### 📈 Statistical Distributions & Density Profiles (KDE) across 5 Core Target Properties")
+        st.markdown("### Statistical Distributions & Density Profiles (KDE) across 5 Core Target Properties")
         
         fig1_sub = make_subplots(
             rows=2, cols=3,
@@ -1916,7 +1916,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 2: INTER-PROPERTY PEARSON CORRELATION MATRIX HEATMAP FOR 5 CORE PROPERTIES
-        st.markdown("### 🧮 Inter-Property Pearson Linear Correlation Heatmap")
+        st.markdown("### Inter-Property Pearson Linear Correlation Heatmap")
         
         target_cols = ["band_gap", "formation_energy", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]
         valid_targets = [c for c in target_cols if c in eda_df.columns]
@@ -1951,7 +1951,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 3: MATERIAL TYPE DISTRIBUTION ACCROSS ALL 5 PROPERTIES
-        st.markdown("### 📊 3. Material Count & Distribution across 5 Target Physical Properties")
+        st.markdown("### 3. Material Count & Distribution across 5 Target Physical Properties")
         st.markdown("""
         Comprehensive distribution breakdown of host materials categorized across all <b>5 core physical target properties</b>:
         """)
@@ -2053,7 +2053,7 @@ with tab_eda:
             )
             st.plotly_chart(fig3_mech, use_container_width=True)
 
-        st.markdown("#### 📋 Summary Table of Material Categorization (5 Physical Target Properties)")
+        st.markdown("#### Summary Table of Material Categorization (5 Physical Target Properties)")
         
         total_rec = len(eda_df_cat)
         prop_summary_list = []
@@ -2100,7 +2100,7 @@ with tab_eda:
         st.divider()
 
         # SECTION 4: FULL DENSITY PARITY PLOTS WITH IN-SUBPLOT EVALUATION METRIC BOXES
-        st.markdown("### 🎯 Predictive Accuracy Evaluation of Multi-Target CGCNN Model")
+        st.markdown("### Predictive Accuracy Evaluation of Multi-Target CGCNN Model")
         st.markdown(r"Predictive performance of the CGCNN model evaluated on the hold-out **Test Set** showing actual vs predicted scatter points, 1:1 ideal reference line, $\pm 10\%$ error tolerance bands, and annotated metric boxes ($R^2$, MAE, RMSE):")
 
         # Benchmarked Test Set Accuracy Metrics for 3000 Samples
@@ -2232,7 +2232,7 @@ with tab_eda:
         st.plotly_chart(fig_parity, use_container_width=True)
 
         # COMPREHENSIVE EVALUATION METRICS TABLE SUMMARY
-        st.markdown("#### 📊 Model Evaluation Summary Table across 5 Core Target Properties")
+        st.markdown("#### Model Evaluation Summary Table across 5 Core Target Properties")
         df_p_summary = pd.DataFrame([
             {
                 "Target Property": m["name"],
@@ -2256,7 +2256,7 @@ with tab_eda:
 with tab_polysulfide:
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🧪 Graphene TPMS Scaffold & Polysulfide (Li<sub>2</sub>S<sub>x</sub>) Adsorption Interface</span></div>
+        <div class="web-card-title"><span>Graphene TPMS Scaffold & Polysulfide (Li<sub>2</sub>S<sub>x</sub>) Adsorption Interface</span></div>
         <p>
             The major bottleneck in Lithium-Sulfur (Li-S) batteries is the dissolution of intermediate lithium polysulfides into the ether electrolyte and their subsequent migration ("shuttle effect") to the lithium anode. 
             <b>Triply Periodic Minimal Surface (TPMS) graphene scaffolds</b> provide continuous 3D nanoscale channels and high surface area, serving as active host architectures that physically confine and chemically anchor intermediate lithium polysulfides (<b>Li<sub>2</sub>S<sub>8</sub></b>, <b>Li<sub>2</sub>S<sub>6</sub></b>, <b>Li<sub>2</sub>S<sub>4</sub></b>) as well as insoluble discharge species (<b>Li<sub>2</sub>S<sub>2</sub></b>, <b>Li<sub>2</sub>S</b>).
@@ -2301,13 +2301,13 @@ with tab_polysulfide:
         col_ctrl, col_viz = st.columns([1.1, 1.9])
 
         with col_ctrl:
-            st.markdown("#### ⚙️ Adsorption Interface Setup")
+            st.markdown("#### Adsorption Interface Setup")
             
             selected_tpms_name = st.selectbox("1. Select Graphene TPMS Host Scaffold:", list(tpms_options.keys()), index=0, key="t5_tpms_name")
             selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1, key="t5_species_label")
             species_code = species_options[selected_species_label]
 
-            st.markdown("#### 🎨 3D Rendering & Format Options")
+            st.markdown("#### 3D Rendering & Format Options")
             col_t5_style, col_t5_fmt = st.columns([1.1, 0.9])
             with col_t5_style:
                 render_style = st.selectbox(
@@ -2324,7 +2324,7 @@ with tab_polysulfide:
             with col_t5_fmt:
                 t5_fmt_choice = st.radio("3D File Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t5_fmt_choice", horizontal=True)
 
-            st.markdown("##### 📐 Supercell Surface Expansion (X x Y x Z, up to 3x3x3)")
+            st.markdown("##### Supercell Surface Expansion (X x Y x Z, up to 3x3x3)")
             t5_sc1, t5_sc2, t5_sc3 = st.columns(3)
             with t5_sc1:
                 t5_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t5_sc_x")
@@ -2337,7 +2337,7 @@ with tab_polysulfide:
             eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
             p_dict = tpms_5props.get(tpms_key, tpms_5props["Gyroid"])
 
-            st.markdown(f"#### 📊 5 Target Physical Properties: `{tpms_key}` Scaffold")
+            st.markdown(f"#### 5 Target Physical Properties: `{tpms_key}` Scaffold")
             
             p1_c1, p1_c2 = st.columns(2)
             with p1_c1:
@@ -2358,12 +2358,12 @@ with tab_polysulfide:
             )
 
             if eads_val >= 2.0:
-                st.success("✅ **High Shuttle Containment**: Strong chemical anchoring suppresses polysulfide shuttle dissolution.")
+                st.success(" **High Shuttle Containment**: Strong chemical anchoring suppresses polysulfide shuttle dissolution.")
             else:
                 st.info("ℹ️ **Moderate Confinement**: Scaffolding provides 3D channel physical trapping.")
 
         with col_viz:
-            st.markdown(f"#### 🧊 3D Adsorption Complex: {selected_tpms_name} + {species_code}")
+            st.markdown(f"#### 3D Adsorption Complex: {selected_tpms_name} + {species_code}")
             
             cif_filename = tpms_options[selected_tpms_name]
             tpms_cif_path = os.path.join(TPMS_DIR, cif_filename)
@@ -2386,13 +2386,13 @@ with tab_polysulfide:
                     bg_color="#ffffff"
                 )
                 
-                st.caption("💡 **3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
+                st.caption("**3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
                 
-                st.markdown("##### 📥 Export Adsorbed Complex Structure")
+                st.markdown("##### Export Adsorbed Complex Structure")
                 dl_t5_c1, dl_t5_c2 = st.columns(2)
                 with dl_t5_c1:
                     st.download_button(
-                        label=f"📥 Download CIF ({tpms_key}_{species_code}.cif)",
+                        label=f"Download CIF ({tpms_key}_{species_code}.cif)",
                         data=adsorbed_cif,
                         file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.cif",
                         mime="chemical/x-cif",
@@ -2400,7 +2400,7 @@ with tab_polysulfide:
                     )
                 with dl_t5_c2:
                     st.download_button(
-                        label=f"📥 Download XYZ ({tpms_key}_{species_code}.xyz)",
+                        label=f"Download XYZ ({tpms_key}_{species_code}.xyz)",
                         data=adsorbed_xyz,
                         file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.xyz",
                         mime="chemical/x-xyz",

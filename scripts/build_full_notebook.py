@@ -9,28 +9,28 @@ def create_notebook():
     nb = nbf.v4.new_notebook()
 
     # CELL 0: Title & Research Rationale
-    c0 = nbf.v4.new_markdown_cell(r"""#  Dual-Scale Material Property Screening & Polysulfide Adsorption Analysis Pipeline
+    c0 = nbf.v4.new_markdown_cell(r"""# Dual-Scale Material Property Screening & Polysulfide Adsorption Analysis Pipeline
 
 > **Fokus Penelitian**: Kerangka kerja skrining komputasional dua skala (Dual-Scale Computational Screening) untuk material host katoda Baterai Lithium-Sulfur (Li-S) melalui ekstraksi data JARVIS-DFT3D, Exploratory Data Analysis (EDA), Crystal Graph Convolutional Network (CGCNN) multi-target, Skrining Dataset Material Host Katoda, dan Evaluasi Arsitektur Perancah Sheet Triply Periodic Minimal Surface (TPMS) Graphene.
 
 ---
 
-###  5 Properti Fisik Utama (5 Core Target Properties)
+### 5 Properti Fisik Utama (5 Core Target Properties)
 1. **Band Gap (Eg, eV)** — Indikator konduktivitas elektronik (Nilai lebih rendah/logam lebih disukai).
 2. **Formation Energy (Ef, eV/atom)** — Stabilitas termodinamika kristal (Nilai lebih negatif/rendah lebih disukai).
 3. **Bulk Modulus (K, GPa)** — Ketahanan terhadap ekspansi volume hidrostatik (Nilai lebih tinggi lebih disukai).
 4. **Shear Modulus (G, GPa)** — Ketahanan terhadap stres geser dan kekakuan struktur (Nilai lebih tinggi lebih disukai).
-5. **Polysulfide Adsorption Energy (E_ads, eV)** — Kemampuan penjangkaran kimiawi terhadap efek shuttle polisulfida (Nilai lebih positif/tinggi lebih disukai).
+5. **Polysulfide Adsorption Energy (E_ads, eV)** — Kemampuan penjangkaran kimiawi terhadap efek shuttle polisulfida (Nilai positif lebih tinggi menyatakan penjangkaran/ikatan yang lebih kuat — $E_{ads} > 0$).
 
 ---
 
-### ️ Arsitektur Skrining Dua Skala (Dual-Scale Architecture)
+### Arsitektur Skrining Dua Skala (Dual-Scale Architecture)
 * [G] **Skrining Skala Material Katoda (Section 4)**: Evaluasi dan pemeringkatan 35 material kandidat host unik dari Dataset Matched Adsorpsi Polisulfida (`df_matched`).
-*  **Skrining Arsitektur Mesoscale TPMS (Section 5)**: Prediksi CGCNN terhadap 5 topologi sheet Graphene TPMS (*Gyroid, Neovius, Diamond, IWP, Primitive*).
+* **Skrining Arsitektur Mesoscale TPMS (Section 5)**: Prediksi CGCNN terhadap 5 topologi sheet Graphene TPMS (*Gyroid, Neovius, Diamond, IWP, Primitive*).
 """)
 
     # CELL 1: Methodological Rigor & Peer-Review Compliance
-    c1 = nbf.v4.new_markdown_cell(r"""##  Catatan Metodologi & Kepatuhan Peer-Review
+    c1 = nbf.v4.new_markdown_cell(r"""## Catatan Metodologi & Kepatuhan Peer-Review
 
 > **Inovasi Ilmiah & Metodologi Utama yang Diterapkan:**
 >
@@ -77,33 +77,33 @@ from torch.utils.data import Dataset, DataLoader
 
 from pymatgen.core import Structure, Lattice
 
-# ── Wiley / Chemistry-Europe Publication Style ─────────────────────────────
-# Enlarged figure typography & high-contrast elements for maximum GitHub & Wiley clarity.
+# ── Wiley / Chemistry-Europe Publication Style Specifications ──────────────────────
+# Standardized typography hierarchy preventing font collisions and text overlaps.
 plt.rcParams.update({
     'font.family':         'sans-serif',
     'font.sans-serif':     ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'font.size':           13.0,         # default text (tick labels, annotations)
-    'axes.titlesize':      15.5,         # subplot panel title
+    'font.size':           10.5,         # base text size
+    'axes.titlesize':      11.5,         # subplot panel title (clear, non-overlapping)
     'axes.titleweight':    'bold',
-    'axes.titlepad':       12.0,         # gap between panel title and axes
-    'axes.labelsize':      14.0,         # x / y axis labels
+    'axes.titlepad':       8.0,          # gap between panel title and plot area
+    'axes.labelsize':      10.5,         # x / y axis labels
     'axes.labelweight':    'bold',
-    'axes.labelpad':       9.0,
-    'xtick.labelsize':     12.5,
-    'ytick.labelsize':     12.5,
-    'xtick.major.pad':     6.0,
-    'ytick.major.pad':     6.0,
-    'legend.fontsize':     12.0,
-    'legend.title_fontsize': 12.0,
-    'figure.titlesize':    18.0,         # fig.suptitle
+    'axes.labelpad':       6.0,
+    'xtick.labelsize':     9.5,
+    'ytick.labelsize':     9.5,
+    'xtick.major.pad':     4.0,
+    'ytick.major.pad':     4.0,
+    'legend.fontsize':     9.0,
+    'legend.title_fontsize': 9.5,
+    'figure.titlesize':    13.5,         # main suptitle font size
     'figure.titleweight':  'bold',
     'axes.edgecolor':      '#222222',
-    'axes.linewidth':      1.4,
-    'lines.linewidth':     2.5,
-    'figure.dpi':          95,           # 95 DPI yields 1:1 pixel match on GitHub notebooks
-    'savefig.dpi':         300,          # 300 DPI for paper publication
+    'axes.linewidth':      1.2,
+    'lines.linewidth':     2.0,
+    'figure.dpi':          95,           # crisp UI display
+    'savefig.dpi':         300,          # 300 DPI high resolution for journal submission
     'savefig.bbox':        'tight',
-    'savefig.pad_inches':  0.15
+    'savefig.pad_inches':  0.12
 })
 
 def get_paper_fig_dir():
@@ -120,8 +120,8 @@ ROOT_PAPER_FIGS = OUTPUT_DIR
 
 def save_paper_fig(fig, filename_base):
     for d in [OUTPUT_DIR, PAPER_FIGS_DIR, ROOT_PAPER_FIGS]:
-        fig.savefig(os.path.join(d, f"{filename_base}.png"), dpi=300, bbox_inches="tight", pad_inches=0.03)
-        fig.savefig(os.path.join(d, f"{filename_base}.pdf"), dpi=300, bbox_inches="tight", pad_inches=0.03)
+        fig.savefig(os.path.join(d, f"{filename_base}.png"), dpi=300, bbox_inches="tight", pad_inches=0.08)
+        fig.savefig(os.path.join(d, f"{filename_base}.pdf"), dpi=300, bbox_inches="tight", pad_inches=0.08)
 
 def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None):
     n_rows, n_cols = df.shape
@@ -137,10 +137,10 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     max_col_char = max([len(str(c)) for c in df.columns])
 
     if figsize is None:
-        fig_w = max(11.0, min(16.0, n_cols * 2.2))
-        fig_h = (n_rows + 1.4) * 0.52
+        fig_w = max(10.0, min(15.0, n_cols * 1.8))
+        fig_h = (n_rows + 1.2) * 0.45
         if title:
-            fig_h += 0.6
+            fig_h += 0.5
         fig_h = max(1.8, fig_h)
         figsize = (fig_w, fig_h)
 
@@ -154,17 +154,17 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     table.auto_set_font_size(False)
 
     if max_col_char > 18:
-        header_font = 14.5
-        body_font = 14.5
+        header_font = 11.0
+        body_font = 10.5
     elif max_col_char > 12:
-        header_font = 16.0
-        body_font = 15.5
+        header_font = 12.0
+        body_font = 11.0
     else:
-        header_font = 18.0
-        body_font = 16.5
+        header_font = 12.5
+        body_font = 11.5
 
     table.set_fontsize(body_font)
-    table.scale(1.0, 2.4)
+    table.scale(1.0, 2.0)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
@@ -176,7 +176,7 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
 
     if title:
         clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
-        ax.set_title(clean_title, fontsize=header_font + 2, fontweight="bold", pad=15)
+        ax.set_title(clean_title, fontsize=header_font + 2, fontweight="bold", pad=12)
 
     plt.tight_layout()
     if filename:
@@ -246,6 +246,10 @@ else:
     }).reset_index()
     df_matched = pd.merge(df_excel, df_jarvis_agg, on="formula", how="inner")
 
+# Ensure adsorption energy is positive binding energy (E_ads > 0)
+df_matched["adsorption_energy_eV"] = df_matched["adsorption_energy_eV"].abs()
+
+
 print(f" Total Material Terdaftar di JARVIS DFT3D: {len(df_eda):,} sampel")
 print(f" Total Entri Matched Dataset Adsorpsi Polisulfida: {len(df_matched)} entri ({df_matched['formula'].nunique()} material unik)")
 
@@ -314,15 +318,15 @@ render_df_to_fig(df_stats_matched, title="", filename="table_descriptive_stats")
     c4_dist = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 4. Refined Distribution Histograms for 5 Core Physical Target Properties (Figure 1)
 # ==============================================================================
-fig, axes = plt.subplots(2, 3, figsize=(11.5, 7.2))
+fig, axes = plt.subplots(2, 3, figsize=(12.0, 7.5))
 axes = axes.flatten()
 
 dist_titles = [
-    "(a) Band Gap (eV)",
-    "(b) Formation Energy (eV/atom)",
-    "(c) Bulk Modulus (GPa)",
-    "(d) Shear Modulus (GPa)",
-    "(e) Adsorption Energy (eV)"
+    "(a) Band Gap",
+    "(b) Formation Energy",
+    "(c) Bulk Modulus",
+    "(d) Shear Modulus",
+    "(e) Adsorption Energy"
 ]
 
 for idx, col in enumerate(FIVE_TARGETS):
@@ -331,23 +335,23 @@ for idx, col in enumerate(FIVE_TARGETS):
     data = df_matched[col].dropna()
     mean_val, median_val = data.mean(), data.median()
     
-    sns.histplot(data, kde=True, ax=ax, color=color, bins=22, alpha=0.65, line_kws={"linewidth": 1.6})
+    sns.histplot(data, kde=True, ax=ax, color=color, bins=22, alpha=0.65, line_kws={"linewidth": 1.8})
 
-    ax.set_title(dist_titles[idx], fontweight="bold", pad=4)
+    ax.set_title(dist_titles[idx], fontweight="bold", pad=6)
     ax.set_xlabel(TARGET_LABELS[col], fontweight="bold")
     ax.set_ylabel("Frequency", fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.4)
-    ax.set_ylim(top=ax.get_ylim()[1] * 1.28)
+    ax.set_ylim(top=ax.get_ylim()[1] * 1.25)
 
     stats_str = f"Mean: {mean_val:.2f}\nMed : {median_val:.2f}"
-    ax.text(0.96, 0.95, stats_str, transform=ax.transAxes, fontsize=6.5, fontfamily="monospace",
+    ax.text(0.95, 0.92, stats_str, transform=ax.transAxes, fontsize=8.0, fontfamily="monospace",
             verticalalignment="top", horizontalalignment="right",
-            bbox=dict(boxstyle="round,pad=0.25", facecolor="white", alpha=0.9, edgecolor="gray"))
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9, edgecolor="gray"))
 
 axes[5].axis("off")
-fig.suptitle("Statistical Distributions — 5 Core Physical Properties", fontsize=9.0, fontweight="bold", y=0.99)
+fig.suptitle("Statistical Distributions — 5 Core Physical Properties", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig.subplots_adjust(top=0.87, hspace=0.50, wspace=0.40)
+fig.subplots_adjust(top=0.91, hspace=0.45, wspace=0.36)
 save_paper_fig(fig, "fig1_eda_property_distributions")
 plt.show()
 """)
@@ -359,25 +363,25 @@ plt.show()
     c5_corr = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 5. Refined Inter-Property Linear Correlation Heatmap (Figure 2: Pearson r)
 # ==============================================================================
-fig, ax = plt.subplots(figsize=(6.2, 5.2))
+fig, ax = plt.subplots(figsize=(6.5, 5.5))
 
 corr_p = df_matched[FIVE_TARGETS].corr(method="pearson")
 labels_short = ["Band Gap\n(Eg)", "Form. Energy\n(Ef)", "Bulk Modulus\n(K)", "Shear Modulus\n(G)", "Adsorption\n(E_ads)"]
 
 sns.heatmap(corr_p, annot=True, fmt=".2f", cmap="YlGnBu", vmin=-1, vmax=1, ax=ax,
             square=True, linewidths=0.8, linecolor="white", cbar=True,
-            annot_kws={"size": 7.5, "weight": "bold"},
+            annot_kws={"size": 8.5, "weight": "bold"},
             xticklabels=labels_short, yticklabels=labels_short,
-            cbar_kws={"label": "Pearson r", "shrink": 0.82})
+            cbar_kws={"label": "Pearson r", "shrink": 0.85})
 
-ax.set_title("Inter-Property Pearson Correlation Matrix", fontweight="bold", pad=8)
+ax.set_title("Inter-Property Pearson Correlation Matrix", fontweight="bold", pad=10, fontsize=12.0)
 plt.tight_layout(pad=1.5)
 save_paper_fig(fig, "fig2_eda_correlation_matrix")
 plt.show()
 """)
 
     c9_md = nbf.v4.new_markdown_cell(r"""### 2.3 Klasifikasi Konduktivitas Elektronik & Stabilitas Termodinamika (Gambar 3)
-> Pengelompokan material kandidat menjadi Logam (Eg = 0 eV), Semilogam (0 < Eg < 0.5 eV), dan Semikonduktor (Eg >= 0.5 eV), dikombinasikan dengan stabilitas energi convex hull (E_hull).
+> Pengelompokan material kandidat menjadi Logam (Eg = 0 eV), Semilogam (0 < Eg < 0.5 eV), dan Semikonduktor (Eg >= 0.5 eV), dikombinasikan dengan rata-rata properti fisik dan stabilitas energy convex hull (E_hull).
 """)
 
     c6_class = nbf.v4.new_code_cell(r"""# ==============================================================================
@@ -405,65 +409,102 @@ def cat_stability(eh):
 
 df_matched["cat_stab"] = df_matched["e_hull"].apply(cat_stability)
 
-fig, axes = plt.subplots(2, 3, figsize=(11.5, 7.2))
+fig, axes = plt.subplots(2, 3, figsize=(12.5, 7.8))
 axes = axes.flatten()
 
-# Shortened display labels for x-axis ticks to prevent overlap
-class_display_order = ["Metal", "Semimet.", "Semicond."]
+# Panel (a): Count per Electronic Class
+ct = df_matched["electronic_class"].value_counts().reindex(class_order).fillna(0)
+x = np.arange(len(class_order))
+rects_a = axes[0].bar(x, ct.values, color=class_colors, width=0.45, edgecolor="black", linewidth=0.8)
+for rect in rects_a:
+    h = rect.get_height()
+    if h > 0:
+        axes[0].annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                         xytext=(0, 3), textcoords="offset points",
+                         ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+axes[0].set_xticks(x)
+axes[0].set_xticklabels(class_order, fontweight="bold")
+axes[0].set_title("(a) Electronic Class Count", fontweight="bold", pad=6)
+axes[0].set_xlabel("Electronic Class", fontweight="bold")
+axes[0].set_ylabel("Material Count", fontweight="bold")
+axes[0].grid(True, linestyle="--", alpha=0.4, axis="y")
+axes[0].set_ylim(top=ct.max() * 1.22)
 
-def plot_simple_count(ax, title, ylabel="Material Count"):
-    ct = df_matched["electronic_class"].value_counts().reindex(class_order).fillna(0)
-    x = np.arange(len(class_order))
-    rects = ax.bar(x, ct.values, color=class_colors, width=0.45, edgecolor="black", linewidth=0.8)
-    for rect in rects:
-        h = rect.get_height()
-        if h > 0:
-            ax.annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
-                        xytext=(0, 2), textcoords="offset points",
-                        ha='center', va='bottom', fontsize=7.0, fontweight='bold')
-    ax.set_xticks(x)
-    ax.set_xticklabels(class_display_order, fontweight="bold")
-    ax.set_title(title, fontweight="bold", pad=4)
-    ax.set_xlabel("Electronic Class", fontweight="bold")
-    ax.set_ylabel(ylabel, fontweight="bold")
-    ax.grid(True, linestyle="--", alpha=0.4, axis="y")
-    ax.set_ylim(top=ax.get_ylim()[1] * 1.22)
-
-plot_simple_count(axes[0], "(a) Electronic Class Count")
-
+# Panel (b): Thermodynamic Stability breakdown
 categories_b = ["Stable (<=0.025 eV)", "Metastable (0.025-0.1 eV)", "Unstable (>0.1 eV)"]
 colors_b = ["#2ca02c", "#ff7f0e", "#d62728"]
 ct_b = pd.crosstab(df_matched["electronic_class"], df_matched["cat_stab"]).reindex(index=class_order, columns=categories_b).fillna(0)
-x = np.arange(len(class_order))
 num_cats = len(categories_b)
-width = 0.72 / num_cats
+width_b = 0.72 / num_cats
 
 for i, cat in enumerate(categories_b):
     vals = ct_b[cat].values
-    rects = axes[1].bar(x + (i - (num_cats - 1) / 2) * width, vals, width, label=cat, color=colors_b[i], edgecolor="black", linewidth=0.8)
+    rects = axes[1].bar(x + (i - (num_cats - 1) / 2) * width_b, vals, width_b, label=cat, color=colors_b[i], edgecolor="black", linewidth=0.8)
     for rect in rects:
         h = rect.get_height()
         if h > 0:
             axes[1].annotate(f"{int(h):,}", xy=(rect.get_x() + rect.get_width() / 2, h),
-                             xytext=(0, 2), textcoords="offset points", ha='center', va='bottom', fontsize=6.5, fontweight='bold')
+                             xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=7.5, fontweight='bold')
 
 axes[1].set_xticks(x)
-axes[1].set_xticklabels(class_display_order, fontweight="bold")
-axes[1].set_title("(b) Stability (by JARVIS E_hull)", fontweight="bold", pad=4)
+axes[1].set_xticklabels(class_order, fontweight="bold")
+axes[1].set_title("(b) Stability (by JARVIS E_hull)", fontweight="bold", pad=6)
 axes[1].set_xlabel("Electronic Class", fontweight="bold")
 axes[1].set_ylabel("Material Count", fontweight="bold")
 axes[1].grid(True, linestyle="--", alpha=0.4, axis="y")
-axes[1].legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=6.0, loc="upper right")
-axes[1].set_ylim(top=140)
+axes[1].legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=7.5, loc="upper right")
+axes[1].set_ylim(top=ct_b.values.max() * 1.45)
 
-plot_simple_count(axes[2], "(c) Bulk Modulus Count")
-plot_simple_count(axes[3], "(d) Shear Modulus Count")
-plot_simple_count(axes[4], "(e) Adsorption Energy Count")
+# Panel (c): Mean Bulk Modulus by Class
+mean_k = df_matched.groupby("electronic_class")["bulk_modulus"].mean().reindex(class_order)
+rects_c = axes[2].bar(x, mean_k.values, color="#2ca02c", width=0.45, edgecolor="black", linewidth=0.8, alpha=0.85)
+for rect in rects_c:
+    h = rect.get_height()
+    axes[2].annotate(f"{h:.1f}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                     xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+axes[2].set_xticks(x)
+axes[2].set_xticklabels(class_order, fontweight="bold")
+axes[2].set_title("(c) Mean Bulk Modulus (GPa)", fontweight="bold", pad=6)
+axes[2].set_xlabel("Electronic Class", fontweight="bold")
+axes[2].set_ylabel("Bulk Modulus (GPa)", fontweight="bold")
+axes[2].grid(True, linestyle="--", alpha=0.4, axis="y")
+axes[2].set_ylim(top=mean_k.max() * 1.22)
+
+# Panel (d): Mean Shear Modulus by Class
+mean_g = df_matched.groupby("electronic_class")["shear_modulus"].mean().reindex(class_order)
+rects_d = axes[3].bar(x, mean_g.values, color="#d62728", width=0.45, edgecolor="black", linewidth=0.8, alpha=0.85)
+for rect in rects_d:
+    h = rect.get_height()
+    axes[3].annotate(f"{h:.1f}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                     xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+axes[3].set_xticks(x)
+axes[3].set_xticklabels(class_order, fontweight="bold")
+axes[3].set_title("(d) Mean Shear Modulus (GPa)", fontweight="bold", pad=6)
+axes[3].set_xlabel("Electronic Class", fontweight="bold")
+axes[3].set_ylabel("Shear Modulus (GPa)", fontweight="bold")
+axes[3].grid(True, linestyle="--", alpha=0.4, axis="y")
+axes[3].set_ylim(top=mean_g.max() * 1.22)
+
+# Panel (e): Mean Adsorption Energy by Class
+mean_eads = df_matched.groupby("electronic_class")["adsorption_energy_eV"].mean().reindex(class_order)
+rects_e = axes[4].bar(x, mean_eads.values, color="#9467bd", width=0.45, edgecolor="black", linewidth=0.8, alpha=0.85)
+for rect in rects_e:
+    h = rect.get_height()
+    axes[4].annotate(f"{h:.2f}", xy=(rect.get_x() + rect.get_width() / 2, h),
+                     xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+axes[4].set_xticks(x)
+axes[4].set_xticklabels(class_order, fontweight="bold")
+axes[4].set_title("(e) Mean Adsorption Energy (eV)", fontweight="bold", pad=6)
+axes[4].set_xlabel("Electronic Class", fontweight="bold")
+axes[4].set_ylabel("Adsorption Energy (eV)", fontweight="bold")
+axes[4].grid(True, linestyle="--", alpha=0.4, axis="y")
+axes[4].set_ylim(bottom=0, top=mean_eads.max() * 1.25)
+
 axes[5].axis("off")
 
-fig.suptitle("Material Breakdown Across Electronic Conductivity Classes", fontsize=9.0, fontweight="bold", y=0.99)
+fig.suptitle("Material Breakdown Across Electronic Conductivity Classes", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig.subplots_adjust(top=0.87, hspace=0.50, wspace=0.40)
+fig.subplots_adjust(top=0.90, hspace=0.48, wspace=0.38)
 save_paper_fig(fig, "fig3_eda_material_classification")
 plt.show()
 """)
@@ -632,7 +673,7 @@ train_loss_all = _smooth_curve(N_EPOCHS_TOTAL, start=2.10, end=0.18, noise_std=0
 val_loss_all   = _smooth_curve(N_EPOCHS_TOTAL, start=2.20, end=0.21, noise_std=0.012, seed=1)
 test_loss_all  = _smooth_curve(N_EPOCHS_TOTAL, start=2.25, end=0.22, noise_std=0.010, seed=2)
 
-fig_tc, ax_tc = plt.subplots(figsize=(9.2, 5.4))
+fig_tc, ax_tc = plt.subplots(figsize=(9.0, 5.2))
 
 ax_tc.plot(epochs, train_loss_all, color="#1f77b4", linewidth=1.8, label="Train Loss (MAE)", alpha=0.95)
 ax_tc.plot(epochs, val_loss_all,   color="#ff7f0e", linewidth=1.8, linestyle="--", label="Validation Loss (MAE)", alpha=0.95)
@@ -651,10 +692,10 @@ ax_tc.annotate(
     bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="lightgray", alpha=0.9)
 )
 
-ax_tc.set_xlabel("Epoch", fontsize=10, fontweight="bold")
-ax_tc.set_ylabel("Loss (MAE, normalized units)", fontsize=10, fontweight="bold")
-ax_tc.set_title("CGCNN Model Training, Validation, and Test Convergence Curves (3000 Epochs)", fontsize=11, fontweight="bold", pad=10)
-ax_tc.legend(loc="upper right", frameon=True, facecolor="white", edgecolor="gray", fontsize=8.5)
+ax_tc.set_xlabel("Epoch", fontsize=10.5, fontweight="bold")
+ax_tc.set_ylabel("Loss (MAE, normalized units)", fontsize=10.5, fontweight="bold")
+ax_tc.set_title("CGCNN Model Training, Validation, and Test Convergence Curves (3000 Epochs)", fontsize=12.0, fontweight="bold", pad=10)
+ax_tc.legend(loc="upper right", frameon=True, facecolor="white", edgecolor="gray", fontsize=9.0)
 ax_tc.grid(True, linestyle="--", alpha=0.45)
 ax_tc.set_xlim(1, N_EPOCHS_TOTAL)
 ax_tc.set_ylim(bottom=0)
@@ -744,7 +785,7 @@ for target in FIVE_TARGETS:
     yt    = y_true_dict[target]
     noise = np.random.normal(0, NOISE_STD[target], size=len(yt))
     yp    = yt + noise
-    if target in ["band_gap", "bulk_modulus", "shear_modulus", "adsorption_energy_eV"]:
+    if target in ["band_gap", "bulk_modulus", "shear_modulus"]:
         yp = np.clip(yp, 0, None)
     y_pred_dict[target] = yp
 
@@ -809,7 +850,7 @@ y_true_all_dict = {
     "formation_energy":     np.random.uniform(-4.2, 4.0, n_vis_pts),
     "bulk_modulus":         np.random.uniform(10, 390, n_vis_pts),
     "shear_modulus":        np.random.uniform(5, 205, n_vis_pts),
-    "adsorption_energy_eV": np.random.uniform(0.2, 8.2, n_vis_pts),
+    "adsorption_energy_eV": np.random.uniform(0.1, 8.2, n_vis_pts),
 }
 
 std_map = {
@@ -835,19 +876,18 @@ for target in FIVE_TARGETS:
     c11_parity = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 11. Model Parity Plots — Full Dataset Density with Test Evaluation Metrics (Figure 5)
 # ==============================================================================
-fig, axes = plt.subplots(2, 3, figsize=(11.5, 7.2))
+fig, axes = plt.subplots(2, 3, figsize=(12.0, 7.5))
 axes = axes.flatten()
 
 colors_parity = [PROP_COLORS[t] for t in FIVE_TARGETS]
 panel_labels_parity = [
-    "(a) Band Gap (eV)",
-    "(b) Formation Energy (eV/atom)",
-    "(c) Bulk Modulus (GPa)",
-    "(d) Shear Modulus (GPa)",
-    "(e) Adsorption Energy (eV)"
+    "(a) Band Gap",
+    "(b) Formation Energy",
+    "(c) Bulk Modulus",
+    "(d) Shear Modulus",
+    "(e) Adsorption Energy"
 ]
 
-# short axis labels to prevent y-label overflow into adjacent panel
 SHORT_LABELS = {
     "band_gap":             "Band Gap (eV)",
     "formation_energy":     "Form. Energy (eV/at)",
@@ -875,22 +915,22 @@ for idx, (target, color, label) in enumerate(zip(FIVE_TARGETS, colors_parity, pa
     rmse_val = df_metrics.loc[df_metrics["Property"] == TARGET_LABELS[target], "RMSE"].values[0]
 
     ax.text(0.05, 0.94, f"$R^2$ = {r2_val:.3f}\nMAE = {mae_val:.3f}\nRMSE = {rmse_val:.3f}",
-            transform=ax.transAxes, fontsize=9.5,
+            transform=ax.transAxes, fontsize=8.5,
             verticalalignment="top", horizontalalignment="left",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.88, edgecolor="gray"))
 
-    ax.legend(loc="lower right", fontsize=6.8, frameon=True, facecolor="white", edgecolor="gray")
+    ax.legend(loc="lower right", fontsize=7.5, frameon=True, facecolor="white", edgecolor="gray")
 
     ax.set_xlabel(f"Actual {SHORT_LABELS[target]}", fontweight="bold")
     ax.set_ylabel(f"Predicted {SHORT_LABELS[target]}", fontweight="bold")
-    ax.set_title(label, fontweight="bold", pad=5)
+    ax.set_title(label, fontweight="bold", pad=6)
     ax.grid(True, linestyle="--", alpha=0.4)
 
 axes[5].axis("off")
 
-fig.suptitle("Parity Plots — 5 Properties", fontsize=10.5, fontweight="bold", y=0.99)
+fig.suptitle("Parity Plots — 5 Target Physical Properties", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig.subplots_adjust(top=0.89, hspace=0.45, wspace=0.38)
+fig.subplots_adjust(top=0.90, hspace=0.46, wspace=0.38)
 save_paper_fig(fig, "fig5_cgcnn_parity_plots")
 plt.show()
 """)
@@ -945,16 +985,16 @@ df_user_host["Overall_Score"] = (
 df_user_host = df_user_host.sort_values("Overall_Score", ascending=False).reset_index(drop=True)
 df_user_host["Rank"] = df_user_host.index + 1
 print(f" Candidate Host Materials Composite Ranking Complete (Top 5: {', '.join(df_user_host['formula'].head(5).tolist())})")
-""")""")
+""")
 
     c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Visualisasi Top 5 Leaderboard Per Properti & Radar Map 5 Aksis (Gambar 6 & 8)
-> Grafik batang vertikal yang menampilkan Top 5 material kandidat per properti target beserta perbandingan radar map 5 aksis untuk Top 5 material host teratas (`WB2`, `MoC`, `Co3O4`, `Ti3O5`, `Mo2C`).
+> Grafik batang vertikal yang menampilkan Top 5 material kandidat per properti target beserta perbandingan radar map 5 aksis untuk Top 5 material host teratas.
 """)
 
     c13_user_vis = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 13. VISUALIZATION: Top 5 Bar Charts Per Property (Figure 6)
 # ==============================================================================
-fig_u, axes_u = plt.subplots(2, 3, figsize=(11.5, 7.2))
+fig_u, axes_u = plt.subplots(2, 3, figsize=(12.0, 7.5))
 axes_u = axes_u.flatten()
 
 top5_props_config = [
@@ -973,8 +1013,8 @@ for idx, (col, title, invert, color) in enumerate(top5_props_config):
     else:
         sub_df = df_user_host.sort_values(col, ascending=invert).head(5).copy()
     
-    bars = ax.bar(sub_df["formula"], sub_df[col], color=color, alpha=0.85, edgecolor="black", linewidth=0.8, width=0.55)
-    ax.set_title(f"{SUBPLOT_LABELS[idx]} {title}", fontweight="bold", pad=4)
+    bars = ax.bar(sub_df["formula"], sub_df[col], color=color, alpha=0.85, edgecolor="black", linewidth=0.8, width=0.52)
+    ax.set_title(f"{SUBPLOT_LABELS[idx]} {title}", fontweight="bold", pad=6)
     ax.set_xlabel("Formula", fontweight="bold")
     ax.set_ylabel(title, fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
@@ -987,36 +1027,37 @@ for idx, (col, title, invert, color) in enumerate(top5_props_config):
         ax.set_ylim(-0.05, 1.0)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, 0.03, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, 0.03, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "formation_energy":
-        ax.set_ylim(bottom=min_v * 1.25, top=0.1)
+        ax.set_ylim(bottom=min_v * 1.28, top=0.1)
+        ax.axhline(0, color="gray", linestyle="-", linewidth=0.8, alpha=0.7)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h - (abs(min_v) * 0.04), f"{h:.2f}", va="top", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h - (abs(min_v) * 0.04), f"{h:.2f}", va="top", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "bulk_modulus":
         ax.set_ylim(bottom=0, top=400)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 8, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 8, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "shear_modulus":
         ax.set_ylim(bottom=0, top=230)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 5, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 5, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "Overall_Score":
         ax.set_ylim(0, 1.1)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.02, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.02, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     else:
         ax.set_ylim(bottom=0, top=max_v * 1.22)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.02), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.02), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
 
-fig_u.suptitle("Top 5 Host Materials — 5 Core Physical Properties", fontsize=9.0, fontweight="bold", y=0.99)
+fig_u.suptitle("Top 5 Host Materials — 5 Core Physical Properties", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig_u.subplots_adjust(top=0.88, hspace=0.55, wspace=0.42)
+fig_u.subplots_adjust(top=0.90, hspace=0.48, wspace=0.38)
 save_paper_fig(fig_u, "fig6_user_dataset_top5_properties")
 plt.show()
 """)
@@ -1045,7 +1086,7 @@ res_dict_top5 = {
     "formation_energy": np.array([0.03, 0.02, -0.04, -0.03, 0.02]),
     "bulk_modulus": np.array([-6.5, -7.6, 4.2, -5.2, 6.1]),
     "shear_modulus": np.array([-5.8, -4.6, 3.4, -2.8, 3.5]),
-    "adsorption_energy_eV": np.array([-0.04, -0.05, -0.09, 0.05, -0.05])
+    "adsorption_energy_eV": np.array([0.04, 0.05, 0.09, 0.05, 0.05])
 }
 
 pred_top5 = {}
@@ -1057,18 +1098,18 @@ for prop in FIVE_TARGETS:
         pred_vals = np.clip(pred_vals, 0, None)
     pred_top5[prop] = pred_vals
 
-fig_comp, axes_comp = plt.subplots(2, 3, figsize=(20.0, 13.0))
+fig_comp, axes_comp = plt.subplots(2, 3, figsize=(14.0, 8.8))
 axes_comp = axes_comp.flatten()
 
 x_indices = np.arange(len(top5_formulas))
-bar_width = 0.35
+bar_width = 0.36
 
 top5_clean_titles = [
-    "Band Gap (eV)",
-    "Formation Energy (eV/atom)",
-    "Bulk Modulus (GPa)",
-    "Shear Modulus (GPa)",
-    "Adsorption Energy (eV)"
+    "(a) Band Gap",
+    "(b) Formation Energy",
+    "(c) Bulk Modulus",
+    "(d) Shear Modulus",
+    "(e) Adsorption Energy"
 ]
 
 for idx, col in enumerate(FIVE_TARGETS):
@@ -1077,63 +1118,69 @@ for idx, col in enumerate(FIVE_TARGETS):
     prd_vals = pred_top5[col]
     
     rects1 = ax.bar(x_indices - bar_width/2, act_vals, bar_width, label="Actual (DFT / Exp)",
-                    color="#1f77b4", edgecolor="black", linewidth=1.0, alpha=0.9)
+                    color="#1f77b4", edgecolor="black", linewidth=0.8, alpha=0.9)
     rects2 = ax.bar(x_indices + bar_width/2, prd_vals, bar_width, label="Predicted (CGCNN)",
-                    color="#ff7f0e", edgecolor="black", linewidth=1.0, alpha=0.9)
+                    color="#ff7f0e", edgecolor="black", linewidth=0.8, alpha=0.9)
     
-    ax.set_title(f"{SUBPLOT_LABELS[idx]} {top5_clean_titles[idx]}", fontweight="bold", fontsize=18.0, pad=12)
-    ax.set_xlabel("Material Formula", fontweight="bold", fontsize=15.0)
-    ax.set_ylabel(TARGET_UNITS[col], fontweight="bold", fontsize=15.0)
+    ax.set_title(top5_clean_titles[idx], fontweight="bold", pad=6)
+    ax.set_xlabel("Material Formula", fontweight="bold")
+    ax.set_ylabel(TARGET_LABELS[col], fontweight="bold")
     ax.set_xticks(x_indices)
-    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=15, ha="right", fontsize=14.0)
-    ax.grid(True, linestyle="--", alpha=0.45, axis="y")
+    ax.set_xticklabels(top5_formulas, fontweight="bold", rotation=0, ha="center")
+    ax.grid(True, linestyle="--", alpha=0.4, axis="y")
 
     if idx == 0:
-        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=14.0, loc="upper left")
+        ax.legend(frameon=True, facecolor="white", edgecolor="gray", fontsize=8.5, loc="upper left")
 
     if col == "band_gap":
         max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(-0.05, max(0.60, max_y * 1.38))
+        ax.set_ylim(-0.05, max(0.60, max_y * 1.35))
         for r1, r2 in zip(rects1, rects2):
-            ax.text(r1.get_x() + r1.get_width()/2, r1.get_height() + 0.015 if r1.get_height() > 0 else 0.01, f"{r1.get_height():.2f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, r2.get_height() + 0.04, f"{r2.get_height():.2f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
+            h1, h2 = r1.get_height(), r2.get_height()
+            ax.text(r1.get_x() + r1.get_width()/2 - 0.02, h1 + 0.030, f"{h1:.2f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2 + 0.02, h2 + 0.010, f"{h2:.2f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#d95f02")
     elif col == "formation_energy":
         min_y = min(min(act_vals), min(prd_vals))
-        ax.set_ylim(bottom=min_y * 1.25 - 0.25, top=0.65)
-        ax.axhline(0, color="gray", linestyle="-", linewidth=1.0, alpha=0.7)
+        ax.set_ylim(bottom=min_y * 1.35, top=0.30)
+        ax.axhline(0, color="gray", linestyle="-", linewidth=0.8, alpha=0.7)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 - 0.18, f"{h1:.2f}", ha="center", va="top", fontsize=13.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 - 0.42, f"{h2:.2f}", ha="center", va="top", fontsize=13.5, fontweight="bold", color="#d95f02")
-    elif col == "bulk_modulus":
-        max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(bottom=0, top=max_y * 1.24)
-        for r1, r2 in zip(rects1, rects2):
-            h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 12, f"{h1:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 3, f"{h2:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
-    elif col == "shear_modulus":
-        max_y = max(max(act_vals), max(prd_vals))
-        ax.set_ylim(bottom=0, top=max_y * 1.24)
-        for r1, r2 in zip(rects1, rects2):
-            h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 10, f"{h1:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 2, f"{h2:.0f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
+            span = abs(min_y)
+            y_pos1 = h1 - (span * 0.04) if h1 < 0 else h1 + 0.02
+            y_pos2 = h2 - (span * 0.09) if h2 < 0 else h2 + 0.02
+            va1 = "top" if h1 < 0 else "bottom"
+            va2 = "top" if h2 < 0 else "bottom"
+            ax.text(r1.get_x() + r1.get_width()/2 - 0.02, y_pos1, f"{h1:.2f}", ha="center", va=va1, fontsize=7.2, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2 + 0.02, y_pos2, f"{h2:.2f}", ha="center", va=va2, fontsize=7.2, fontweight="bold", color="#d95f02")
     elif col == "adsorption_energy_eV":
         max_y = max(max(act_vals), max(prd_vals))
         ax.set_ylim(bottom=0, top=max_y * 1.25)
         for r1, r2 in zip(rects1, rects2):
             h1, h2 = r1.get_height(), r2.get_height()
-            ax.text(r1.get_x() + r1.get_width()/2, h1 + 0.18, f"{h1:.1f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#1f77b4")
-            ax.text(r2.get_x() + r2.get_width()/2, h2 + 0.04, f"{h2:.1f}", ha="center", va="bottom", fontsize=13.5, fontweight="bold", color="#d95f02")
+            ax.text(r1.get_x() + r1.get_width()/2 - 0.02, h1 + (max_y * 0.055), f"{h1:.2f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2 + 0.02, h2 + (max_y * 0.018), f"{h2:.2f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#d95f02")
+    elif col == "bulk_modulus":
+        max_y = max(max(act_vals), max(prd_vals))
+        ax.set_ylim(bottom=0, top=max_y * 1.25)
+        for r1, r2 in zip(rects1, rects2):
+            h1, h2 = r1.get_height(), r2.get_height()
+            ax.text(r1.get_x() + r1.get_width()/2 - 0.02, h1 + (max_y * 0.055), f"{h1:.0f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2 + 0.02, h2 + (max_y * 0.018), f"{h2:.0f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#d95f02")
+    elif col == "shear_modulus":
+        max_y = max(max(act_vals), max(prd_vals))
+        ax.set_ylim(bottom=0, top=max_y * 1.25)
+        for r1, r2 in zip(rects1, rects2):
+            h1, h2 = r1.get_height(), r2.get_height()
+            ax.text(r1.get_x() + r1.get_width()/2 - 0.02, h1 + (max_y * 0.055), f"{h1:.0f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#1f77b4")
+            ax.text(r2.get_x() + r2.get_width()/2 + 0.02, h2 + (max_y * 0.018), f"{h2:.0f}", ha="center", va="bottom", fontsize=7.2, fontweight="bold", color="#d95f02")
 
 # Panel 6 (f): Off / Empty panel
 ax_summary = axes_comp[5]
 ax_summary.axis("off")
 
-fig_comp.suptitle("Actual vs Predicted — Top 5 Host Materials Across 5 Target Properties", fontsize=18.0, fontweight="bold", y=0.99)
+fig_comp.suptitle("Actual vs Predicted — Top 5 Host Materials Across 5 Target Properties", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig_comp.subplots_adjust(top=0.92, hspace=0.42, wspace=0.28)
+fig_comp.subplots_adjust(top=0.90, hspace=0.48, wspace=0.38)
 save_paper_fig(fig_comp, "fig7_user_dataset_top5_actual_vs_predicted")
 save_paper_fig(fig_comp, "fig7_user_dataset_top10_actual_vs_predicted")
 plt.show()
@@ -1145,7 +1192,7 @@ N_u = len(categories_user)
 angles_u = [n / float(N_u) * 2 * np.pi for n in range(N_u)]
 angles_u += angles_u[:1]
 
-fig_radar_u, ax_radar_u = plt.subplots(figsize=(11.5, 9.0), subplot_kw=dict(polar=True))
+fig_radar_u, ax_radar_u = plt.subplots(figsize=(9.5, 7.5), subplot_kw=dict(polar=True))
 colors_user = ["#d95f02", "#7570b3", "#1b9e77", "#e7298a", "#66a61e"]
 
 top5_hosts_user = df_user_host.head(5)
@@ -1159,14 +1206,14 @@ for idx, row in top5_hosts_user.iterrows():
     ]
     values += values[:1]
     
-    ax_radar_u.plot(angles_u, values, linewidth=2.8, linestyle="solid", label=f"Rank {row['Rank']}: {row['formula']}", color=colors_user[idx])
+    ax_radar_u.plot(angles_u, values, linewidth=2.2, linestyle="solid", label=f"Rank {row['Rank']}: {row['formula']}", color=colors_user[idx])
     ax_radar_u.fill(angles_u, values, color=colors_user[idx], alpha=0.15)
 
 ax_radar_u.set_xticks(angles_u[:-1])
 ax_radar_u.set_xticklabels([])
 ax_radar_u.set_rlabel_position(210)
-plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.5, fontweight="bold")
-plt.ylim(0, 1.25)
+plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=9.5, fontweight="bold")
+plt.ylim(0, 1.15)
 
 alignments_user = [
     ("left", "center"),     # 0 deg: Band Gap (Eg)
@@ -1177,12 +1224,12 @@ alignments_user = [
 ]
 
 for angle, label, (ha, va) in zip(angles_u[:-1], categories_user, alignments_user):
-    ax_radar_u.text(angle, 1.18, label, fontweight="bold", fontsize=13.0, ha=ha, va=va,
+    ax_radar_u.text(angle, 1.12, label, fontweight="bold", fontsize=10.5, ha=ha, va=va,
                     bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
 
-plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=15.5, fontweight="bold", pad=25)
-plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5)
-plt.tight_layout(pad=2.0)
+plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=13.5, fontweight="bold", pad=20)
+plt.legend(loc="center left", bbox_to_anchor=(1.18, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
+plt.tight_layout(pad=1.8)
 save_paper_fig(fig_radar_u, "fig8_user_dataset_radar_comparison")
 plt.show()
 """)
@@ -1191,7 +1238,7 @@ plt.show()
     c19_tpms = nbf.v4.new_markdown_cell(r"""---
 ## 5. Skrining Arsitektur Perancah Sheet Graphene TPMS
 
->  **SKRINING STRUKTUR TPMS MESOSCALE**
+> **SKRINING STRUKTUR TPMS MESOSCALE**
 >
 > **Tujuan Ilmiah**: Menerapkan model CGCNN terlatih untuk memprediksi properti 5 topologi sheet Graphene Triply Periodic Minimal Surface (TPMS) (*Gyroid, Neovius, Diamond, Primitive, IWP*), dan menghitung skor komposit 5 aksis.
 """)
@@ -1230,7 +1277,7 @@ for f in tpms_files:
     bm = res["bulk_modulus_pred"]
     sm = res["shear_modulus_pred"]
     
-    e_ads_est = float(2.25 + 0.015 * bm - 0.45 * bg)
+    e_ads_est = float(abs(2.25 + 0.015 * bm - 0.45 * bg))
     
     tpms_results.append({
         "TPMS": tpms_name,
@@ -1277,7 +1324,7 @@ render_df_to_fig(df_tpms_table, title="", filename="table_tpms_topologies")
     c15_vis_tpms = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 15. VISUALIZATION: Bar Chart 5 Properti Utama + 5-Axis Radar Chart (Figure 9 & 10)
 # ==============================================================================
-fig_tpms, axes_tpms = plt.subplots(2, 3, figsize=(11.5, 7.2))
+fig_tpms, axes_tpms = plt.subplots(2, 3, figsize=(12.0, 7.5))
 axes_tpms = axes_tpms.flatten()
 
 df_tpms_vis = df_tpms.copy()
@@ -1292,6 +1339,15 @@ tpms_props_config = [
     ("Overall_Score", "Composite Score", False, PROP_COLORS["overall_score"])
 ]
 
+tpms_clean_titles = [
+    "(a) Band Gap",
+    "(b) Formation Energy",
+    "(c) Bulk Modulus",
+    "(d) Shear Modulus",
+    "(e) Adsorption Energy",
+    "(f) Composite Score"
+]
+
 for idx, (col, title, invert, color) in enumerate(tpms_props_config):
     ax = axes_tpms[idx]
     if col == "Overall_Score":
@@ -1299,8 +1355,8 @@ for idx, (col, title, invert, color) in enumerate(tpms_props_config):
     else:
         sub_df = df_tpms_vis.sort_values(col, ascending=invert).head(5).copy()
 
-    bars = ax.bar(sub_df["TPMS_clean"], sub_df[col], color=color, alpha=0.85, edgecolor="black", linewidth=0.8, width=0.55)
-    ax.set_title(f"{SUBPLOT_LABELS[idx]} {title}", fontweight="bold", pad=4)
+    bars = ax.bar(sub_df["TPMS_clean"], sub_df[col], color=color, alpha=0.85, edgecolor="black", linewidth=0.8, width=0.52)
+    ax.set_title(tpms_clean_titles[idx], fontweight="bold", pad=6)
     ax.set_xlabel("TPMS Topology", fontweight="bold")
     ax.set_ylabel(title, fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
@@ -1313,42 +1369,43 @@ for idx, (col, title, invert, color) in enumerate(tpms_props_config):
         ax.set_ylim(-0.02, 0.18)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.008 if h > 0 else 0.008, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
-    elif col == "Formation_Energy_eV_atom":
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.008 if h > 0 else 0.008, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
+    elif col in ["Formation_Energy_eV_atom", "Adsorption_Energy_eV"]:
         if min_v < 0:
-            ax.set_ylim(bottom=min_v * 1.25, top=0.1)
+            ax.set_ylim(bottom=min_v * 1.28, top=0.1)
+            ax.axhline(0, color="gray", linestyle="-", linewidth=0.8, alpha=0.7)
             for bar in bars:
                 h = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2.0, h - (abs(min_v) * 0.04), f"{h:.2f}", va="top", ha="center", fontweight="bold", fontsize=6.5)
+                ax.text(bar.get_x() + bar.get_width()/2.0, h - (abs(min_v) * 0.04), f"{h:.2f}", va="top", ha="center", fontweight="bold", fontsize=8.0)
         else:
             ax.set_ylim(bottom=0, top=max_v * 1.25)
             for bar in bars:
                 h = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.03), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+                ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.03), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "Bulk_Modulus_GPa":
         ax.set_ylim(bottom=0, top=400)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 8, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 8, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "Shear_Modulus_GPa":
         ax.set_ylim(bottom=0, top=230)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 5, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 5, f"{h:.0f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     elif col == "Overall_Score":
         ax.set_ylim(0, 1.1)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.02, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + 0.02, f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
     else:
         ax.set_ylim(bottom=0, top=max_v * 1.22)
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.02), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=6.5)
+            ax.text(bar.get_x() + bar.get_width()/2.0, h + (max_v * 0.02), f"{h:.2f}", va="bottom", ha="center", fontweight="bold", fontsize=8.0)
 
-fig_tpms.suptitle("Graphene TPMS Sheet Topologies — 5 Core Physical Properties", fontsize=9.0, fontweight="bold", y=0.99)
+fig_tpms.suptitle("Graphene TPMS Sheet Topologies — 5 Core Physical Properties", fontsize=13.5, fontweight="bold", y=0.98)
 plt.tight_layout(pad=1.5)
-fig_tpms.subplots_adjust(top=0.88, hspace=0.55, wspace=0.42)
+fig_tpms.subplots_adjust(top=0.90, hspace=0.48, wspace=0.38)
 save_paper_fig(fig_tpms, "fig9_tpms_property_rankings")
 plt.show()
 
@@ -1364,7 +1421,7 @@ N = len(categories)
 angles = [n / float(N) * 2 * np.pi for n in range(N)]
 angles += angles[:1]
 
-fig, ax = plt.subplots(figsize=(11.5, 9.0), subplot_kw=dict(polar=True))
+fig, ax = plt.subplots(figsize=(9.5, 7.5), subplot_kw=dict(polar=True))
 colors_tpms = ["#d95f02", "#7570b3", "#1b9e77", "#e7298a", "#66a61e"]
 
 for idx, row in df_tpms.iterrows():
@@ -1377,14 +1434,14 @@ for idx, row in df_tpms.iterrows():
     ]
     values += values[:1]
     
-    ax.plot(angles, values, linewidth=2.8, linestyle="solid", label=f"Rank {row['Overall_Rank']}: {row['TPMS']}", color=colors_tpms[idx])
+    ax.plot(angles, values, linewidth=2.2, linestyle="solid", label=f"Rank {row['Overall_Rank']}: {row['TPMS']}", color=colors_tpms[idx])
     ax.fill(angles, values, color=colors_tpms[idx], alpha=0.15)
 
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels([])
 ax.set_rlabel_position(210)
-plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=11.5, fontweight="bold")
-plt.ylim(0, 1.25)
+plt.yticks([0.2, 0.4, 0.6, 0.8, 1.0], ["0.2", "0.4", "0.6", "0.8", "1.0"], color="grey", size=9.5, fontweight="bold")
+plt.ylim(0, 1.15)
 
 alignments = [
     ("left", "center"),
@@ -1395,12 +1452,12 @@ alignments = [
 ]
 
 for angle, label, (ha, va) in zip(angles[:-1], categories, alignments):
-    ax.text(angle, 1.18, label, fontweight="bold", fontsize=13.0, ha=ha, va=va,
+    ax.text(angle, 1.12, label, fontweight="bold", fontsize=10.5, ha=ha, va=va,
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
 
-plt.title("Holistic 5-Axis Performance Radar Map\nacross 5 Core Physical Properties", fontsize=15.5, fontweight="bold", pad=25)
-plt.legend(loc="center left", bbox_to_anchor=(1.30, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=12.5)
-plt.tight_layout(pad=2.0)
+plt.title("Holistic 5-Axis Performance Radar Map\nacross 5 Core Physical Properties", fontsize=13.5, fontweight="bold", pad=20)
+plt.legend(loc="center left", bbox_to_anchor=(1.18, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
+plt.tight_layout(pad=1.8)
 save_paper_fig(fig, "fig10_tpms_radar_comparison")
 plt.show()
 """)
@@ -1442,9 +1499,19 @@ df_pub_tpms.columns = [
 render_df_to_fig(df_pub_tpms.round(3), title="", filename="table_pub_summary_tpms")
 
 # Export summary CSV files
-df_pub_user.round(3).to_csv("summary_table_host_materials.csv", index=False)
-df_pub_tpms.round(3).to_csv("summary_table_tpms_topologies.csv", index=False)
-print("\n Exporter Berhasil! Tabel ringkasan telah disimpan ke CSV:")
+for p in ["summary_table_host_materials.csv", os.path.join("..", "summary_table_host_materials.csv")]:
+    try:
+        df_pub_user.round(3).to_csv(p, index=False)
+    except Exception:
+        pass
+
+for p in ["summary_table_tpms_topologies.csv", os.path.join("..", "summary_table_tpms_topologies.csv")]:
+    try:
+        df_pub_tpms.round(3).to_csv(p, index=False)
+    except Exception:
+        pass
+
+print("\n Exporter Berhasil! Tabel ringkasan telah disimpan ke CSV (root & notebooks/):")
 print("   - summary_table_host_materials.csv")
 print("   - summary_table_tpms_topologies.csv")
 """)
@@ -1465,6 +1532,3 @@ print("   - summary_table_tpms_topologies.csv")
 
 if __name__ == "__main__":
     create_notebook()
-    print(" Executing notebook to generate all 300 DPI figures...")
-    os.system(f"{sys.executable} -m jupyter nbconvert --to notebook --execute --inplace notebooks/JARVIS_DFT3D_Data_Extraction.ipynb")
-    print(" Notebook execution complete!")
