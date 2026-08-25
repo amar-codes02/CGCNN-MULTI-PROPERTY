@@ -98,7 +98,7 @@ if os.path.exists(TPMS_DIR):
 # ---------------------------------------------------------------------------
 # 3Dmol.js CIF Viewer Component
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19", key=None):
+def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=True, bg_color="#0b0f19"):
     """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
     safe_cif = (
         cif_text.replace("\\", "\\\\")
@@ -175,7 +175,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
     </body>
     </html>
     """
-    components.html(html, height=height + 5, key=key)
+    components.html(html, height=height + 5)
 
 
 # ---------------------------------------------------------------------------
@@ -1038,7 +1038,7 @@ with tab_viz3d:
             st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
             viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0)
             supercell_val = st.slider("Supercell Dimension:", min_value=1, max_value=3, value=1)
-            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg, key=f"cif_tab3_{hash(cif_text_curr)}_{viz_style}_{supercell_val}")
+            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
         with col_v2:
             st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
@@ -1694,8 +1694,7 @@ with tab_polysulfide:
                     style=render_style,
                     supercell=1,
                     replicate_z=False,
-                    bg_color=mol3d_bg,
-                    key=f"cif_ads_{tpms_key}_{species_code}_{supercell_n}_{render_style}"
+                    bg_color=mol3d_bg
                 )
                 
                 st.caption("💡 **3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
