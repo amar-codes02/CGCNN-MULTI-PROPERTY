@@ -115,11 +115,13 @@ def get_paper_fig_dir():
     return p
 
 OUTPUT_DIR = get_paper_fig_dir()
+PAPER_FIGS_DIR = OUTPUT_DIR
+ROOT_PAPER_FIGS = OUTPUT_DIR
 
 def save_paper_fig(fig, filename_base):
-    for ext in ["png", "pdf"]:
-        fig.savefig(os.path.join(OUTPUT_DIR, f"{filename_base}.{ext}"), dpi=300, bbox_inches="tight")
-    print(f" Saved publication figure: {OUTPUT_DIR}/{filename_base}.png & .pdf")
+    for d in [OUTPUT_DIR, PAPER_FIGS_DIR, ROOT_PAPER_FIGS]:
+        fig.savefig(os.path.join(d, f"{filename_base}.png"), dpi=300, bbox_inches="tight", pad_inches=0.03)
+        fig.savefig(os.path.join(d, f"{filename_base}.pdf"), dpi=300, bbox_inches="tight", pad_inches=0.03)
 
 def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None):
     n_rows, n_cols = df.shape
@@ -128,14 +130,16 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
         for col in df.columns:
             cell_strs = [str(col)] + [str(v) for v in df[col].values]
             max_len = max([len(s) for s in cell_strs]) if cell_strs else len(str(col))
-            col_lens.append(max_len + 6)
+            col_lens.append(max_len + 3)
         tot_len = sum(col_lens)
         col_widths = [l / tot_len for l in col_lens]
 
     if figsize is None:
-        tot_chars = sum([max([len(str(v)) for v in [col] + df[col].tolist()]) for col in df.columns])
-        fig_w = max(18.0, min(28.0, tot_chars * 0.28 + n_cols * 1.1))
-        fig_h = max(5.5, (n_rows + 2.2) * 0.95)
+        fig_w = 9.5 if n_cols <= 6 else 11.5
+        fig_h = (n_rows + 1.2) * 0.48
+        if title:
+            fig_h += 0.5
+        fig_h = max(1.5, fig_h)
         figsize = (fig_w, fig_h)
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -146,20 +150,24 @@ def render_df_to_fig(df, title="", filename=None, figsize=None, col_widths=None)
     table = ax.table(cellText=table_data, colWidths=col_widths, loc="center", cellLoc="center")
 
     table.auto_set_font_size(False)
-    table.set_fontsize(17.0)
-    table.scale(1.2, 3.2)
+
+    header_font = 21.0 if n_cols <= 6 else 18.0
+    body_font = 19.0 if n_cols <= 6 else 16.0
+
+    table.set_fontsize(body_font)
+    table.scale(1.0, 2.3)
 
     for (r, c), cell in table.get_celld().items():
         if r == 0:
             cell.set_facecolor("#2b5c8f")
-            cell.set_text_props(color="white", fontweight="bold", fontsize=19.0)
+            cell.set_text_props(color="white", fontweight="bold", fontsize=header_font)
         else:
             cell.set_facecolor("#f9f9f9" if r % 2 == 0 else "white")
-            cell.set_text_props(color="#111111", fontsize=16.5)
+            cell.set_text_props(color="#111111", fontsize=body_font)
 
     if title:
         clean_title = title.replace("Tabel ( ) :", "").replace("Tabel", "").strip()
-        ax.set_title(clean_title, fontsize=20.0, fontweight="bold", pad=25)
+        ax.set_title(clean_title, fontsize=header_font + 2, fontweight="bold", pad=15)
 
     plt.tight_layout()
     if filename:
