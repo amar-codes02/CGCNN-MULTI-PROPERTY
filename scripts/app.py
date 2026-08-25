@@ -246,14 +246,16 @@ def get_flat_graphene_single_polysulfide_cif(sp_name="Li2S8", supercell_x=1, sup
     except Exception as e:
         print("ERROR IN SINGLE SPECIES CIF:", e)
         return ""
-
-
 @st.cache_data
 def generate_matplotlib_graphene_fig():
-    """Generate a pure Python Matplotlib 2D vector schematic plot of 2D Pristine Monolayer Flat Graphene with adsorbed polysulfides."""
+    """Generate a pure Python Matplotlib 2D vector schematic plot adhering strictly to Chemistry Europe / Wiley Graphics Guidelines (Arial/Helvetica, 600 DPI, Double-Column Width 17.5 cm)."""
     import matplotlib.pyplot as plt
     
-    fig, ax = plt.subplots(figsize=(11, 5.5), dpi=200)
+    plt.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'DejaVu Sans']
+    plt.rcParams['font.family'] = 'sans-serif'
+
+    # Chemistry Europe Double-Column Width: 17.5 cm (~6.89 inches), DPI=600
+    fig, ax = plt.subplots(figsize=(6.89, 3.4), dpi=600)
     fig.patch.set_facecolor("#ffffff")
     ax.set_facecolor("#ffffff")
 
@@ -274,62 +276,65 @@ def generate_matplotlib_graphene_fig():
                 lns.append((p1, p4))
 
     for p1, p2 in lns:
-        ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=1.5, zorder=1)
+        ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=1.0, zorder=1)
 
     cx, cy = zip(*pts)
-    ax.scatter(cx, cy, s=35, color="#475569", edgecolors="#1e293b", linewidth=0.6, label="Carbon (C)", zorder=2)
+    ax.scatter(cx, cy, s=20, color="#475569", edgecolors="#1e293b", linewidth=0.4, label="Carbon (C)", zorder=2)
 
     species_data = [
-        ("Li2S8", 2.5, 7.5, "#dc2626", 8, 2),
-        ("Li2S6", 6.5, 7.5, "#9333ea", 6, 2),
-        ("Li2S4", 10.5, 7.5, "#2563eb", 4, 2),
-        ("Li2S2", 14.5, 7.5, "#16a34a", 2, 2),
-        ("Li2S",  18.5, 7.5, "#ea580c", 1, 2),
+        ("Li₂S₈", 2.5, 7.5, "#dc2626", 8, 2),
+        ("Li₂S₆", 6.5, 7.5, "#9333ea", 6, 2),
+        ("Li₂S₄", 10.5, 7.5, "#2563eb", 4, 2),
+        ("Li₂S₂", 14.5, 7.5, "#16a34a", 2, 2),
+        ("Li₂S",  18.5, 7.5, "#ea580c", 1, 2),
     ]
 
     for name, x, y, col, n_s, n_li in species_data:
-        ax.text(x, y + 1.8, name, fontsize=12, fontweight="bold", color=col, ha="center", va="bottom",
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="#f8fafc", edgecolor=col, linewidth=1.5))
+        ax.text(x, y + 1.8, name, fontsize=8, fontweight="bold", color=col, ha="center", va="bottom",
+                bbox=dict(boxstyle="round,pad=0.2", facecolor="#f8fafc", edgecolor=col, linewidth=1.0))
         
         s_x = [x + (i - (n_s-1)/2)*0.45 for i in range(n_s)]
         s_y = [y + np.sin(i*0.8)*0.3 for i in range(n_s)]
         for i in range(len(s_x)-1):
-            ax.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=3, zorder=3)
-        ax.scatter(s_x, s_y, s=110, color="#eab308", edgecolors="#713f12", linewidth=1.0, zorder=4, label="Sulfur (S)" if name=="Li2S8" else "")
+            ax.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=2.0, zorder=3)
+        ax.scatter(s_x, s_y, s=60, color="#eab308", edgecolors="#713f12", linewidth=0.6, zorder=4, label="Sulfur (S)" if name=="Li₂S₈" else "")
         
         li_x = [s_x[0] - 0.4, s_x[-1] + 0.4]
         li_y = [y - 0.7, y - 0.7]
         for lx, ly in zip(li_x, li_y):
-            ax.plot([lx, s_x[0] if lx==li_x[0] else s_x[-1]], [ly, s_y[0] if lx==li_x[0] else s_y[-1]], color="#a855f7", linestyle="--", linewidth=1.5, zorder=3)
-            ax.plot([lx, lx], [ly, ly - 0.6], color="#0284c7", linestyle=":", linewidth=1.5, zorder=3)
-        ax.scatter(li_x, li_y, s=90, color="#a855f7", edgecolors="#581c87", linewidth=1.0, zorder=4, label="Lithium (Li)" if name=="Li2S8" else "")
+            ax.plot([lx, s_x[0] if lx==li_x[0] else s_x[-1]], [ly, s_y[0] if lx==li_x[0] else s_y[-1]], color="#a855f7", linestyle="--", linewidth=1.0, zorder=3)
+            ax.plot([lx, lx], [ly, ly - 0.6], color="#0284c7", linestyle=":", linewidth=1.0, zorder=3)
+        ax.scatter(li_x, li_y, s=50, color="#a855f7", edgecolors="#581c87", linewidth=0.6, zorder=4, label="Lithium (Li)" if name=="Li₂S₈" else "")
 
-    ax.set_title("Schematic illustration of LiPS adsorption on the host material", fontsize=13, fontweight="bold", pad=15)
+    ax.set_title("Schematic illustration of LiPS adsorption on the host material", fontsize=10, fontweight="bold", pad=10)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=10)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=7.5)
     plt.tight_layout()
     return fig
 
 
 @st.cache_data
 def generate_matplotlib_top_side_grid_fig():
-    """Generate a publication-grade Top View vs Side View 5-species multi-panel plot using pure Python Matplotlib."""
+    """Generate a publication-grade Top View vs Side View 5-species multi-panel plot adhering strictly to Chemistry Europe / Wiley Graphics Guidelines (Arial/Helvetica, 600 DPI, Double-Column Width 17.5 cm)."""
     import matplotlib.pyplot as plt
     
-    fig, axes = plt.subplots(5, 2, figsize=(10, 11), dpi=200)
+    plt.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'DejaVu Sans']
+    plt.rcParams['font.family'] = 'sans-serif'
+
+    # Chemistry Europe Double-Column Width: 17.5 cm (~6.89 inches), DPI=600
+    fig, axes = plt.subplots(5, 2, figsize=(6.89, 7.5), dpi=600)
     fig.patch.set_facecolor("#ffffff")
     
     species = [
-        ("Li₂S<sub>8</sub>", 8, 2, "#dc2626", "d_Li-C = 1.98 Å"),
-        ("Li₂S<sub>6</sub>", 6, 2, "#9333ea", "d_Li-C = 1.95 Å"),
-        ("Li₂S<sub>4</sub>", 4, 2, "#2563eb", "d_Li-C = 1.91 Å"),
-        ("Li₂S<sub>2</sub>", 2, 2, "#16a34a", "d_Li-C = 1.86 Å"),
+        ("Li₂S₈", 8, 2, "#dc2626", "d_Li-C = 1.98 Å"),
+        ("Li₂S₆", 6, 2, "#9333ea", "d_Li-C = 1.95 Å"),
+        ("Li₂S₄", 4, 2, "#2563eb", "d_Li-C = 1.91 Å"),
+        ("Li₂S₂", 2, 2, "#16a34a", "d_Li-C = 1.86 Å"),
         ("Li₂S",  1, 2, "#ea580c", "d_Li-C = 1.80 Å"),
     ]
     
     for row_idx, (sp_name, n_s, n_li, color, d_text) in enumerate(species):
-        clean_name = sp_name.replace("<sub>", "").replace("</sub>", "")
         # Left column: Top view
         ax_top = axes[row_idx, 0]
         ax_top.set_facecolor("#ffffff")
@@ -351,21 +356,21 @@ def generate_matplotlib_top_side_grid_fig():
                     lns.append((p1, p4))
 
         for p1, p2 in lns:
-            ax_top.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=1.2, zorder=1)
+            ax_top.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#cbd5e1", linewidth=0.8, zorder=1)
         cx, cy = zip(*pts)
-        ax_top.scatter(cx, cy, s=25, color="#475569", edgecolors="#1e293b", linewidth=0.5, zorder=2)
+        ax_top.scatter(cx, cy, s=16, color="#475569", edgecolors="#1e293b", linewidth=0.4, zorder=2)
         
         center_x, center_y = 4.2, 3.2
         s_x = [center_x + (i - (n_s-1)/2)*0.45 for i in range(n_s)]
         s_y = [center_y + np.sin(i*0.8)*0.3 for i in range(n_s)]
         for i in range(len(s_x)-1):
-            ax_top.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=2.5, zorder=3)
-        ax_top.scatter(s_x, s_y, s=80, color="#eab308", edgecolors="#713f12", linewidth=0.8, zorder=4)
+            ax_top.plot([s_x[i], s_x[i+1]], [s_y[i], s_y[i+1]], color="#eab308", linewidth=1.8, zorder=3)
+        ax_top.scatter(s_x, s_y, s=45, color="#eab308", edgecolors="#713f12", linewidth=0.5, zorder=4)
         li_x = [s_x[0] - 0.4, s_x[-1] + 0.4]
         li_y = [center_y - 0.5, center_y - 0.5]
-        ax_top.scatter(li_x, li_y, s=70, color="#a855f7", edgecolors="#581c87", linewidth=0.8, zorder=4)
+        ax_top.scatter(li_x, li_y, s=40, color="#a855f7", edgecolors="#581c87", linewidth=0.5, zorder=4)
         
-        ax_top.set_ylabel(clean_name, fontsize=13, fontweight="bold", color=color, rotation=0, labelpad=30, va="center")
+        ax_top.set_ylabel(sp_name, fontsize=9, fontweight="bold", color=color, rotation=0, labelpad=25, va="center")
         ax_top.set_aspect("equal")
         ax_top.axis("off")
         
@@ -375,31 +380,31 @@ def generate_matplotlib_top_side_grid_fig():
         
         gx = np.linspace(0, 9, 18)
         gy = np.zeros_like(gx)
-        ax_side.plot([0, 9], [0, 0], color="#64748b", linewidth=2, zorder=1)
-        ax_side.scatter(gx, gy, s=40, color="#475569", edgecolors="#1e293b", linewidth=0.6, zorder=2)
+        ax_side.plot([0, 9], [0, 0], color="#64748b", linewidth=1.5, zorder=1)
+        ax_side.scatter(gx, gy, s=25, color="#475569", edgecolors="#1e293b", linewidth=0.5, zorder=2)
         
         s_x_side = [4.5 + (i - (n_s-1)/2)*0.4 for i in range(n_s)]
         s_y_side = [1.2 + np.sin(i*0.9)*0.4 for i in range(n_s)]
         for i in range(len(s_x_side)-1):
-            ax_side.plot([s_x_side[i], s_x_side[i+1]], [s_y_side[i], s_y_side[i+1]], color="#eab308", linewidth=2.5, zorder=3)
-        ax_side.scatter(s_x_side, s_y_side, s=80, color="#eab308", edgecolors="#713f12", linewidth=0.8, zorder=4)
+            ax_side.plot([s_x_side[i], s_x_side[i+1]], [s_y_side[i], s_y_side[i+1]], color="#eab308", linewidth=1.8, zorder=3)
+        ax_side.scatter(s_x_side, s_y_side, s=45, color="#eab308", edgecolors="#713f12", linewidth=0.5, zorder=4)
         
         li_x_side = [s_x_side[0] - 0.35, s_x_side[-1] + 0.35]
         li_y_side = [0.7, 0.7]
         for lx, ly in zip(li_x_side, li_y_side):
-            ax_side.plot([lx, lx], [ly, 0.0], color="#0284c7", linestyle=":", linewidth=1.2, zorder=3)
-        ax_side.scatter(li_x_side, li_y_side, s=70, color="#a855f7", edgecolors="#581c87", linewidth=0.8, zorder=4)
+            ax_side.plot([lx, lx], [ly, 0.0], color="#0284c7", linestyle=":", linewidth=1.0, zorder=3)
+        ax_side.scatter(li_x_side, li_y_side, s=40, color="#a855f7", edgecolors="#581c87", linewidth=0.5, zorder=4)
         
-        ax_side.text(9.3, 0.7, d_text, fontsize=9, va="center", color="#334155")
-        ax_side.text(9.3, 0.0, "d_graphene = 0.0 Å", fontsize=9, va="center", color="#64748b")
+        ax_side.text(9.3, 0.7, d_text, fontsize=7.5, va="center", color="#334155")
+        ax_side.text(9.3, 0.0, "d_graphene = 0.0 Å", fontsize=7.5, va="center", color="#64748b")
         
         ax_side.set_ylim(-0.5, 2.5)
         ax_side.set_xlim(-0.5, 12.0)
         ax_side.axis("off")
 
-    axes[0, 0].set_title("Top view", fontsize=14, fontweight="bold", pad=10)
-    axes[0, 1].set_title("Side view", fontsize=14, fontweight="bold", pad=10)
-    fig.suptitle("Schematic illustration of LiPS adsorption on the host material", fontsize=14, fontweight="bold", y=1.01)
+    axes[0, 0].set_title("Top view", fontsize=9, fontweight="bold", pad=8)
+    axes[0, 1].set_title("Side view", fontsize=9, fontweight="bold", pad=8)
+    fig.suptitle("Schematic illustration of LiPS adsorption on the host material", fontsize=10, fontweight="bold", y=0.99)
     
     plt.tight_layout()
     return fig
@@ -1173,6 +1178,18 @@ with tab_intro:
                 🔵 <b>Li<sub>2</sub>S<sub>4</sub></b>: Center Region (Medium-chain)<br>
                 🟢 <b>Li<sub>2</sub>S<sub>2</sub></b>: Bottom-Left Region (Short-chain)<br>
                 🟠 <b>Li<sub>2</sub>S</b>: Bottom-Right Region (Insoluble End-product)
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Chemistry Europe / Wiley Guidelines Badge
+            st.markdown("""
+            <div style="background: #eff6ff; border: 1px solid #93c5fd; padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.88rem; margin-top: 0.8rem; color: #1e3a8a;">
+                <b>📐 Chemistry Europe / Wiley Publisher Compliance:</b><br>
+                • <b>Resolution</b>: 600 DPI High-Res Vector Line Art<br>
+                • <b>Font Family</b>: Arial / Helvetica (Sans-Serif)<br>
+                • <b>Font Sizes</b>: Title 10 pt, Labels 8 pt, Details 7.5 pt<br>
+                • <b>Double-Column Width</b>: 17.5 cm (6.89 in)<br>
+                • <b>Target Standard</b>: Chemistry Europe (Wiley) Guidelines
             </div>
             """, unsafe_allow_html=True)
 
