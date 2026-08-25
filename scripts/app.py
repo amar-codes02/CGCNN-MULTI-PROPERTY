@@ -99,8 +99,23 @@ if os.path.exists(TPMS_DIR):
 
 
 # ---------------------------------------------------------------------------
-# Cached TPMS Adsorption Structure Generator
+# Cached TPMS Adsorption & Format Converters
 # ---------------------------------------------------------------------------
+@st.cache_data
+def cif_to_xyz(cif_text):
+    """Convert CIF text string to XYZ coordinate format."""
+    if not cif_text:
+        return ""
+    try:
+        struct = Structure.from_str(cif_text, fmt="cif")
+        lines = [str(len(struct)), f"Comment: {struct.formula}"]
+        for site in struct:
+            lines.append(f"{site.specie.symbol:<3s} {site.x:12.6f} {site.y:12.6f} {site.z:12.6f}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
 @st.cache_data
 def get_adsorbed_cif(tpms_cif_path, species_code, supercell_n=1):
     """Build and cache adsorbed TPMS structure CIF string."""
@@ -133,12 +148,15 @@ def get_adsorbed_cif(tpms_cif_path, species_code, supercell_n=1):
 
 
 # ---------------------------------------------------------------------------
-# 3Dmol.js CIF Viewer Component
+# 3Dmol.js CIF/XYZ Structure Viewer Component (Pure Light Mode)
 # ---------------------------------------------------------------------------
-def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#0b0f19"):
-    """Render 3D Crystal Structure using 3Dmol.js library in HTML component."""
-    safe_cif = (
-        cif_text.replace("\\", "\\\\")
+def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#ffffff"):
+    """Render 3D Crystal/Molecular Structure (CIF or XYZ) using 3Dmol.js library in HTML component."""
+    if not data_text:
+        return
+
+    safe_data = (
+        data_text.replace("\\", "\\\\")
         .replace("`", "\\`")
         .replace("${", "\\${")
     )
@@ -151,6 +169,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
     style_js = style_map.get(style, style_map["stick_sphere"])
     supercell = max(1, min(int(supercell), 2))
     supercell_z = supercell if replicate_z else 1
+    fmt_str = str(fmt).lower()
 
     html = f"""
     <!DOCTYPE html>
@@ -159,18 +178,18 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
       <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js"></script>
     </head>
     <body style="margin:0; padding:0; background-color:{bg_color}; overflow:hidden;">
-      <div id="viewer3dmol" style="height: {height}px; width: 100%; position: relative;"></div>
+      <div id="viewer3dmol" style="height: {height}px; width: 100%; position: relative; border-radius: 16px; border: 1px solid #cbd5e1;"></div>
       <script>
         (function() {{
           var el = document.getElementById("viewer3dmol");
           if (!el || typeof $3Dmol === "undefined") {{
-            el.innerHTML = "<p style='color:#f87171; padding:20px;'>Failed to load 3Dmol.js library.</p>";
+            el.innerHTML = "<p style='color:#ef4444; padding:20px;'>Failed to load 3Dmol.js library.</p>";
             return;
           }}
           try {{
-            var cifData = `{safe_cif}`;
+            var rawData = `{safe_data}`;
             var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
-            var model = viewer.addModel(cifData, "cif", {{
+            var model = viewer.addModel(rawData, "{fmt_str}", {{
               doAssembly: false,
               duplicateAssemblyAtoms: false,
               normalizeAssembly: false
@@ -189,7 +208,7 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
               if (dupes.length > 0) model.removeAtoms(dupes);
             }} catch (e) {{ }}
 
-            if ({supercell} > 1) {{
+            if ({supercell} > 1 && "{fmt_str}" === "cif") {{
               try {{
                 var countBefore = model.selectedAtoms({{}}).length;
                 if (countBefore <= 350) {{
@@ -206,16 +225,18 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
             }}
 
             viewer.setStyle({{}}, chosenStyle);
-            viewer.addUnitCell(model, {{
-              box: {{ color: "#38bdf8", linewidth: 1.5 }},
-              alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
-            }});
-            try {{ viewer.addAxes({{ scale: 1.0, color: "#38bdf8" }}); }} catch (e) {{ }}
+            if ("{fmt_str}" === "cif") {{
+              viewer.addUnitCell(model, {{
+                box: {{ color: "#0284c7", linewidth: 1.5 }},
+                alabel: "a (X)", blabel: "b (Y)", clabel: "c (Z)"
+              }});
+            }}
+            try {{ viewer.addAxes({{ scale: 1.0, color: "#0284c7" }}); }} catch (e) {{ }}
             viewer.zoomTo();
             viewer.zoom(1.05);
             viewer.render();
           }} catch (errMain) {{
-            el.innerHTML = "<p style='color:#f87171; padding:20px;'>3D Viewer Error: " + errMain + "</p>";
+            el.innerHTML = "<p style='color:#ef4444; padding:20px;'>3D Viewer Error: " + errMain + "</p>";
           }}
         }})();
       </script>
@@ -223,6 +244,9 @@ def render_cif_3d(cif_text, height=560, style="stick_sphere", supercell=1, repli
     </html>
     """
     components.html(html, height=height + 5)
+
+
+render_cif_3d = render_structure_3d
 
 
 # ---------------------------------------------------------------------------
@@ -1086,10 +1110,44 @@ with tab_viz3d:
             col_v1, col_v2 = st.columns([1, 1])
 
             with col_v1:
-                st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
-                viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
+                st.markdown(f"#### ⚛️ 3D Renderer: `{cif_name_curr}`")
+                
+                col_f1, col_f2 = st.columns([1, 1])
+                with col_f1:
+                    fmt_choice_t3 = st.radio("Display Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t3_fmt_choice", horizontal=True)
+                with col_f2:
+                    viz_style = st.selectbox("3D Representation:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
+
                 supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t3_supercell_val")
-                render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
+                
+                fmt_code_t3 = "xyz" if "XYZ" in fmt_choice_t3 else "cif"
+                xyz_text_t3 = cif_to_xyz(cif_text_curr)
+                render_data_t3 = xyz_text_t3 if fmt_code_t3 == "xyz" else cif_text_curr
+                
+                render_structure_3d(render_data_t3, fmt=fmt_code_t3, height=480, style=viz_style, supercell=supercell_val, bg_color="#ffffff")
+
+                st.markdown("##### 📥 Structure Export Options")
+                dl_col1, dl_col2 = st.columns(2)
+                base_name_clean = os.path.splitext(cif_name_curr)[0]
+                with dl_col1:
+                    st.download_button(
+                        label=f"📥 Download CIF ({base_name_clean}.cif)",
+                        data=cif_text_curr,
+                        file_name=f"{base_name_clean}.cif",
+                        mime="chemical/x-cif",
+                        key="t3_dl_cif"
+                    )
+                with dl_col2:
+                    st.download_button(
+                        label=f"📥 Download XYZ ({base_name_clean}.xyz)",
+                        data=xyz_text_t3,
+                        file_name=f"{base_name_clean}.xyz",
+                        mime="chemical/x-xyz",
+                        key="t3_dl_xyz"
+                    )
+
+                with st.expander("📄 Inspect Atomic Coordinates (XYZ Format)"):
+                    st.code(xyz_text_t3[:1800] + ("\n... [truncated for display]" if len(xyz_text_t3) > 1800 else ""), language="text")
 
             with col_v2:
                 st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
@@ -1677,17 +1735,22 @@ with tab_polysulfide:
             selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1, key="t5_species_label")
             species_code = species_options[selected_species_label]
 
-            st.markdown("#### 🎨 3D Rendering Options")
-            render_style = st.selectbox(
-                "3D Representation Style:",
-                ["stick_sphere", "spacefill", "line"],
-                format_func=lambda x: {
-                    "stick_sphere": "Stick & Sphere (Ball & Stick)",
-                    "spacefill": "Spacefill (CPK Van der Waals Radii)",
-                    "line": "Wireframe Line"
-                }[x],
-                key="t5_render_style"
-            )
+            st.markdown("#### 🎨 3D Rendering & Format Options")
+            col_t5_style, col_t5_fmt = st.columns([1.1, 0.9])
+            with col_t5_style:
+                render_style = st.selectbox(
+                    "3D Representation Style:",
+                    ["stick_sphere", "spacefill", "line"],
+                    format_func=lambda x: {
+                        "stick_sphere": "Stick & Sphere (Ball & Stick)",
+                        "spacefill": "Spacefill (CPK Van der Waals Radii)",
+                        "line": "Wireframe Line"
+                    }[x],
+                    key="t5_render_style"
+                )
+            with col_t5_fmt:
+                t5_fmt_choice = st.radio("3D File Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t5_fmt_choice", horizontal=True)
+
             supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t5_supercell_n")
 
             tpms_key = selected_tpms_name.split()[0]
@@ -1717,24 +1780,43 @@ with tab_polysulfide:
             adsorbed_cif = get_adsorbed_cif(tpms_cif_path, species_code, supercell_n)
 
             if adsorbed_cif:
-                render_cif_3d(
-                    adsorbed_cif,
-                    height=540,
+                fmt_code_t5 = "xyz" if "XYZ" in t5_fmt_choice else "cif"
+                adsorbed_xyz = cif_to_xyz(adsorbed_cif)
+                render_data_t5 = adsorbed_xyz if fmt_code_t5 == "xyz" else adsorbed_cif
+
+                render_structure_3d(
+                    render_data_t5,
+                    fmt=fmt_code_t5,
+                    height=500,
                     style=render_style,
                     supercell=1,
                     replicate_z=False,
-                    bg_color=mol3d_bg
+                    bg_color="#ffffff"
                 )
                 
                 st.caption("💡 **3D Interaction**: Click and drag to rotate the TPMS + Polysulfide interface. Scroll to zoom in/out.")
                 
-                st.download_button(
-                    label=f"📥 Download Adsorbed Structure CIF ({tpms_key}_{species_code}.cif)",
-                    data=adsorbed_cif,
-                    file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.cif",
-                    mime="chemical/x-cif",
-                    key=f"dl_cif_{tpms_key}_{species_code}_{supercell_n}"
-                )
+                st.markdown("##### 📥 Export Adsorbed Complex File")
+                dl_t5_c1, dl_t5_c2 = st.columns(2)
+                with dl_t5_c1:
+                    st.download_button(
+                        label=f"📥 Download CIF ({tpms_key}_{species_code}.cif)",
+                        data=adsorbed_cif,
+                        file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.cif",
+                        mime="chemical/x-cif",
+                        key=f"dl_cif_{tpms_key}_{species_code}_{supercell_n}"
+                    )
+                with dl_t5_c2:
+                    st.download_button(
+                        label=f"📥 Download XYZ ({tpms_key}_{species_code}.xyz)",
+                        data=adsorbed_xyz,
+                        file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.xyz",
+                        mime="chemical/x-xyz",
+                        key=f"dl_xyz_{tpms_key}_{species_code}_{supercell_n}"
+                    )
+
+                with st.expander("📄 Inspect Adsorption Complex Coordinates (XYZ Format)"):
+                    st.code(adsorbed_xyz[:1800] + ("\n... [truncated for display]" if len(adsorbed_xyz) > 1800 else ""), language="text")
             else:
                 st.warning(f"TPMS CIF file not found at `{tpms_cif_path}`.")
 
