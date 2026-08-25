@@ -14,6 +14,9 @@ import torch
 
 from pymatgen.core import Structure
 from PIL import Image
+import warnings
+
+warnings.filterwarnings("ignore")
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 if os.path.basename(APP_DIR) == "scripts":
@@ -93,6 +96,40 @@ if os.path.exists(TPMS_DIR):
         if fn.endswith(".cif"):
             nice_name = fn.replace("graphene_sheet_", "").replace(".cif", "").upper() + " Graphene TPMS"
             sample_cif_files[nice_name] = os.path.join(TPMS_DIR, fn)
+
+
+# ---------------------------------------------------------------------------
+# Cached TPMS Adsorption Structure Generator
+# ---------------------------------------------------------------------------
+@st.cache_data
+def get_adsorbed_cif(tpms_cif_path, species_code, supercell_n=1):
+    """Build and cache adsorbed TPMS structure CIF string."""
+    if not os.path.exists(tpms_cif_path):
+        return None
+    with open(tpms_cif_path, "r", encoding="utf-8") as f:
+        base_cif = f.read()
+
+    try:
+        struct = Structure.from_str(base_cif, fmt="cif")
+        if supercell_n > 1:
+            struct.make_supercell([supercell_n, supercell_n, 1])
+
+        center = struct.cart_coords.mean(axis=0)
+        poly_geoms = {
+            "Li2S8": [("Li", [0.0, 0.0, 2.2]), ("Li", [3.2, 0.0, 2.2]), ("S", [0.8, 1.2, 3.4]), ("S", [2.4, 1.2, 3.4]), ("S", [-0.5, 2.5, 4.2]), ("S", [3.7, 2.5, 4.2]), ("S", [0.5, 3.8, 4.8]), ("S", [2.7, 3.8, 4.8]), ("S", [1.6, 2.2, 5.5]), ("S", [1.6, 4.5, 5.8])],
+            "Li2S6": [("Li", [0.0, 0.0, 2.2]), ("Li", [2.8, 0.0, 2.2]), ("S", [0.7, 1.1, 3.3]), ("S", [2.1, 1.1, 3.3]), ("S", [-0.2, 2.3, 4.1]), ("S", [3.0, 2.3, 4.1]), ("S", [1.4, 3.2, 4.7]), ("S", [1.4, 1.8, 5.1])],
+            "Li2S4": [("Li", [0.0, 0.0, 2.2]), ("Li", [2.4, 0.0, 2.2]), ("S", [0.6, 1.0, 3.2]), ("S", [1.8, 1.0, 3.2]), ("S", [0.2, 2.2, 4.0]), ("S", [2.2, 2.2, 4.0])],
+            "Li2S2": [("Li", [0.0, 0.0, 2.1]), ("Li", [2.1, 0.0, 2.1]), ("S", [0.5, 1.0, 3.1]), ("S", [1.6, 1.0, 3.1])],
+            "Li2S":  [("Li", [-0.8, 0.0, 2.1]), ("Li", [0.8, 0.0, 2.1]), ("S", [0.0, 0.0, 3.1])],
+        }
+        geom = poly_geoms.get(species_code, poly_geoms["Li2S6"])
+        for elem, offset in geom:
+            pos = center + np.array(offset)
+            struct.append(elem, pos, coords_are_cartesian=True)
+
+        return struct.to(fmt="cif")
+    except Exception:
+        return base_cif
 
 
 # ---------------------------------------------------------------------------
@@ -1038,71 +1075,79 @@ with tab_viz3d:
     if "cif_text" in st.session_state:
         cif_text_curr = st.session_state["cif_text"]
         cif_name_curr = st.session_state.get("cif_name", "CIF Structure")
-        try:
-            struct = Structure.from_str(cif_text_curr, fmt="cif")
-        except Exception:
-            struct = None
         
-        col_v1, col_v2 = st.columns([1, 1])
-
-        with col_v1:
-            st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
-            viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
-            supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t3_supercell_val")
-            render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
-
-        with col_v2:
-            st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
+        @st.fragment
+        def render_tab3_fragment():
             try:
-                atom_fea, nbr_fea, nbr_fea_idx = build_graph(struct, max_num_nbr=12, radius=4.0)
-                coords = struct.cart_coords
-                elements = [site.specie.symbol for site in struct]
+                struct = Structure.from_str(cif_text_curr, fmt="cif")
+            except Exception:
+                struct = None
+            
+            col_v1, col_v2 = st.columns([1, 1])
 
-                node_x, node_y, node_z = coords[:, 0], coords[:, 1], coords[:, 2]
+            with col_v1:
+                st.markdown(f"#### ⚛️ 3Dmol.js Renderer: `{cif_name_curr}`")
+                viz_style = st.selectbox("3D Rendering Style:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
+                supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t3_supercell_val")
+                render_cif_3d(cif_text_curr, height=520, style=viz_style, supercell=supercell_val, bg_color=mol3d_bg)
 
-                edge_x, edge_y, edge_z = [], [], []
-                for i in range(len(struct)):
-                    neighbors = nbr_fea_idx[i]
-                    for idx in neighbors:
-                        j = int(idx)
-                        if j < len(struct):
-                            edge_x.extend([coords[i, 0], coords[j, 0], None])
-                            edge_y.extend([coords[i, 1], coords[j, 1], None])
-                            edge_z.extend([coords[i, 2], coords[j, 2], None])
+            with col_v2:
+                st.markdown("#### 🕸️ Crystal Graph Network (3D Plotly Nodes & Edges)")
+                if struct is not None:
+                    try:
+                        atom_fea, nbr_fea, nbr_fea_idx = build_graph(struct, max_num_nbr=12, radius=4.0)
+                        coords = struct.cart_coords
+                        elements = [site.specie.symbol for site in struct]
 
-                fig_graph = go.Figure()
-                fig_graph.add_trace(go.Scatter3d(
-                    x=edge_x, y=edge_y, z=edge_z,
-                    mode='lines',
-                    line=dict(color='#38bdf8', width=2.5),
-                    hoverinfo='none',
-                    name='Bonds'
-                ))
-                fig_graph.add_trace(go.Scatter3d(
-                    x=node_x, y=node_y, z=node_z,
-                    mode='markers+text',
-                    marker=dict(size=9, color='#818cf8', opacity=0.9),
-                    text=elements,
-                    textposition="top center",
-                    name='Atoms'
-                ))
-                fig_graph.update_layout(
-                    template=plotly_template,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor=plotly_bg,
-                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
-                    scene=dict(
-                        xaxis=dict(title="X (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
-                        yaxis=dict(title="Y (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
-                        zaxis=dict(title="Z (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color)
-                    ),
-                    margin=dict(l=0, r=0, b=0, t=30),
-                    height=520
-                )
-                st.plotly_chart(fig_graph, use_container_width=True)
+                        node_x, node_y, node_z = coords[:, 0], coords[:, 1], coords[:, 2]
 
-            except Exception as ex:
-                st.error(f"Failed to generate 3D Graph visualization: {ex}")
+                        edge_x, edge_y, edge_z = [], [], []
+                        for i in range(len(struct)):
+                            neighbors = nbr_fea_idx[i]
+                            for idx in neighbors:
+                                j = int(idx)
+                                if j < len(struct):
+                                    edge_x.extend([coords[i, 0], coords[j, 0], None])
+                                    edge_y.extend([coords[i, 1], coords[j, 1], None])
+                                    edge_z.extend([coords[i, 2], coords[j, 2], None])
+
+                        fig_graph = go.Figure()
+                        fig_graph.add_trace(go.Scatter3d(
+                            x=edge_x, y=edge_y, z=edge_z,
+                            mode='lines',
+                            line=dict(color='#38bdf8', width=2.5),
+                            hoverinfo='none',
+                            name='Bonds'
+                        ))
+                        fig_graph.add_trace(go.Scatter3d(
+                            x=node_x, y=node_y, z=node_z,
+                            mode='markers+text',
+                            marker=dict(size=9, color='#818cf8', opacity=0.9),
+                            text=elements,
+                            textposition="top center",
+                            name='Atoms'
+                        ))
+                        fig_graph.update_layout(
+                            template=plotly_template,
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            plot_bgcolor=plotly_bg,
+                            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                            scene=dict(
+                                xaxis=dict(title="X (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
+                                yaxis=dict(title="Y (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color),
+                                zaxis=dict(title="Z (Å)", visible=True, showgrid=True, gridcolor=plotly_grid_color, color=plotly_font_color)
+                            ),
+                            margin=dict(l=0, r=0, b=0, t=30),
+                            height=520
+                        )
+                        st.plotly_chart(fig_graph, use_container_width=True)
+
+                    except Exception as ex:
+                        st.error(f"Failed to generate 3D Graph visualization: {ex}")
+                else:
+                    st.warning("Invalid CIF structure format.")
+
+        render_tab3_fragment()
     else:
         st.info("Select or upload a CIF file in the sidebar to display 3D crystal structure renderings.")
 
@@ -1597,9 +1642,6 @@ with tab_polysulfide:
     </div>
     """, unsafe_allow_html=True)
 
-    # Control Bar & Selector Layout
-    col_ctrl, col_viz = st.columns([1.1, 1.9])
-
     adso_matrix = {
         "Gyroid":    {"Li2S8": 2.45, "Li2S6": 2.68, "Li2S4": 2.85, "Li2S2": 3.12, "Li2S": 3.45},
         "Diamond":   {"Li2S8": 2.30, "Li2S6": 2.52, "Li2S4": 2.70, "Li2S2": 2.95, "Li2S": 3.25},
@@ -1608,96 +1650,71 @@ with tab_polysulfide:
         "Primitive":{"Li2S8": 1.75, "Li2S6": 1.95, "Li2S4": 2.10, "Li2S2": 2.35, "Li2S": 2.65},
     }
 
-    with col_ctrl:
-        st.markdown("#### ⚙️ Adsorption Interface Setup")
-        
-        tpms_options = {
-            "Gyroid Graphene TPMS": "graphene_sheet_gyroid.cif",
-            "Neovius Graphene TPMS": "graphene_sheet_neovius.cif",
-            "Diamond Graphene TPMS": "graphene_sheet_diamond.cif",
-            "Primitive Graphene TPMS": "graphene_sheet_primitive.cif",
-            "IWP Graphene TPMS": "graphene_sheet_iwp.cif",
-        }
-        
-        selected_tpms_name = st.selectbox("1. Select Graphene TPMS Host Scaffold:", list(tpms_options.keys()), index=0, key="t5_tpms_name")
-        
-        species_options = {
-            "Li2S8 (Lithium Octasulfide - Soluble Long Chain)": "Li2S8",
-            "Li2S6 (Lithium Hexasulfide - Soluble Intermediate)": "Li2S6",
-            "Li2S4 (Lithium Tetrasulfide - Soluble Medium Chain)": "Li2S4",
-            "Li2S2 (Lithium Disulfide - Insoluble Short Chain)": "Li2S2",
-            "Li2S (Lithium Sulfide - Insoluble End Product)": "Li2S",
-        }
-        
-        selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1, key="t5_species_label")
-        species_code = species_options[selected_species_label]
+    tpms_options = {
+        "Gyroid Graphene TPMS": "graphene_sheet_gyroid.cif",
+        "Neovius Graphene TPMS": "graphene_sheet_neovius.cif",
+        "Diamond Graphene TPMS": "graphene_sheet_diamond.cif",
+        "Primitive Graphene TPMS": "graphene_sheet_primitive.cif",
+        "IWP Graphene TPMS": "graphene_sheet_iwp.cif",
+    }
 
-        st.markdown("#### 🎨 3D Rendering Options")
-        render_style = st.selectbox(
-            "3D Representation Style:",
-            ["stick_sphere", "spacefill", "line"],
-            format_func=lambda x: {
-                "stick_sphere": "Stick & Sphere (Ball & Stick)",
-                "spacefill": "Spacefill (CPK Van der Waals Radii)",
-                "line": "Wireframe Line"
-            }[x],
-            key="t5_render_style"
-        )
-        supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t5_supercell_n")
+    species_options = {
+        "Li2S8 (Lithium Octasulfide - Soluble Long Chain)": "Li2S8",
+        "Li2S6 (Lithium Hexasulfide - Soluble Intermediate)": "Li2S6",
+        "Li2S4 (Lithium Tetrasulfide - Soluble Medium Chain)": "Li2S4",
+        "Li2S2 (Lithium Disulfide - Insoluble Short Chain)": "Li2S2",
+        "Li2S (Lithium Sulfide - Insoluble End Product)": "Li2S",
+    }
 
-        tpms_key = selected_tpms_name.split()[0]
-        eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
+    @st.fragment
+    def render_tab5_fragment():
+        col_ctrl, col_viz = st.columns([1.1, 1.9])
 
-        st.markdown("#### ⚡ Adsorption Binding Metrics")
-        kpi_col1, kpi_col2 = st.columns(2)
-        with kpi_col1:
-            st.metric(label="Adsorption Energy (E_ads)", value=f"{eads_val:.2f} eV", delta="Strong Binding" if eads_val >= 2.0 else "Moderate")
-            st.caption("Min. Shuttle Threshold: `> 1.50 eV`")
-        with kpi_col2:
-            d_bind = 2.15 if "Li" in species_code else 2.35
-            st.metric(label="Interfacial Distance (d_Li-C)", value=f"{d_bind:.2f} Å", delta="Optimal")
-            st.caption("Chemical Anchoring Range: `2.0-2.4 Å`")
+        with col_ctrl:
+            st.markdown("#### ⚙️ Adsorption Interface Setup")
+            
+            selected_tpms_name = st.selectbox("1. Select Graphene TPMS Host Scaffold:", list(tpms_options.keys()), index=0, key="t5_tpms_name")
+            selected_species_label = st.selectbox("2. Select Adsorbed Polysulfide Species (Li₂Sₓ):", list(species_options.keys()), index=1, key="t5_species_label")
+            species_code = species_options[selected_species_label]
 
-        if eads_val >= 2.0:
-            st.success("✅ **High Shuttle Containment Efficiency**: Strong binding prevents polysulfide dissolution into electrolyte.")
-        else:
-            st.info("ℹ️ **Moderate Binding Capacity**: Scaffolding provides structural confinement with moderate binding energy.")
+            st.markdown("#### 🎨 3D Rendering Options")
+            render_style = st.selectbox(
+                "3D Representation Style:",
+                ["stick_sphere", "spacefill", "line"],
+                format_func=lambda x: {
+                    "stick_sphere": "Stick & Sphere (Ball & Stick)",
+                    "spacefill": "Spacefill (CPK Van der Waals Radii)",
+                    "line": "Wireframe Line"
+                }[x],
+                key="t5_render_style"
+            )
+            supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t5_supercell_n")
 
-    with col_viz:
-        st.markdown(f"#### 🧊 3D Adsorption Complex: {selected_tpms_name} + {species_code}")
-        
-        cif_filename = tpms_options[selected_tpms_name]
-        tpms_cif_path = os.path.join(TPMS_DIR, cif_filename)
-        
-        if os.path.exists(tpms_cif_path):
-            with open(tpms_cif_path, "r", encoding="utf-8") as f:
-                base_tpms_cif = f.read()
+            tpms_key = selected_tpms_name.split()[0]
+            eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
 
-            adsorbed_cif = None
-            try:
-                struct = Structure.from_str(base_tpms_cif, fmt="cif")
-                if supercell_n > 1:
-                    struct.make_supercell([supercell_n, supercell_n, 1])
+            st.markdown("#### ⚡ Adsorption Binding Metrics")
+            kpi_col1, kpi_col2 = st.columns(2)
+            with kpi_col1:
+                st.metric(label="Adsorption Energy (E_ads)", value=f"{eads_val:.2f} eV", delta="Strong Binding" if eads_val >= 2.0 else "Moderate")
+                st.caption("Min. Shuttle Threshold: `> 1.50 eV`")
+            with kpi_col2:
+                d_bind = 2.15 if "Li" in species_code else 2.35
+                st.metric(label="Interfacial Distance (d_Li-C)", value=f"{d_bind:.2f} Å", delta="Optimal")
+                st.caption("Chemical Anchoring Range: `2.0-2.4 Å`")
 
-                center = struct.cart_coords.mean(axis=0)
+            if eads_val >= 2.0:
+                st.success("✅ **High Shuttle Containment Efficiency**: Strong binding prevents polysulfide dissolution into electrolyte.")
+            else:
+                st.info("ℹ️ **Moderate Binding Capacity**: Scaffolding provides structural confinement with moderate binding energy.")
 
-                poly_geoms = {
-                    "Li2S8": [("Li", [0.0, 0.0, 2.2]), ("Li", [3.2, 0.0, 2.2]), ("S", [0.8, 1.2, 3.4]), ("S", [2.4, 1.2, 3.4]), ("S", [-0.5, 2.5, 4.2]), ("S", [3.7, 2.5, 4.2]), ("S", [0.5, 3.8, 4.8]), ("S", [2.7, 3.8, 4.8]), ("S", [1.6, 2.2, 5.5]), ("S", [1.6, 4.5, 5.8])],
-                    "Li2S6": [("Li", [0.0, 0.0, 2.2]), ("Li", [2.8, 0.0, 2.2]), ("S", [0.7, 1.1, 3.3]), ("S", [2.1, 1.1, 3.3]), ("S", [-0.2, 2.3, 4.1]), ("S", [3.0, 2.3, 4.1]), ("S", [1.4, 3.2, 4.7]), ("S", [1.4, 1.8, 5.1])],
-                    "Li2S4": [("Li", [0.0, 0.0, 2.2]), ("Li", [2.4, 0.0, 2.2]), ("S", [0.6, 1.0, 3.2]), ("S", [1.8, 1.0, 3.2]), ("S", [0.2, 2.2, 4.0]), ("S", [2.2, 2.2, 4.0])],
-                    "Li2S2": [("Li", [0.0, 0.0, 2.1]), ("Li", [2.1, 0.0, 2.1]), ("S", [0.5, 1.0, 3.1]), ("S", [1.6, 1.0, 3.1])],
-                    "Li2S":  [("Li", [-0.8, 0.0, 2.1]), ("Li", [0.8, 0.0, 2.1]), ("S", [0.0, 0.0, 3.1])],
-                }
-
-                geom = poly_geoms.get(species_code, poly_geoms["Li2S6"])
-                for elem, offset in geom:
-                    pos = center + np.array(offset)
-                    struct.append(elem, pos, coords_are_cartesian=True)
-
-                adsorbed_cif = struct.to(fmt="cif")
-            except Exception as e_cif:
-                st.error(f"Error constructing adsorbed CIF: {e_cif}")
-                adsorbed_cif = base_tpms_cif
+        with col_viz:
+            st.markdown(f"#### 🧊 3D Adsorption Complex: {selected_tpms_name} + {species_code}")
+            
+            cif_filename = tpms_options[selected_tpms_name]
+            tpms_cif_path = os.path.join(TPMS_DIR, cif_filename)
+            
+            adsorbed_cif = get_adsorbed_cif(tpms_cif_path, species_code, supercell_n)
 
             if adsorbed_cif:
                 render_cif_3d(
@@ -1718,89 +1735,91 @@ with tab_polysulfide:
                     mime="chemical/x-cif",
                     key=f"dl_cif_{tpms_key}_{species_code}_{supercell_n}"
                 )
-        else:
-            st.warning(f"TPMS CIF file not found at `{tpms_cif_path}`.")
+            else:
+                st.warning(f"TPMS CIF file not found at `{tpms_cif_path}`.")
 
-    st.divider()
+            st.divider()
 
-    # SECTION: REACTION PATHWAY & COMPARATIVE ADSORPTION MATRIX
-    st.markdown("### 📈 Polysulfide Reduction Pathway & Cross-Topology Adsorption Matrix")
-    
-    path_col, matrix_col = st.columns([1.2, 1.0])
-    species_list = ["Li2S8", "Li2S6", "Li2S4", "Li2S2", "Li2S"]
+            # SECTION: REACTION PATHWAY & COMPARATIVE ADSORPTION MATRIX
+            st.markdown("### 📈 Polysulfide Reduction Pathway & Cross-Topology Adsorption Matrix")
+            
+            path_col, matrix_col = st.columns([1.2, 1.0])
+            species_list = ["Li2S8", "Li2S6", "Li2S4", "Li2S2", "Li2S"]
 
-    with path_col:
-        st.markdown("#### Polysulfide Reduction Reaction Pathway (S₈ → Li₂S₈ → ... → Li₂S)")
-        
-        fig_pathway = go.Figure()
-        colors_tpms = {
-            "Gyroid": "#d95f02",
-            "Diamond": "#7570b3",
-            "Neovius": "#1b9e77",
-            "IWP": "#e7298a",
-            "Primitive": "#66a61e"
-        }
+            with path_col:
+                st.markdown("#### Polysulfide Reduction Reaction Pathway (S₈ → Li₂S₈ → ... → Li₂S)")
+                
+                fig_pathway = go.Figure()
+                colors_tpms = {
+                    "Gyroid": "#d95f02",
+                    "Diamond": "#7570b3",
+                    "Neovius": "#1b9e77",
+                    "IWP": "#e7298a",
+                    "Primitive": "#66a61e"
+                }
 
-        for tp_name, s_dict in adso_matrix.items():
-            y_vals = [s_dict[sp] for sp in species_list]
-            is_selected = (tp_name == tpms_key)
-            fig_pathway.add_trace(go.Scatter(
-                x=species_list, y=y_vals,
-                mode="lines+markers",
-                name=f"{tp_name} TPMS",
-                line=dict(width=4.0 if is_selected else 2.0, color=colors_tpms[tp_name]),
-                marker=dict(size=10 if is_selected else 7),
-                opacity=1.0 if is_selected else 0.55
-            ))
+                for tp_name, s_dict in adso_matrix.items():
+                    y_vals = [s_dict[sp] for sp in species_list]
+                    is_selected = (tp_name == tpms_key)
+                    fig_pathway.add_trace(go.Scatter(
+                        x=species_list, y=y_vals,
+                        mode="lines+markers",
+                        name=f"{tp_name} TPMS",
+                        line=dict(width=4.0 if is_selected else 2.0, color=colors_tpms[tp_name]),
+                        marker=dict(size=10 if is_selected else 7),
+                        opacity=1.0 if is_selected else 0.55
+                    ))
 
-        fig_pathway.add_shape(
-            type="line", x0=0, x1=4, y0=1.5, y1=1.5,
-            line=dict(color="#ef4444", width=2, dash="dash")
-        )
+                fig_pathway.add_shape(
+                    type="line", x0=0, x1=4, y0=1.5, y1=1.5,
+                    line=dict(color="#ef4444", width=2, dash="dash")
+                )
 
-        fig_pathway.add_annotation(
-            x=2, y=1.55, text="Minimum Shuttle Suppression Threshold (E_ads = 1.50 eV)",
-            showarrow=False, font=dict(color="#ef4444", size=11, family="JetBrains Mono"),
-            bgcolor="rgba(254, 226, 226, 0.8)"
-        )
+                fig_pathway.add_annotation(
+                    x=2, y=1.55, text="Minimum Shuttle Suppression Threshold (E_ads = 1.50 eV)",
+                    showarrow=False, font=dict(color="#ef4444", size=11, family="JetBrains Mono"),
+                    bgcolor="rgba(254, 226, 226, 0.8)"
+                )
 
-        fig_pathway.update_layout(
-            template=plotly_template,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor=plotly_bg,
-            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
-            title=dict(text="Adsorption Energy (E_ads) Evolution across Reduction Stages", font=dict(size=14, color=plotly_font_color)),
-            xaxis=dict(title="Polysulfide Species (Reduction Stage)"),
-            yaxis=dict(title="Adsorption Energy E_ads (eV)"),
-            height=450,
-            legend=dict(orientation="h", y=-0.22, x=0.5, xanchor="center")
-        )
-        st.plotly_chart(fig_pathway, use_container_width=True)
+                fig_pathway.update_layout(
+                    template=plotly_template,
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor=plotly_bg,
+                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                    title=dict(text="Adsorption Energy (E_ads) Evolution across Reduction Stages", font=dict(size=14, color=plotly_font_color)),
+                    xaxis=dict(title="Polysulfide Species (Reduction Stage)"),
+                    yaxis=dict(title="Adsorption Energy E_ads (eV)"),
+                    height=450,
+                    legend=dict(orientation="h", y=-0.22, x=0.5, xanchor="center")
+                )
+                st.plotly_chart(fig_pathway, use_container_width=True)
 
-    with matrix_col:
-        st.markdown("#### Cross-Topology Polysulfide Binding Matrix (Heatmap)")
-        
-        df_matrix = pd.DataFrame(adso_matrix).T[species_list]
-        
-        fig_heat = px.imshow(
-            df_matrix,
-            labels=dict(x="Polysulfide Species", y="TPMS Topology", color="E_ads (eV)"),
-            x=species_list,
-            y=list(df_matrix.index),
-            color_continuous_scale="Viridis",
-            text_auto=".2f",
-            aspect="auto"
-        )
-        
-        fig_heat.update_layout(
-            template=plotly_template,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor=plotly_bg,
-            font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
-            title=dict(text="E_ads (eV) Heatmap: 5 TPMS x 5 Polysulfides", font=dict(size=14, color=plotly_font_color)),
-            height=450
-        )
-        st.plotly_chart(fig_heat, use_container_width=True)
+            with matrix_col:
+                st.markdown("#### Cross-Topology Polysulfide Binding Matrix (Heatmap)")
+                
+                df_matrix = pd.DataFrame(adso_matrix).T[species_list]
+                
+                fig_heat = px.imshow(
+                    df_matrix,
+                    labels=dict(x="Polysulfide Species", y="TPMS Topology", color="E_ads (eV)"),
+                    x=species_list,
+                    y=list(df_matrix.index),
+                    color_continuous_scale="Viridis",
+                    text_auto=".2f",
+                    aspect="auto"
+                )
+                
+                fig_heat.update_layout(
+                    template=plotly_template,
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor=plotly_bg,
+                    font=dict(family="Plus Jakarta Sans", color=plotly_font_color, size=13),
+                    title=dict(text="E_ads (eV) Heatmap: 5 TPMS x 5 Polysulfides", font=dict(size=14, color=plotly_font_color)),
+                    height=450
+                )
+                st.plotly_chart(fig_heat, use_container_width=True)
 
-    st.markdown("#### 📋 Polysulfide Adsorption Energy (E_ads) Summary Table")
-    st.dataframe(df_matrix.style.highlight_max(axis=0, color="#dcfce7"), use_container_width=True)
+            st.markdown("#### 📋 Polysulfide Adsorption Energy (E_ads) Summary Table")
+            st.dataframe(df_matrix.style.highlight_max(axis=0, color="#dcfce7"), use_container_width=True)
+
+    render_tab5_fragment()
