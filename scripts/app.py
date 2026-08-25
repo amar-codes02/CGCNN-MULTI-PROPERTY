@@ -117,17 +117,27 @@ def cif_to_xyz(cif_text):
 
 
 @st.cache_data
-def get_adsorbed_cif(tpms_cif_path, species_code, supercell_n=1):
-    """Build and cache adsorbed TPMS structure CIF string."""
+def get_adsorbed_cif(tpms_cif_path, species_code, supercell_x=1, supercell_y=1, supercell_z=1, supercell_n=None):
+    """Build and cache adsorbed TPMS structure CIF string up to 3x3x3 supercell expansion."""
     if not os.path.exists(tpms_cif_path):
         return None
     with open(tpms_cif_path, "r", encoding="utf-8") as f:
         base_cif = f.read()
 
+    if supercell_n is not None:
+        if isinstance(supercell_n, (tuple, list)) and len(supercell_n) == 3:
+            supercell_x, supercell_y, supercell_z = supercell_n
+        else:
+            supercell_x = supercell_y = supercell_z = int(supercell_n)
+
+    sx = max(1, min(int(supercell_x), 3))
+    sy = max(1, min(int(supercell_y), 3))
+    sz = max(1, min(int(supercell_z), 3))
+
     try:
         struct = Structure.from_str(base_cif, fmt="cif")
-        if supercell_n > 1:
-            struct.make_supercell([supercell_n, supercell_n, 1])
+        if sx > 1 or sy > 1 or sz > 1:
+            struct.make_supercell([sx, sy, sz])
 
         center = struct.cart_coords.mean(axis=0)
         poly_geoms = {
@@ -148,12 +158,22 @@ def get_adsorbed_cif(tpms_cif_path, species_code, supercell_n=1):
 
 
 # ---------------------------------------------------------------------------
-# 3Dmol.js CIF/XYZ Structure Viewer Component (Pure Light Mode)
+# 3Dmol.js CIF/XYZ Structure Viewer Component (Pure Light Mode + PNG Export)
 # ---------------------------------------------------------------------------
-def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", supercell=1, replicate_z=False, bg_color="#ffffff"):
-    """Render 3D Crystal/Molecular Structure (CIF or XYZ) using 3Dmol.js library in HTML component."""
+def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", supercell_x=1, supercell_y=1, supercell_z=1, supercell=None, bg_color="#ffffff"):
+    """Render 3D Crystal/Molecular Structure (CIF or XYZ) using 3Dmol.js library with 3x3x3 supercell & 3D PNG export button."""
     if not data_text:
         return
+
+    if supercell is not None:
+        if isinstance(supercell, (tuple, list)) and len(supercell) == 3:
+            supercell_x, supercell_y, supercell_z = supercell
+        elif isinstance(supercell, (int, float)):
+            supercell_x = supercell_y = supercell_z = int(supercell)
+
+    sx = max(1, min(int(supercell_x), 3))
+    sy = max(1, min(int(supercell_y), 3))
+    sz = max(1, min(int(supercell_z), 3))
 
     safe_data = (
         data_text.replace("\\", "\\\\")
@@ -167,8 +187,6 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
         "line": '{ line: { colorscheme: "Jmol", linewidth: 2 } }',
     }
     style_js = style_map.get(style, style_map["stick_sphere"])
-    supercell = max(1, min(int(supercell), 2))
-    supercell_z = supercell if replicate_z else 1
     fmt_str = str(fmt).lower()
 
     html = f"""
@@ -176,10 +194,40 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
     <html>
     <head>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js"></script>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&display=swap');
+        .png-btn {{
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 1000;
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          color: #ffffff;
+          border: none;
+          border-radius: 10px;
+          padding: 8px 14px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+          transition: all 0.2s ease-in-out;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }}
+        .png-btn:hover {{
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45);
+          background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        }}
+      </style>
     </head>
-    <body style="margin:0; padding:0; background-color:{bg_color}; overflow:hidden;">
+    <body style="margin:0; padding:0; background-color:{bg_color}; overflow:hidden; position:relative;">
+      <button class="png-btn" onclick="download3DPNG()">📷 Save 3D PNG</button>
       <div id="viewer3dmol" style="height: {height}px; width: 100%; position: relative; border-radius: 16px; border: 1px solid #cbd5e1;"></div>
       <script>
+        var viewer = null;
         (function() {{
           var el = document.getElementById("viewer3dmol");
           if (!el || typeof $3Dmol === "undefined") {{
@@ -188,7 +236,7 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
           }}
           try {{
             var rawData = `{safe_data}`;
-            var viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
+            viewer = $3Dmol.createViewer(el, {{ backgroundColor: "{bg_color}" }});
             var model = viewer.addModel(rawData, "{fmt_str}", {{
               doAssembly: false,
               duplicateAssemblyAtoms: false,
@@ -208,11 +256,11 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
               if (dupes.length > 0) model.removeAtoms(dupes);
             }} catch (e) {{ }}
 
-            if ({supercell} > 1 && "{fmt_str}" === "cif") {{
+            if (({sx} > 1 || {sy} > 1 || {sz} > 1) && "{fmt_str}" === "cif") {{
               try {{
                 var countBefore = model.selectedAtoms({{}}).length;
-                if (countBefore <= 350) {{
-                  viewer.replicateUnitCell({supercell}, {supercell}, {supercell_z}, model);
+                if (countBefore <= 400) {{
+                  viewer.replicateUnitCell({sx}, {sy}, {sz}, model);
                 }}
               }} catch (e) {{ }}
             }}
@@ -239,6 +287,23 @@ def render_structure_3d(data_text, fmt="cif", height=560, style="stick_sphere", 
             el.innerHTML = "<p style='color:#ef4444; padding:20px;'>3D Viewer Error: " + errMain + "</p>";
           }}
         }})();
+
+        function download3DPNG() {{
+          try {{
+            if (viewer) {{
+              viewer.render();
+              var uri = viewer.pngURI();
+              var link = document.createElement("a");
+              link.download = "3D_structure_render.png";
+              link.href = uri;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+          }} catch (err) {{
+            alert("PNG Export Error: " + err);
+          }}
+        }}
       </script>
     </body>
     </html>
@@ -1118,13 +1183,20 @@ with tab_viz3d:
                 with col_f2:
                     viz_style = st.selectbox("3D Representation:", ["stick_sphere", "spacefill", "line"], index=0, key="t3_viz_style")
 
-                supercell_val = st.slider("Supercell Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t3_supercell_val")
+                st.markdown("##### 📐 Supercell Expansion (X x Y x Z, up to 3x3x3)")
+                sc_c1, sc_c2, sc_c3 = st.columns(3)
+                with sc_c1:
+                    sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t3_sc_x")
+                with sc_c2:
+                    sc_y = st.slider("Expansion Y:", min_value=1, max_value=3, value=1, key="t3_sc_y")
+                with sc_c3:
+                    sc_z = st.slider("Expansion Z:", min_value=1, max_value=3, value=1, key="t3_sc_z")
                 
                 fmt_code_t3 = "xyz" if "XYZ" in fmt_choice_t3 else "cif"
                 xyz_text_t3 = cif_to_xyz(cif_text_curr)
                 render_data_t3 = xyz_text_t3 if fmt_code_t3 == "xyz" else cif_text_curr
                 
-                render_structure_3d(render_data_t3, fmt=fmt_code_t3, height=480, style=viz_style, supercell=supercell_val, bg_color="#ffffff")
+                render_structure_3d(render_data_t3, fmt=fmt_code_t3, height=480, style=viz_style, supercell_x=sc_x, supercell_y=sc_y, supercell_z=sc_z, bg_color="#ffffff")
 
                 st.markdown("##### 📥 Structure Export Options")
                 dl_col1, dl_col2 = st.columns(2)
@@ -1751,7 +1823,14 @@ with tab_polysulfide:
             with col_t5_fmt:
                 t5_fmt_choice = st.radio("3D File Format:", ["CIF (.cif)", "XYZ (.xyz)"], index=0, key="t5_fmt_choice", horizontal=True)
 
-            supercell_n = st.slider("Supercell Surface Expansion (X x Y):", min_value=1, max_value=2, value=1, help="1x1 Unit Cell (~240 atoms) or 2x2 Surface Expansion (~970 atoms)", key="t5_supercell_n")
+            st.markdown("##### 📐 Supercell Surface Expansion (X x Y x Z, up to 3x3x3)")
+            t5_sc1, t5_sc2, t5_sc3 = st.columns(3)
+            with t5_sc1:
+                t5_sc_x = st.slider("Expansion X:", min_value=1, max_value=3, value=1, key="t5_sc_x")
+            with t5_sc2:
+                t5_sc_y = st.slider("Expansion Y:", min_value=1, max_value=3, value=1, key="t5_sc_y")
+            with t5_sc3:
+                t5_sc_z = st.slider("Expansion Z:", min_value=1, max_value=3, value=1, key="t5_sc_z")
 
             tpms_key = selected_tpms_name.split()[0]
             eads_val = adso_matrix.get(tpms_key, {}).get(species_code, 2.50)
@@ -1777,7 +1856,7 @@ with tab_polysulfide:
             cif_filename = tpms_options[selected_tpms_name]
             tpms_cif_path = os.path.join(TPMS_DIR, cif_filename)
             
-            adsorbed_cif = get_adsorbed_cif(tpms_cif_path, species_code, supercell_n)
+            adsorbed_cif = get_adsorbed_cif(tpms_cif_path, species_code, supercell_x=t5_sc_x, supercell_y=t5_sc_y, supercell_z=t5_sc_z)
 
             if adsorbed_cif:
                 fmt_code_t5 = "xyz" if "XYZ" in t5_fmt_choice else "cif"
@@ -1789,8 +1868,9 @@ with tab_polysulfide:
                     fmt=fmt_code_t5,
                     height=500,
                     style=render_style,
-                    supercell=1,
-                    replicate_z=False,
+                    supercell_x=t5_sc_x,
+                    supercell_y=t5_sc_y,
+                    supercell_z=t5_sc_z,
                     bg_color="#ffffff"
                 )
                 
@@ -1804,7 +1884,7 @@ with tab_polysulfide:
                         data=adsorbed_cif,
                         file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.cif",
                         mime="chemical/x-cif",
-                        key=f"dl_cif_{tpms_key}_{species_code}_{supercell_n}"
+                        key=f"dl_cif_{tpms_key}_{species_code}_{t5_sc_x}_{t5_sc_y}_{t5_sc_z}"
                     )
                 with dl_t5_c2:
                     st.download_button(
@@ -1812,7 +1892,7 @@ with tab_polysulfide:
                         data=adsorbed_xyz,
                         file_name=f"{tpms_key.lower()}_graphene_adsorbed_{species_code.lower()}.xyz",
                         mime="chemical/x-xyz",
-                        key=f"dl_xyz_{tpms_key}_{species_code}_{supercell_n}"
+                        key=f"dl_xyz_{tpms_key}_{species_code}_{t5_sc_x}_{t5_sc_y}_{t5_sc_z}"
                     )
 
                 with st.expander("📄 Inspect Adsorption Complex Coordinates (XYZ Format)"):
