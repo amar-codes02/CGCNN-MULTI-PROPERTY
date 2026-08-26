@@ -937,20 +937,20 @@ plt.show()
 
     # SECTION 4: USER MATCHED DATASET SCREENING & TOP 5 LEADERBOARD
     c16_user = nbf.v4.new_markdown_cell(r"""---
-## 4. Candidate Host Material Screening from User Matched Dataset (`df_matched`)
+## 4. Candidate Host Material Screening from Matched Dataset (`df_matched`)
 
 > [G] **CATHODE MATERIAL SCALE SCREENING**
 >
 > **Scientific Objective**: Evaluate and rank 35 unique candidate host materials from the matched dataset (`dataset_jarvis_dft3d_matched.pkl`) across 5 target properties (Eg, Ef, K, G, E_ads) to identify the Top 5 cathode host candidates.
 """)
 
-    c17_user_md = nbf.v4.new_markdown_cell(r"""### 4.1 Multi-Property Composite Score for User Matched Dataset
+    c17_user_md = nbf.v4.new_markdown_cell(r"""### 4.1 Multi-Property Composite Score for Matched Host Dataset
 > Aggregation of dataset entries by chemical formula, min-max normalized sub-score calculation, and Composite Host Score evaluation:
 > `Composite Score = 0.20 * Score_Eg + 0.20 * Score_Ef + 0.20 * Score_K + 0.20 * Score_G + 0.20 * Score_Eads`
 """)
 
     c12_user_score = nbf.v4.new_code_cell(r"""# ==============================================================================
-# 12. User Matched Dataset Host Screening & Top 10 Leaderboard Table Figure
+# 12. Matched Dataset Host Screening & Top 10 Leaderboard Table Figure
 # ==============================================================================
 df_user_host = df_matched.groupby("formula").agg({
     "band_gap": "mean",
@@ -1227,7 +1227,7 @@ for angle, label, (ha, va) in zip(angles_u[:-1], categories_user, alignments_use
     ax_radar_u.text(angle, 1.12, label, fontweight="bold", fontsize=10.5, ha=ha, va=va,
                     bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
 
-plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(User Matched Dataset Screening)", fontsize=13.5, fontweight="bold", pad=20)
+plt.title("Holistic 5-Axis Radar Map for Top 5 Host Materials\n(Matched Dataset Screening)", fontsize=13.5, fontweight="bold", pad=20)
 plt.legend(loc="center left", bbox_to_anchor=(1.18, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
 plt.tight_layout(pad=1.8)
 save_paper_fig(fig_radar_u, "fig8_user_dataset_radar_comparison")
@@ -1455,7 +1455,7 @@ for angle, label, (ha, va) in zip(angles[:-1], categories, alignments):
     ax.text(angle, 1.12, label, fontweight="bold", fontsize=10.5, ha=ha, va=va,
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc", alpha=0.9, linewidth=0.8))
 
-plt.title("Holistic 5-Axis Performance Radar Map\nacross 5 Core Physical Properties", fontsize=13.5, fontweight="bold", pad=20)
+plt.title("Holistic 5-Axis Performance Radar Map for Graphene TPMS Topologies\nacross 5 Core Physical Properties", fontsize=13.5, fontweight="bold", pad=20)
 plt.legend(loc="center left", bbox_to_anchor=(1.18, 0.5), frameon=True, facecolor="white", edgecolor="gray", fontsize=9.5)
 plt.tight_layout(pad=1.8)
 save_paper_fig(fig, "fig10_tpms_radar_comparison")
@@ -1472,7 +1472,7 @@ plt.show()
     c16_latex_out = nbf.v4.new_code_cell(r"""# ==============================================================================
 # 16. Summary Publication Tables (Host Materials & Graphene TPMS) & CSV Exporter
 # ==============================================================================
-# 1. Summary Table for User Matched Dataset Top Host Candidates
+# 1. Summary Table for Matched Dataset Top Host Candidates
 df_pub_user = df_user_host.head(5)[[
     "Rank", "formula", "band_gap", "formation_energy",
     "bulk_modulus", "shear_modulus", "adsorption_energy_eV", "Overall_Score"
