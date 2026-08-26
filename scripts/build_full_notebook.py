@@ -1260,7 +1260,7 @@ except ImportError:
     from models.cgcnn_model import predict_from_cif
 
 TPMS_DIR = find_path("Graphene_TPMS_Sheet")
-if not os.path.isdir(TPMS_DIR):
+if not os.path.exists(TPMS_DIR) or not os.path.isdir(TPMS_DIR):
     TPMS_DIR = find_path("structures")
 
 tpms_files = sorted([f for f in os.listdir(TPMS_DIR) if f.endswith(".cif")])
