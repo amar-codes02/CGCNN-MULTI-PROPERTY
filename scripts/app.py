@@ -1293,7 +1293,7 @@ with tab_host_rank:
                 "Shear Modulus (GPa)": "{:.1f}",
                 "Adsorption Energy (eV)": "{:.2f}",
                 "Composite Host Score": "{:.4f}"
-            }).background_gradient(cmap="mako", subset=["Composite Host Score"]),
+            }).background_gradient(cmap="YlGnBu", subset=["Composite Host Score"]),
             use_container_width=True
         )
 
