@@ -1087,7 +1087,7 @@ with tab_intro:
     # SECTION 4: CENTERED HD YOUTUBE VIDEO EMBED
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>🎥 4. Working Principle Animation Video</span></div>
+        <div class="web-card-title"><span>4. Working Principle Animation Video</span></div>
         <p style="margin:0;">
             Below is an interactive video animation of the Lithium-Sulfur battery electrochemical working principle:
         </p>
@@ -1112,7 +1112,7 @@ with tab_intro:
     # SECTION 5: SCHEMATIC ILLUSTRATION OF LIPS ADSORPTION ON HOST MATERIAL
     st.markdown("""
     <div class="web-card">
-        <div class="web-card-title"><span>💠 Schematic illustration of LiPS adsorption on the host material</span></div>
+        <div class="web-card-title"><span>Schematic illustration of LiPS adsorption on the host material</span></div>
         <p style="margin:0; font-size:1.02rem; line-height:1.6;">
             <b>Schematic illustration of LiPS adsorption on the host material</b>, showing the interaction of different lithium polysulfide species (Li<sub>2</sub>S<sub>8</sub>, Li<sub>2</sub>S<sub>6</sub>, Li<sub>2</sub>S<sub>4</sub>, Li<sub>2</sub>S<sub>2</sub>, and Li<sub>2</sub>S) with the host surface.
         </p>
@@ -1126,12 +1126,12 @@ with tab_intro:
         with col_ctrl_t1:
             st.markdown("#### Display Mode & Rendering Controls")
             t1_display_mode = st.radio(
-                "Visual Mode / Tampilan Interface:",
+                "Visualization Mode:",
                 [
-                    "2D Journal Figure Matrix: Top View vs Side View (Kodingan Python Murni 100%)",
-                    "3D Journal Matrix: Individual 5-Species 3D Viewers (Format Jurnal Interaktif 3Dmol.js)",
-                    "2D Host Surface Adsorption Overview (Kodingan Python Murni 100%)",
-                    "3D Combined Surface: All 5 Species Simultaneous (Visual Interaktif 3Dmol.js)"
+                    "2D Journal Figure Matrix: Top View vs Side View",
+                    "3D Journal Matrix: Individual 5-Species 3D Viewers (Interactive 3Dmol.js)",
+                    "2D Host Surface Adsorption Overview",
+                    "3D Combined Surface: All 5 Species Simultaneous (Interactive 3Dmol.js)"
                 ],
                 index=0,
                 key="t1_display_mode"
@@ -1169,10 +1169,10 @@ with tab_intro:
                 t1_sc_x, t1_sc_y, t1_sc_z = 1, 1, 1
 
             # Polysulfide Layout Badge Legend
-            st.markdown("#### 🏷️ Polysulfide Adsorbate Spatial Layout")
+            st.markdown("#### Polysulfide Adsorbate Spatial Layout")
             st.markdown("""
             <div style="background: rgba(248,250,252,0.8); border: 1px solid rgba(203,213,225,0.6); padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.92rem;">
-                <b>📍 Surface Positions of 5 Adsorbed Species:</b><br>
+                <b>Surface Positions of 5 Adsorbed Species:</b><br>
                 🔴 <b>Li<sub>2</sub>S<sub>8</sub></b>: Top-Left Region (Long-chain)<br>
                 🟣 <b>Li<sub>2</sub>S<sub>6</sub></b>: Top-Right Region (Intermediate)<br>
                 🔵 <b>Li<sub>2</sub>S<sub>4</sub></b>: Center Region (Medium-chain)<br>
