@@ -10,5 +10,9 @@ SCRIPTS_DIR = os.path.join(PROJECT_ROOT, "scripts")
 if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
 
-# Import and execute main Streamlit application code
-import scripts.app
+# Execute main Streamlit app script dynamically on every rerun
+script_path = os.path.join(SCRIPTS_DIR, "app.py")
+with open(script_path, "r", encoding="utf-8") as f:
+    code = compile(f.read(), script_path, "exec")
+
+exec(code, globals())
