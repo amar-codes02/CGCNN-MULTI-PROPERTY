@@ -1,7 +1,9 @@
 .venv/
 .jdk1.8.0_202/
 __pycache__/
+**/__pycache__/
 data/graph_cache.pkl
+**/data/graph_cache.pkl
 *.zip
 *.tar.gz
 .DS_Store
@@ -12,4 +14,3 @@ submission_documents/
 wiley_graphics/
 *.docx
 Response_to_Reviewers.md
-
