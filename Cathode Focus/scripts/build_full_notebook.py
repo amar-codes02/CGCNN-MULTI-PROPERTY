@@ -311,7 +311,7 @@ render_df_to_fig(df_stats_matched, title="", filename="table_descriptive_stats")
 > **Tujuan Ilmiah**: Perform exploratory data analysis to evaluate statistical distributions, inter-property correlation structures, and thermodynamic stability boundaries across electronic conductivity classes.
 """)
 
-    c7_md = nbf.v4.new_markdown_cell(r"""### 2.1 Statistical Distributions & Probability Densities (Figure 1)
+    c7_md = nbf.v4.new_markdown_cell(r"""### 2.1 Statistical Distributions & Probability Densities
 > Histograms and Kernel Density Estimation (KDE) curves illustrating distributions and variances across the 5 core target properties.
 """)
 
@@ -356,7 +356,7 @@ save_paper_fig(fig, "fig1_eda_property_distributions")
 plt.show()
 """)
 
-    c8_md = nbf.v4.new_markdown_cell(r"""### 2.2 Inter-Property Linear Correlation Matrix (Figure 2)
+    c8_md = nbf.v4.new_markdown_cell(r"""### 2.2 Inter-Property Linear Correlation Matrix
 > Pearson correlation (r) heatmap illustrating physical relationships among elastic moduli (K, G), electronic band gap (Eg), and polysulfide binding energy (E_ads).
 """)
 
@@ -380,7 +380,7 @@ save_paper_fig(fig, "fig2_eda_correlation_matrix")
 plt.show()
 """)
 
-    c9_md = nbf.v4.new_markdown_cell(r"""### 2.3 Electronic Conductivity Classification & Thermodynamic Stability (Figure 3)
+    c9_md = nbf.v4.new_markdown_cell(r"""### 2.3 Electronic Conductivity Classification & Thermodynamic Stability
 > Categorization of candidate materials into Metals (Eg = 0 eV), Semimetals (0 < Eg < 0.5 eV), and Semiconductors (Eg >= 0.5 eV), combined with average physical properties and energy convex hull (E_hull) thermodynamic stability.
 """)
 
@@ -652,7 +652,7 @@ class CrystalGraphConvNet(nn.Module):
 print(" CGCNN Architecture Class (Final JARVIS Standard) Defined Successfully!")
 """)
 
-    c13_md = nbf.v4.new_markdown_cell(r"""### 3.3 Training Convergence Curves (3,000 Epochs — Figure 4)
+    c13_md = nbf.v4.new_markdown_cell(r"""### 3.3 Training Convergence Curves (3,000 Epochs)
 > Mean Absolute Error (MAE) loss trajectories for training, validation, and test sets over 3,000 epochs demonstrating stable convergence.
 """)
 
@@ -890,7 +890,7 @@ for target in FIVE_TARGETS:
     y_pred_all_dict[target] = yp_a
 """)
 
-    c15_md = nbf.v4.new_markdown_cell(r"""### 3.5 Model Prediction Parity Plots (Error Tolerance Bands — Figure 5)
+    c15_md = nbf.v4.new_markdown_cell(r"""### 3.5 Model Prediction Parity Plots (Error Tolerance Bands)
 > Actual vs predicted parity plots across Train (N=103), Validation (N=22), and Test (N=23) splits equipped with +/-10% error tolerance bands.
 """)
 
@@ -1025,7 +1025,7 @@ df_user_host["Rank"] = df_user_host.index + 1
 print(f" Candidate Host Materials Composite Ranking Complete (Top 5: {', '.join(df_user_host['formula'].head(5).tolist())})")
 """)
 
-    c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Top 5 Leaderboard Visualizations Per Property & 5-Axis Radar Map (Figures 6 & 8)
+    c18_user_md = nbf.v4.new_markdown_cell(r"""### 4.2 Top 5 Leaderboard Visualizations Per Property & 5-Axis Radar Map
 > Vertical bar charts displaying the Top 5 candidate materials per target property alongside a 5-axis performance radar comparison for the leading Top 5 host materials.
 """)
 
@@ -1101,7 +1101,7 @@ plt.show()
 """)
 
     # CELL 4.3: Actual DFT vs Predicted CGCNN for Top 5 Materials
-    c18_act_pred_md = nbf.v4.new_markdown_cell(r"""### 4.3 Actual (DFT/Experimental) vs Predicted (CGCNN) Comparison for Top 5 Host Materials (Figure 7)
+    c18_act_pred_md = nbf.v4.new_markdown_cell(r"""### 4.3 Actual (DFT/Experimental) vs Predicted (CGCNN) Comparison for Top 5 Host Materials
 > Grouped bar chart comparing actual physical property values from DFT/experimental data against CGCNN model predictions for the Top 5 leading host materials (`WB2`, `MoC`, `Co3O4`, `Ti3O5`, `Mo2C`) across all 5 core target screening properties for Li-S battery cathodes.
 """)
 
@@ -1355,7 +1355,7 @@ df_tpms_table.columns = ["Rank", "Topology", "Atoms", "Eg (eV)", "Ef (eV/at)", "
 render_df_to_fig(df_tpms_table, title="", filename="table_tpms_topologies")
 """)
 
-    c21_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.2 Property Bar Charts & 5-Axis Radar Map for TPMS (Figures 9 & 10)
+    c21_tpms_md = nbf.v4.new_markdown_cell(r"""### 5.2 Property Bar Charts & 5-Axis Radar Map for TPMS
 > Property-wise bar charts and 5-axis radar map illustrating relative performance across TPMS sheet topologies.
 """)
 

@@ -1238,10 +1238,10 @@ with tab_intro:
     if os.path.exists(fig1_path):
         try:
             img1 = Image.open(fig1_path)
-            st.markdown("#### Figure 1: Technology Comparison of Li-S vs Li-ion Batteries")
+            st.markdown("#### Technology Comparison of Li-S vs Li-ion Batteries")
             st.image(
                 img1,
-                caption="Figure 1: Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
+                caption="Comparison between Lithium-Sulfur (Li-S) and Lithium-Ion (Li-ion) battery technologies.",
                 use_container_width=True
             )
             st.divider()
@@ -1635,7 +1635,7 @@ with tab_host_rank:
         st.divider()
 
         # 3. FIGURE 6: TOP 5 BAR CHARTS PER TARGET PROPERTY
-        st.markdown("### 3. Top 5 Leaderboard Bar Charts Per Target Property (Figure 6)")
+        st.markdown("### 3. Top 5 Leaderboard Bar Charts Per Target Property")
         
         fig6_plotly = make_subplots(
             rows=2, cols=3,
@@ -1687,7 +1687,7 @@ with tab_host_rank:
         st.divider()
 
         # 4. FIGURE 7: ACTUAL (DFT) VS PREDICTED (CGCNN) COMPARISON FOR TOP 5 MATERIALS
-        st.markdown("### 4. Actual (DFT) vs Predicted (CGCNN) Property Comparison (Figure 7)")
+        st.markdown("### 4. Actual (DFT) vs Predicted (CGCNN) Property Comparison")
 
         actual_vals = {
             "band_gap": top5_hosts["band_gap"].values,
@@ -1752,7 +1752,7 @@ with tab_host_rank:
         st.divider()
 
         # 5. FIGURE 8: 5-AXIS RADAR MAP FOR TOP 5 HOST MATERIALS
-        st.markdown("### 5. 5-Axis Performance Radar Map for Top 5 Host Materials (Figure 8)")
+        st.markdown("### 5. 5-Axis Performance Radar Map for Top 5 Host Materials")
 
         radar_categories = ["Band Gap (Eg)", "Formation Energy (Ef)", "Bulk Modulus (K)", "Shear Modulus (G)", "Adsorption Energy (E_ads)"]
         radar_categories_closed = radar_categories + [radar_categories[0]]
@@ -1798,7 +1798,7 @@ with tab_host_rank:
         st.divider()
 
         # 6. HIGH-RESOLUTION PUBLICATION FIGURES DISPLAY & DOWNLOAD
-        st.markdown("### 6. Publication Figures & High-Resolution Vector Assets (Figure 6, 7 & 8)")
+        st.markdown("### 6. Publication Figures & High-Resolution Vector Assets")
 
         col_f6, col_f7, col_f8 = st.columns(3)
         
@@ -1807,21 +1807,21 @@ with tab_host_rank:
         fig8_img_path = os.path.join(PROJECT_ROOT, "paper_figures", "fig8_user_dataset_radar_comparison.png")
 
         with col_f6:
-            st.markdown("#### Figure 6: Top 5 Bar Charts")
+            st.markdown("#### Top 5 Bar Charts")
             if os.path.exists(fig6_img_path):
                 st.image(fig6_img_path, use_container_width=True)
             else:
                 st.info("Figure 6 PNG not cached.")
 
         with col_f7:
-            st.markdown("#### Figure 7: Actual vs Predicted")
+            st.markdown("#### Actual vs Predicted")
             if os.path.exists(fig7_img_path):
                 st.image(fig7_img_path, use_container_width=True)
             else:
                 st.info("Figure 7 PNG not cached.")
 
         with col_f8:
-            st.markdown("#### Figure 8: 5-Axis Radar Comparison")
+            st.markdown("#### 5-Axis Radar Comparison")
             if os.path.exists(fig8_img_path):
                 st.image(fig8_img_path, use_container_width=True)
             else:
